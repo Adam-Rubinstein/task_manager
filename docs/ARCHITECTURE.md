@@ -2,409 +2,308 @@
 
 ## Обзор
 
-Voice Task Manager - это настольное приложение для управления задачами с поддержкой голосового ввода, автоматического парсинга на русском языке и синхронизации между устройствами.
+**Voice Task Manager** — настольное приложение для управления задачами, разработанное на Java 21, Spring Boot и JavaFX.
+
+Текущая версия реализует:
+- создание, редактирование и удаление задач;
+- хранение задач, оповещений и аудиофайлов в PostgreSQL;
+- отображение и фильтрацию задач в JavaFX UI;
+- систему оповещений с пометкой как прочитанных.
+
+Часть схемы БД и зависимостей зарезервирована под будущие фичи: голосовой ввод, повторения, теги, синхронизация.
+
+---
 
 ## Слоистая архитектура
 
-```
-┌─────────────────────────────────────────────────────┐
-│          Presentation Layer (UI)                    │
-│  JavaFX Controllers + FXML + CSS                    │
-└──────────────────┬──────────────────────────────────┘
-                   │
-┌──────────────────▼──────────────────────────────────┐
-│          Application Layer (Services)                │
-│  - TaskService                                       │
-│  - AudioRecordingService                             │
-│  - SpeechRecognitionService                          │
-│  - TextParsingService                                │
-│  - DateParsingService                                │
-│  - RecurrenceService                                 │
-│  - NotificationService                               │
-└──────────────────┬──────────────────────────────────┘
-                   │
-┌──────────────────▼──────────────────────────────────┐
-│          Domain Layer (Business Logic)               │
-│  - TaskManager (основная бизнес-логика)             │
-│  - RecurrenceManager                                 │
-│  - SyncManager (синхронизация между устройствами)    │
-└──────────────────┬──────────────────────────────────┘
-                   │
-┌──────────────────▼──────────────────────────────────┐
-│          Data Access Layer (DAO/Repository)          │
-│  - TaskRepository (JPA)                              │
-│  - AlertRepository (JPA)                             │
-│  - AudioFileRepository (JPA)                         │
-└──────────────────┬──────────────────────────────────┘
-                   │
-┌──────────────────▼──────────────────────────────────┐
-│          Persistence Layer (Database)                │
-│  PostgreSQL + Hibernate/JPA ORM                      │
-└─────────────────────────────────────────────────────┘
-```
-
-## Модульная структура
-
-```
-com.taskmanager/
-├── model/                    # Сущности и Enums
-│   ├── entity/
-│   │   ├── Task.java        # Основная сущность задачи
-│   │   ├── Alert.java       # Уведомления
-│   │   └── AudioFile.java   # Аудиофайлы
-│   └── enums/
-│       ├── TaskStatus.java     # Статусы
-│       ├── RecurrenceType.java # Типы повторения
-│       └── AlertType.java      # Типы уведомлений
-│
-├── service/                  # Бизнес-логика и сервисы
-│   ├── TaskService.java      # CRUD для задач
-│   ├── AudioRecordingService.java  # Запись аудио
-│   ├── SpeechRecognitionService.java  # Распознавание речи
-│   ├── TextParsingService.java     # Парсинг текста -> задачи
-│   ├── DateParsingService.java     # Парсинг дат на русском
-│   ├── RecurrenceService.java      # Управление повторениями
-│   ├── NotificationService.java    # Уведомления и алерты
-│   └── SyncService.java           # Синхронизация между устройствами
-│
-├── dao/                      # Доступ к данным (JPA Repository)
-│   ├── TaskRepository.java
-│   ├── AlertRepository.java
-│   └── AudioFileRepository.java
-│
-├── ui/                       # Пользовательский интерфейс
-│   ├── controllers/
-│   │   ├── MainController.java      # Главный контроллер
-│   │   ├── TaskTableController.java # Таблица задач
-│   │   ├── TaskFormController.java  # Форма редактирования
-│   │   └── AudioRecordingController.java  # Запись голоса
-│   └── views/ (FXML)
-│       ├── main.fxml
-│       ├── task-table.fxml
-│       ├── task-form.fxml
-│       └── audio-recording.fxml
-│
-├── utils/                    # Утилиты
-│   ├── RussianDateParser.java      # Парсинг дат на русском
-│   ├── TaskParser.java              # Парсинг текста в задачи
-│   ├── RecurrenceParser.java        # Парсинг повторений
-│   └── AudioUtil.java               # Работа с аудио
-│
-├── config/                   # Конфигурация
-│   ├── DatabaseConfig.java
-│   └── AppConfig.java
-│
-├── exception/                # Custom Exception классы
-│   ├── TaskManagerException.java
-│   ├── AudioException.java
-│   └── SyncException.java
-│
-└── Application.java          # Точка входа
-```
-
-## Ключевые компоненты
-
-### 1. Entity классы (Модель данных)
-
-#### Task (Основная сущность)
-```
-Task
-├── id (Long)
-├── title (String) - наименование
-├── description (String) - полный текст
-├── dueDate (LocalDateTime) - срок
-├── status (TaskStatus) - статус
-├── priority (Integer 0-10) - приоритет
-├── recurrenceType (RecurrenceType) - тип повторения
-├── recurrenceInterval (Integer) - интервал
-├── recurrenceChildren (List<Task>) - повторения
-├── alerts (List<Alert>) - уведомления
-├── audioFile (AudioFile) - исходный голос
-├── tags (Set<String>) - теги
-├── createdAt (LocalDateTime)
-├── updatedAt (LocalDateTime)
-└── version (Long) - для синхронизации
-```
-
-#### Alert (Уведомление)
-```
-Alert
-├── id (Long)
-├── minutesBefore (Integer) - за N минут до срока
-├── alertType (AlertType) - тип (Desktop/Sound/Telegram)
-├── triggered (Boolean) - был ли выдан
-└── task (Task) - связь
-```
-
-#### AudioFile (Аудиофайл)
-```
-AudioFile
-├── id (Long)
-├── audioData (byte[]) - WAV в BYTEA
-├── fileSize (Long)
-├── createdAt (LocalDateTime)
-├── expiresAt (LocalDateTime) - удалить через 30 дней
-└── task (Task) - связь one-to-one
-```
-
-### 2. Service классы
-
-#### TaskService
-Основной сервис для работы с задачами:
-- `createTask(title, description)` - создать задачу
-- `createTasksFromText(text)` - парсинг текста в задачи
-- `createTasksFromAudio(audioFile)` - транскрипция + парсинг
-- `updateTask(task)` - обновить
-- `deleteTask(id)` - удалить
-- `getTasksByStatus(status)` - фильтр по статусу
-- `searchTasks(query)` - поиск по тексту
-- `synchronizeWithDatabase()` - синхронизация
-
-#### TextParsingService
-Парсинг текста в задачи:
-- Разбиение текста на отдельные фразы
-- Извлечение даты (через RussianDateParser)
-- Извлечение приоритета
-- Извлечение повторения (через RecurrenceParser)
-- Возврат объекта Task с заполненными полями
-
-#### DateParsingService / RussianDateParser
-Парсинг дат на естественном русском языке:
-- "завтра", "сегодня", "послезавтра"
-- "через 3 дня", "в течение недели"
-- "1 января", "01.01.2026", "1/1/26"
-- "в 15:30", "в три часа"
-- "в понедельник", "в следующий вторник"
-- Комбинации: "завтра в 10 утра"
-
-#### AudioRecordingService
-Запись аудио с микрофона:
-- `startRecording()` - начать запись
-- `stopRecording()` - остановить
-- `saveToFile()` - сохранить WAV
-- `getAudioLevel()` - уровень громкости
-
-#### SpeechRecognitionService
-Распознавание речи (заглушка на начало):
-- `transcribeAudio(File)` - основной метод
-- Поддержка русского языка
-- Возвращает текст из голоса
-
-#### NotificationService
-Уведомления и алерты:
-- Desktop notifications (встроенные ОС)
-- Звуковые сигналы
-- Telegram сообщения (заглушка)
-
-### 3. Repository/DAO слой (JPA)
-
-```java
-// TaskRepository
-interface TaskRepository extends JpaRepository<Task, Long> {
-    List<Task> findByStatus(TaskStatus status);
-    List<Task> findByPriority(Integer priority);
-    List<Task> findByDueDateBetween(LocalDateTime from, LocalDateTime to);
-    List<Task> findByTitleContainingOrDescriptionContaining(String title, String desc);
-    // ... другие методы поиска и фильтрации
-}
-```
-
-### 4. UI слой (JavaFX)
-
-#### MainController
-Главный контроллер приложения:
-- Верхняя панель: кнопки записи голоса, ввода текста, синхронизации
-- Центральная часть: таблица задач
-- Боковая панель: фильтры и сортировка
-- Нижняя панель: статус, информация
-
-#### TaskTableController
-Управление таблицей задач:
-- Отображение всех задач
-- Двойной клик для редактирования
-- Контекстное меню (Редактировать, Удалить, Изменить статус)
-- Цветовая кодировка по срокам
-- Сортировка и фильтрация
-
-#### TaskFormController
-Форма редактирования/создания задачи:
-- Поля: Название, Описание, Срок, Статус, Приоритет
-- Настройка повторения
-- Добавление алертов/напоминаний
-- Сохранение/Отмена/Удаление
-
-## Поток данных
-
-### Сценарий 1: Ввод текста
-
-```
-Пользователь вводит текст
-       ↓
-TaskService.createTasksFromText(text)
-       ↓
-TextParsingService.parseTasksFromText()
-       ├─ Разбиение текста
-       ├─ RussianDateParser.parseDate()
-       ├─ Извлечение приоритета
-       └─ RecurrenceParser.parseRecurrence()
-       ↓
-List<Task> с заполненными полями
-       ↓
-TaskRepository.saveAll()
-       ↓
-PostgreSQL БД
-       ↓
-TaskTableController.refreshTable()
-       ↓
-UI обновляется
-```
-
-### Сценарий 2: Ввод голоса
-
-```
-Пользователь нажимает "Записать"
-       ↓
-AudioRecordingDialog открывается
-       ↓
-AudioRecordingService.startRecording()
-       ↓
-Пользователь говорит
-       ↓
-AudioRecordingService.stopRecording()
-       ↓
-TaskService.createTasksFromAudio(audioFile)
-       ├─ SpeechRecognitionService.transcribeAudio() → текст
-       ├─ AudioFile.save() в БД
-       └─ TextParsingService.parseTasksFromText()
-       ↓
-Task сохраняется с привязкой к AudioFile
-       ↓
-UI обновляется
-```
-
-### Сценарий 3: Синхронизация между устройствами
-
-```
-Компьютер А изменяет Task (версия 1 → 2)
-       ↓
-Обновляет в БД с version = 2
-       ↓
-Компьютер Б загружает данные (видит version = 2)
-       ↓
-Компьютер Б также изменял Task (свой version = 2)
-       ↓
-Конфликт версий!
-       ↓
-SyncManager.resolveConflict()
-       ↓
-Показываем dialog с двумя версиями
-       ↓
-Пользователь выбирает версию или мерджит поля
-       ↓
-Обновляем Task в БД
-```
-
-## База данных
-
-### Таблицы
-
-```
-tasks                  # Основная таблица задач
-├── id (PK)
-├── title
-├── description
-├── due_date
-├── status
-├── priority
-├── recurrence_*       # Поля для повторений
-├── created_at
-├── updated_at
-├── version            # Для синхронизации
-└── recurrence_parent_id (FK) # Для повторений
-
-alerts                 # Уведомления
-├── id (PK)
-├── task_id (FK)
-├── minutes_before
-├── alert_type
-└── triggered
-
-audio_files            # Аудиофайлы
-├── id (PK)
-├── task_id (FK, UNIQUE)
-├── audio_data (BYTEA)
-├── created_at
-└── expires_at         # Удаляется через 30 дней
-
-task_tags              # Теги для категоризации
-├── task_id (FK)
-└── tag
-```
-
-### Индексы
-
-```
-idx_due_date           # Для быстрого поиска по срокам
-idx_status             # Для фильтрации по статусу
-idx_priority           # Для фильтрации по приоритету
-idx_recurrence_parent  # Для поиска повторений
-idx_created_at         # Для сортировки по дате создания
-```
-
-## Синхронизация между устройствами
-
-### Механизм
-
-1. **Version field** - каждая Task имеет поле `@Version`
-2. **Optimistic Locking** - Hibernate проверяет версию при обновлении
-3. **Timestamp fields** - `createdAt`, `updatedAt` для разрешения конфликтов
-4. **Conflict Resolution** - User может выбрать версию или мерджить поля
-
-### Алгоритм
-
-```
-При загрузке Task:
-1. Проверяем версию в БД
-2. Если локальная версия < версия в БД → загружаем новую
-
-При сохранении Task:
-1. Пытаемся обновить с текущей версией
-2. Если версия не совпадает → OptimisticLockException
-3. Показываем диалог конфликта
-4. Пользователь выбирает версию
-5. Пересохраняем
-```
-
-## Безопасность
-
-- ✅ SQL Injection защита (JPA параметризованные запросы)
-- ✅ Оптимистичная блокировка для синхронизации
-- ✅ Валидация на уровне Entity (@NotNull, @Min, @Max)
-- ✅ Логирование всех операций
-- ⚠️ Авторизация не реализована (планируется в v2)
-
-## Performance оптимизация
-
-- ✅ Индексы на часто используемые поля
-- ✅ Connection pooling (HikariCP)
-- ✅ Batch processing для вставки множественных задач
-- ✅ Lazy loading для связей
-- ⚠️ Кэширование можно добавить в v2
-
-## Развертывание
-
-### Локальное
-```bash
-mvn javafx:run
-```
-
-### Production
-```bash
-mvn clean package assembly:single
-java -jar target/voice-task-manager-1.0.0-jar-with-dependencies.jar
+```text
+┌───────────────────────────────────────────────┐
+│ Presentation Layer (JavaFX UI)               │
+│ - main-view.fxml                             │
+│ - MainController (@Component)                │
+└───────────────────┬──────────────────────────┘
+                    │
+┌───────────────────▼──────────────────────────┐
+│ Service Layer (Business Logic)               │
+│ - TaskService (@Service)                     │
+│ - AlertService (@Service)                    │
+│ - AudioFileService (@Service)                │
+└───────────────────┬──────────────────────────┘
+                    │
+┌───────────────────▼──────────────────────────┐
+│ Data Access Layer (DAO / Repository)         │
+│ - TaskRepository (Spring Data JPA)           │
+│ - AlertRepository (Spring Data JPA)          │
+│ - AudioFileRepository (Spring Data JPA)      │
+└───────────────────┬──────────────────────────┘
+                    │
+┌───────────────────▼──────────────────────────┐
+│ Persistence Layer (Database)                 │
+│ - PostgreSQL + Hibernate / JPA               │
+│ - schema.sql (расширенная схема)            │
+└──────────────────────────────────────────────┘
 ```
 
 ---
 
-**Версия:** 1.0.0  
-**Обновлено:** 31 декабря 2024
+## Модульная структура
+
+```text
+com.taskmanager/
+├── TaskManagerApp.java                 # Точка входа (@SpringBootApplication + JavaFX)
+│
+├── config/
+│   └── DatabaseConfig.java             # Конфигурация БД (полагается на application.properties)
+│
+├── dao/                                # Доступ к данным (Spring Data JPA)
+│   ├── TaskRepository.java
+│   ├── AlertRepository.java
+│   └── AudioFileRepository.java
+│
+├── model/                              # JPA-сущности и enum-ы
+│   ├── Task.java
+│   ├── Alert.java
+│   ├── AudioFile.java
+│   ├── TaskStatus.java                 # Статусы задач (NEW, IN_PROGRESS, COMPLETED, CANCELLED)
+│   ├── AlertType.java                  # Типы оповещений
+│   └── RecurrenceType.java             # Типы повторений (подготовлено)
+│
+├── service/                            # Бизнес-логика
+│   ├── TaskService.java                # CRUD для задач и фильтрация
+│   ├── AlertService.java               # Управление оповещениями
+│   └── AudioFileService.java           # Работа с аудиофайлами
+│
+└── ui/controllers/
+    └── MainController.java             # JavaFX-контроллер, работает как Spring bean
+```
+
+---
+
+## Модель данных (Entity-классы)
+
+### `Task`
+
+Минимальная модель задачи, привязанная к таблице `tasks`:
+
+```text
+Task
+├── id           : Long                  # Primary Key
+├── title        : String                # Название (обязательно)
+├── description  : String                # Описание (TEXT)
+├── dueDate      : LocalDateTime         # Срок выполнения (обязательно)
+├── createdAt    : LocalDateTime         # Дата создания (обязательно)
+├── status       : TaskStatus            # Статус (NEW, IN_PROGRESS, COMPLETED, CANCELLED)
+├── priority     : Integer               # Приоритет 0–10
+└── updatedAt    : LocalDateTime         # Дата последнего обновления
+```
+
+В `schema.sql` таблица `tasks` содержит дополнительные поля
+(`recurrence_*`, `version`, `tags` через отдельную таблицу и др.) — зарезервированы под будущее развитие.
+
+### `Alert`
+
+Оповещение по задаче, таблица `alerts`:
+
+```text
+Alert
+├── id          : Long                   # Primary Key
+├── taskId      : Long                   # ID связанной задачи (FK)
+├── alertTime   : LocalDateTime          # Когда сработать
+├── type        : AlertType              # Тип оповещения
+├── message     : String                 # Текст сообщения
+├── isRead      : Boolean                # Прочитано ли
+└── createdAt   : LocalDateTime          # Дата создания
+```
+
+### `AudioFile`
+
+Хранение аудиоданных, таблица `audio_files`:
+
+```text
+AudioFile
+├── id              : Long               # Primary Key
+├── audioData       : byte[]             # Бинарные данные (BYTEA)
+├── durationSeconds : Integer            # Длительность в секундах
+├── createdAt       : LocalDateTime      # Дата загрузки
+├── fileName        : String             # Имя файла
+└── taskId          : Long               # ID связанной задачи (FK, UNIQUE)
+```
+
+---
+
+## Сервисный слой
+
+### `TaskService`
+
+Отвечает за:
+- создание задач (валидация, установка `createdAt`, дефолтного статуса и приоритета);
+- получение всех задач;
+- фильтрацию по статусу;
+- удаление задач;
+- (в перспективе) обновление, работа с повторениями и тегами.
+
+### `AlertService`
+
+Отвечает за:
+- создание оповещений по задачам;
+- получение списка непрочитанных оповещений;
+- пометку оповещений как прочитанных;
+- (в будущем) генерацию уведомлений на основе сроков.
+
+### `AudioFileService`
+
+Отвечает за:
+- сохранение аудиофайлов в БД (BYTEA);
+- выборку аудиозаписей по задаче;
+- (в будущем) очистку устаревших записей, интеграцию со Speech-to-Text.
+
+---
+
+## UI-слой (JavaFX)
+
+### `main-view.fxml`
+
+Описывает основное окно приложения:
+- таблица задач (колонки: название, статус, приоритет, срок);
+- поля ввода для создания новой задачи (название, описание, приоритет);
+- комбобокс для фильтрации по статусу;
+- счётчик и список непрочитанных оповещений;
+- кнопки: Создать задачу, Удалить задачу.
+
+### `MainController`
+
+Контроллер UI, помечен как `@Component`, зависимости внедряются через Spring:
+- инициализирует таблицу, комбобоксы и спиннеры при старте;
+- загружает все задачи из БД при инициализации;
+- по кнопке «Создать» вызывает `TaskService.createTask()` и обновляет таблицу;
+- по кнопке «Удалить» удаляет выбранную задачу;
+- по изменению фильтра статуса перезапрашивает только нужные задачи;
+- каждые 10 секунд в отдельном потоке обновляет счётчик и список оповещений.
+
+---
+
+## Потоки данных (основные сценарии)
+
+### 1. Создание задачи
+
+```text
+Пользователь вводит название/описание/приоритет в форме
+      ↓
+MainController.handleCreateTask()
+      ↓
+TaskService.createTask(title, description, dueDate, priority)
+      ↓
+TaskRepository.save(task)
+      ↓
+PostgreSQL (таблица tasks)
+      ↓
+Задача добавляется в ObservableList и таблица обновляется
+```
+
+### 2. Фильтрация по статусу
+
+```text
+Пользователь выбирает статус в ComboBox
+      ↓
+MainController.handleFilterByStatus()
+      ↓
+TaskService.getTasksByStatus(status)
+      ↓
+TaskRepository.findByStatus(...)
+      ↓
+Результат подставляется в ObservableList / TableView
+```
+
+### 3. Оповещения (фоновое обновление)
+
+```text
+Фоновый поток в MainController (обновление каждые 10 сек)
+      ↓
+AlertService.getUnreadAlerts()
+      ↓
+AlertRepository.findByIsReadFalse()
+      ↓
+Platform.runLater() обновляет UI:
+  - Label "Оповещения: N"
+  - ListView со списком сообщений
+```
+
+---
+
+## База данных (PostgreSQL)
+
+Основная схема хранится в `src/main/resources/db/schema.sql`.
+
+Ключевые таблицы:
+
+```text
+tasks
+├── id (BIGSERIAL PK)
+├── title, description, due_date
+├── status (VARCHAR 50)
+├── priority (INTEGER 0–10)
+├── created_at, updated_at
+├── recurrence_* (зарезервировано)
+├── version (для синхронизации)
+
+alerts
+├── id (BIGSERIAL PK)
+├── task_id (FK → tasks.id)
+├── alert_time
+├── alert_type
+├── message
+├── is_read
+├── created_at
+
+audio_files
+├── id (BIGSERIAL PK)
+├── task_id (FK → tasks.id, UNIQUE)
+├── audio_data (BYTEA)
+├── file_size
+├── created_at
+├── expires_at (автоочистка через 30 дней)
+```
+
+Дополнительно:
+- индексы на `due_date`, `status`, `priority`, `created_at`, `is_read`;
+- триггер для автоматического обновления `updated_at` в `tasks`;
+- функция для очистки просроченных записей в `audio_files`.
+
+---
+
+## Интеграция Spring Boot + JavaFX
+
+- `TaskManagerApp` помечен `@SpringBootApplication`, поднимает Spring-контекст.
+- JavaFX-часть использует `FXMLLoader` с `controllerFactory`, которая берёт контроллеры как Spring-beans.
+- `MainController` и сервисы живут в одном DI-контейнере, упрощает тестирование и расширение.
+- `@ComponentScan(basePackages = {"com.taskmanager"})` обязателен для поиска всех компонентов.
+
+---
+
+## Планы развития
+
+Документация и схема БД уже заложили следующие направления:
+
+- **Голосовой ввод** — интеграция со Speech-to-Text API;
+- **Парсинг естественного языка** — извлечение дат, приоритетов из текста (Natty);
+- **Повторяющиеся задачи** — ежедневные, еженедельные, ежемесячные задачи;
+- **Теги и поиск** — полнотекстовый поиск, группировка по тегам;
+- **Синхронизация** — сохранение в облако, доступ с разных устройств;
+- **Desktop-уведомления** — системные уведомления и звуковые напоминания.
+
+Текущая архитектура (слои + Spring Data JPA) позволяет добавлять эти фичи без ломки существующего кода.
+
+---
+
+## Ключевые технические решения
+
+1. **Spring Data JPA** — репозитории наследуются от `JpaRepository`, автоматически получают CRUD методы.
+2. **Hibernate с `ddl-auto=update`** — схема создаётся/обновляется автоматически при запуске.
+3. **FXMLLoader + Spring beans** — контроллеры JavaFX внедряются как Spring компоненты, полная интеграция DI.
+4. **Асинхронное обновление UI** — `Platform.runLater()` для безопасных обновлений UI из фоновых потоков.
+5. **ObservableList + TableView** — реактивное обновление таблицы при изменении данных.
+
+---
+
+**Версия документа:** 1.0.0  
+**Обновлено:** 1 января 2026

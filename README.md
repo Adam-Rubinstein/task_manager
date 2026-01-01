@@ -1,113 +1,213 @@
 # Voice Task Manager
 
-Настольное Java‑приложение для управления задачами с приоритизацией, напоминаниями и хранением связанных аудиозаметок.  
-UI написан на **JavaFX**, бизнес‑логика и доступ к данным — на **Spring Boot + Spring Data JPA**, данные хранятся в **PostgreSQL**.
+Настольное Java-приложение для управления задачами с поддержкой голосового ввода, автоматического парсинга дат на русском языке, повторяющихся задач и уведомлений.
 
----
+## 🎯 Основные функции
 
-## 🎯 Текущие возможности
+- ✅ Ввод задач через текст и форму
+- ✅ Создание, редактирование, удаление задач
+- ✅ Система приоритетов (0–10)
+- ✅ Статусы задач (NEW, IN_PROGRESS, COMPLETED, CANCELLED)
+- ✅ Напоминания и уведомления
+- ✅ Фильтрация и сортировка задач по статусу и приоритету
+- ✅ История аудиозаписей (до 30 дней в БД)
+- ✅ Сохранение всех данных в PostgreSQL
 
-Реализовано:
+**В планах:**
+- 🔄 Голосовой ввод и распознавание речи (Speech-to-Text)
+- 🔄 Автоматический парсинг дат на русском (через Natty)
+- 🔄 Повторяющиеся задачи (ежедневно, еженедельно, ежемесячно)
+- 🔄 Теги и полнотекстовый поиск
 
-- Создание задач с полями:
-    - название;
-    - описание;
-    - срок выполнения (дата/время);
-    - статус (`NEW` и др.);
-    - приоритет (0–10).
-- Просмотр списка задач в таблице JavaFX.
-- Фильтрация задач по статусу.
-- Удаление задач.
-- Сохранение задач, напоминаний и аудио в PostgreSQL через Spring Data JPA.
-- Система оповещений:
-    - хранение уведомлений в таблице `alerts`;
-    - счётчик непрочитанных оповещений в UI;
-    - список непрочитанных оповещений;
-    - пометка оповещений как прочитанных;
-    - периодическое обновление оповещений в UI в фоновом потоке.
-- Хранение аудиофайлов (байтовые данные + метаданные) в таблице `audio_files`.
+## 🛠️ Технологический стек
 
-В планах (пока не реализовано / частично подготовлено в схеме БД):
+**Frontend:**
+- **JavaFX 21** — UI фреймворк для десктопных приложений
+- **FXML** — декларативное описание интерфейса
+- **CSS** — стилизация компонентов
 
-- Голосовой ввод задач и автоматический парсинг текста.
-- Повторяющиеся задачи (ежедневно/еженедельно/ежемесячно и т.п.).
-- Теги и продвинутый полнотекстовый поиск.
-- Синхронизация задач между несколькими устройствами.
+**Backend:**
+- **Java 21** — основной язык программирования
+- **Spring Boot 3.2** — каркас приложения, DI (Dependency Injection), конфигурация
+- **Spring Data JPA** — ORM для работы с БД
+- **Maven 3.8+** — управление зависимостями и сборка проекта
 
----
+**База данных:**
+- **PostgreSQL 12+** — реляционная база данных
+- **Hibernate 6** — ORM (Object-Relational Mapping)
+- **HikariCP** — пул соединений
 
-## 🛠 Технологический стек
+**Инструменты разработки:**
+- **Git** — контроль версий
+- **IntelliJ IDEA** / **VS Code** — IDE
 
-- **Язык:** Java 21
-- **Фреймворки:**
-    - Spring Boot 3.2 (ядро приложения, DI, JPA);
-    - Spring Data JPA (доступ к данным);
-    - JavaFX 21 (графический интерфейс).
-- **База данных:** PostgreSQL 12+
-- **ORM:** Hibernate 6
-- **Пул соединений:** HikariCP
-- **Доп. библиотеки (заложены под развитие):**
-    - Natty — парсинг дат из текста;
-    - Gson — работа с JSON;
-    - Apache Commons IO — операции с файлами.
-- **Сборка:** Maven
-
----
-
-## 📂 Структура проекта
+## 📋 Структура проекта
 
 ```text
-task_manager/                      # Корень репозитория
-├── pom.xml                        # Maven-конфигурация
-├── README.md                      # Этот файл
-├── LICENSE                        # Лицензия (MIT)
-├── auto-commit.ps1                # Скрипт автоматических коммитов (опционально)
-├── auto-commit.bat                # Батник для запуска автокоммита
+task_manager/
+├── pom.xml                             # Maven конфигурация
+├── README.md                           # Этот файл
+├── LICENSE                             # Лицензия (All Rights Reserved)
+├── .gitignore                          # Git исключения
 │
-├── docs/                          # Документация
-│   ├── ARCHITECTURE.md            # Архитектура приложения
-│   └── SETUP.md                   # Подробная инструкция по установке и запуску
+├── docs/
+│   ├── SETUP.md                        # Подробное руководство по установке
+│   └── ARCHITECTURE.md                 # Описание архитектуры и компонентов
 │
-├── src/
-│   ├── main/
-│   │   ├── java/com/taskmanager/
-│   │   │   ├── TaskManagerApp.java        # Точка входа (@SpringBootApplication + JavaFX)
-│   │   │   │
-│   │   │   ├── config/
-│   │   │   │   └── DatabaseConfig.java    # Конфигурация БД (минимальная, через Spring Boot)
-│   │   │   │
-│   │   │   ├── dao/                       # Слой доступа к данным (Spring Data JPA)
-│   │   │   │   ├── TaskRepository.java
-│   │   │   │   ├── AlertRepository.java
-│   │   │   │   └── AudioFileRepository.java
-│   │   │   │
-│   │   │   ├── model/                     # JPA-сущности и enum-ы
-│   │   │   │   ├── Task.java
-│   │   │   │   ├── Alert.java
-│   │   │   │   ├── AudioFile.java
-│   │   │   │   ├── TaskStatus.java
-│   │   │   │   ├── AlertType.java
-│   │   │   │   └── RecurrenceType.java    # Зарезервировано под повторяющиеся задачи
-│   │   │   │
-│   │   │   ├── service/                   # Бизнес-логика
-│   │   │   │   ├── TaskService.java       # Операции с задачами
-│   │   │   │   ├── AlertService.java      # Оповещения
-│   │   │   │   └── AudioFileService.java  # Работа с аудиофайлами
-│   │   │   │
-│   │   │   └── ui/controllers/
-│   │   │       └── MainController.java    # Главный JavaFX-контроллер
+├── src/main/
+│   ├── java/com/taskmanager/
+│   │   ├── TaskManagerApp.java         # Точка входа приложения
 │   │   │
-│   │   └── resources/
-│   │       ├── fxml/
-│   │       │   └── main-view.fxml         # Описание UI
-│   │       ├── css/
-│   │       │   └── style.css              # Стили JavaFX
-│   │       ├── db/
-│   │       │   └── schema.sql             # SQL-схема для PostgreSQL
-│   │       ├── application.properties     # Основной Spring Boot конфиг
-│   │       └── application-example.properties # Пример конфига (для копирования)
+│   │   ├── config/
+│   │   │   └── DatabaseConfig.java     # Конфигурация БД (Spring Boot)
+│   │   │
+│   │   ├── dao/                        # Data Access Layer (Repository)
+│   │   │   ├── TaskRepository.java
+│   │   │   ├── AlertRepository.java
+│   │   │   └── AudioFileRepository.java
+│   │   │
+│   │   ├── model/                      # Entity классы и Enum-ы
+│   │   │   ├── Task.java
+│   │   │   ├── Alert.java
+│   │   │   ├── AudioFile.java
+│   │   │   ├── TaskStatus.java
+│   │   │   ├── AlertType.java
+│   │   │   └── RecurrenceType.java
+│   │   │
+│   │   ├── service/                    # Business Logic Layer
+│   │   │   ├── TaskService.java
+│   │   │   ├── AlertService.java
+│   │   │   └── AudioFileService.java
+│   │   │
+│   │   └── ui/controllers/
+│   │       └── MainController.java     # JavaFX контроллер
 │   │
-│   └── test/
-│       └── java/                          # Тесты (можно расширять)
+│   └── resources/
+│       ├── application.properties      # Конфигурация приложения
+│       ├── application-example.properties  # Пример конфига
+│       ├── fxml/
+│       │   └── main-view.fxml          # FXML разметка UI
+│       ├── css/
+│       │   └── style.css               # CSS стили
+│       └── db/
+│           └── schema.sql              # SQL схема БД
 │
-└── target/                                # Скомпилированные артефакты (Maven создаёт сам)
+├── target/                             # Скомпилированные артефакты (Maven)
+└── test/                               # Unit тесты
+```
+
+## 🚀 Быстрый старт
+
+### Системные требования
+
+- **Java 21+** — [скачать](https://www.oracle.com/java/technologies/downloads/)
+- **PostgreSQL 12+** — [скачать](https://www.postgresql.org/download/)
+- **Maven 3.8+** — [скачать](https://maven.apache.org/download.cgi)
+- **Git** — [скачать](https://git-scm.com/)
+
+### Шаг 1: Клонирование репозитория
+
+```bash
+git clone https://github.com/Adam-Rubinstein/task_manager.git
+cd task_manager
+```
+
+### Шаг 2: Создание базы данных PostgreSQL
+
+```bash
+psql -U postgres
+
+-- Внутри psql:
+CREATE DATABASE taskmanager;
+\q
+```
+
+### Шаг 3: Конфигурация приложения
+
+Отредактируй `src/main/resources/application.properties`:
+
+```properties
+# PostgreSQL Connection
+spring.datasource.url=jdbc:postgresql://localhost:5432/taskmanager
+spring.datasource.username=postgres
+spring.datasource.password=ВАШ_ПАРОЛЬ
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+# Hibernate / JPA
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=false
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+spring.jpa.properties.hibernate.format_sql=true
+
+# Logging
+logging.level.root=INFO
+logging.level.com.taskmanager=DEBUG
+```
+
+**Важно:** Замени `ВАШ_ПАРОЛЬ` на реальный пароль PostgreSQL.
+
+### Шаг 4: Инициализация схемы БД (опционально)
+
+```bash
+psql -U postgres -d taskmanager -f src/main/resources/db/schema.sql
+```
+
+(Hibernate с `ddl-auto=update` создаст таблицы автоматически, но этот скрипт добавит индексы, триггеры и доп. структуры.)
+
+### Шаг 5: Сборка и запуск
+
+Сборка:
+
+```bash
+mvn clean install
+```
+
+Запуск (для разработки):
+
+```bash
+mvn javafx:run
+```
+
+При успешном запуске откроется окно приложения с таблицей задач.
+
+## 🧪 Разработка и тестирование
+
+### Запуск тестов
+
+```bash
+mvn test
+```
+
+### Быстрая проверка компиляции
+
+```bash
+mvn clean compile -DskipTests
+```
+
+### Запуск из IDE
+
+- Открой проект в IntelliJ IDEA
+- Найди класс `TaskManagerApp`
+- Нажми **Run** или **Shift+F10**
+
+## 📚 Документация
+
+- **[Руководство по установке](docs/SETUP.md)** — подробные инструкции с решением проблем
+- **[Архитектура проекта](docs/ARCHITECTURE.md)** — описание слоёв, компонентов и потоков данных
+
+## 📄 Лицензия
+
+All Rights Reserved — см. файл [LICENSE](LICENSE)
+
+Это программное обеспечение защищено авторским правом. Любое копирование, модификация, распространение или использование без письменного разрешения правообладателя строго запрещено.
+
+## 👨‍💻 Автор
+
+**Adam Rubinstein**  
+**GitHub:** [@Adam-Rubinstein](https://github.com/Adam-Rubinstein/)
+
+---
+
+**Версия:** 1.0.0  
+**Последнее обновление:** 1 января 2026  
+**Статус:** В активной разработке
