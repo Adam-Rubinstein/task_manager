@@ -1,36 +1,31 @@
 param([int]$interval = 600)
 
 $projectPath = Get-Location
-Write-Host "🚀 Автокоммит запущен в: $projectPath"
-Write-Host "⏱️  Интервал: $interval секунд ($($interval/60) минут)"
-Write-Host "⏹️  Чтобы остановить: Ctrl+C"
+Write-Host "Autocommit started in: $projectPath"
+Write-Host "Interval: $interval seconds ($($interval/60) minutes)"
+Write-Host "Stop: Ctrl+C"
 Write-Host ""
 
 $commitCount = 0
 
 while ($true) {
     try {
-        # Добавляем все изменения
         git add -A
-        
-        # Создаём коммит с временной меткой
+
         $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
         $commitMessage = "Auto-commit: $timestamp"
-        
+
         git commit -m $commitMessage
-        
-        # Пушим на GitHub
         git push origin main
-        
+
         $commitCount++
-        Write-Host "✅ Коммит #$commitCount создан и загружен на GitHub"
-        Write-Host "   Время следующего коммита: $(Get-Date -Format 'HH:mm:ss')"
+        Write-Host "Commit #$commitCount pushed to GitHub"
+        Write-Host "Next commit time: $(Get-Date -Format 'HH:mm:ss')"
         Write-Host ""
     }
     catch {
-        Write-Host "❌ Ошибка: $_" -ForegroundColor Red
+        Write-Host "No changes to commit or error: $_"
     }
-    
-    # Ждём перед следующим коммитом
+
     Start-Sleep -Seconds $interval
 }
