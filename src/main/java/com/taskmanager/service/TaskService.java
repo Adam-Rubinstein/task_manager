@@ -6,6 +6,7 @@ import com.taskmanager.model.TaskStatus;
 import com.taskmanager.dto.VoiceTaskParsed;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.time.LocalDateTime;
 import java.time.LocalDate;
 import java.util.List;
@@ -37,7 +38,6 @@ public class TaskService {
         task.setCreatedAt(LocalDateTime.now());
         task.setStatus(TaskStatus.NEW);
         task.setUpdatedAt(LocalDateTime.now());
-
         return taskRepository.save(task);
     }
 
@@ -138,7 +138,6 @@ public class TaskService {
         task.setCreatedAt(LocalDateTime.now());
         task.setUpdatedAt(LocalDateTime.now());
         task.setStatus(TaskStatus.NEW);
-
         return taskRepository.save(task);
     }
 
@@ -148,7 +147,6 @@ public class TaskService {
     public List<Task> getTasksForToday() {
         LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
         LocalDateTime endOfDay = LocalDate.now().plusDays(1).atStartOfDay().minusSeconds(1);
-        
         return taskRepository.findByDueDateBetween(startOfDay, endOfDay).stream()
                 .filter(task -> task.getStatus() != TaskStatus.CANCELLED)
                 .collect(Collectors.toList());
@@ -156,12 +154,13 @@ public class TaskService {
 
     /**
      * Получить просроченные задачи (ФАЗА 2)
+     * ✅ FIXED: Добавлена проверка dueDate != null
      */
     public List<Task> getOverdueTasks() {
         LocalDateTime now = LocalDateTime.now();
-        
         return taskRepository.findAll().stream()
-                .filter(task -> task.getDueDate().isBefore(now) &&
+                .filter(task -> task.getDueDate() != null &&
+                        task.getDueDate().isBefore(now) &&
                         task.getStatus() != TaskStatus.COMPLETED &&
                         task.getStatus() != TaskStatus.CANCELLED)
                 .collect(Collectors.toList());
@@ -195,8 +194,8 @@ public class TaskService {
         String lowerKeyword = keyword.toLowerCase();
         return taskRepository.findAll().stream()
                 .filter(task -> task.getTitle().toLowerCase().contains(lowerKeyword) ||
-                        (task.getDescription() != null && 
-                         task.getDescription().toLowerCase().contains(lowerKeyword)))
+                        (task.getDescription() != null &&
+                                task.getDescription().toLowerCase().contains(lowerKeyword)))
                 .collect(Collectors.toList());
     }
 

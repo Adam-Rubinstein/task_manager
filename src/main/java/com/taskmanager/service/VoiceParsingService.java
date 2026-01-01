@@ -1,294 +1,217 @@
 package com.taskmanager.service;
 
-import com.taskmanager.dto.VoiceTaskParsed;
-import com.joestelmach.natty.Parser;
-import com.joestelmach.natty.DateGroup;
-import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
+import java.time.format.DateTimeFormatter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * VoiceParsingService - парсинг голосовых сообщений на русском языке (ФАЗА 2)
- * 
- * Функции:
- * 1. Парсинг дат (Natty): "завтра в 15:00", "через 3 дня", "в понедельник"
- * 2. Парсинг приоритета (Regex): "приоритет 8", "важность 7"
- * 3. Очистка текста для названия задачи
- * 4. Определение срочности
- * 
- * Пример:
- * Input:  "Купить молоко завтра в 15:00, приоритет 8"
- * Output: {
- *   title: "Купить молоко",
- *   dueDate: 2026-01-02T15:00:00,
- *   priority: 8,
- *   isUrgent: false
- * }
+ * VoiceParsingService - Парсинг голосового текста
+ * ФАЗА 2: Извлечение дат, времени и приоритета из текста
  */
-@Service
 public class VoiceParsingService {
 
-    private static final Parser nattyParser = new Parser();
-
-    // Regex для парсинга приоритета
-    private static final Pattern PRIORITY_PATTERN_RU = Pattern.compile(
-            "(?:приоритет|важность)\\s+(\\d+)",
-            Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE
-    );
-    private static final Pattern PRIORITY_PATTERN_EN = Pattern.compile(
-            "(?:priority|importance)\\s+(\\d+)",
-            Pattern.CASE_INSENSITIVE
-    );
-
-    // Regex для определения срочности
-    private static final Pattern URGENT_PATTERN = Pattern.compile(
-            "(срочно|urgent|спешно|asap|немедленно|быстро|экстренно)",
-            Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE
-    );
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
     /**
      * Основной метод парсинга голосового текста
-     * @param text Исходный текст (например, "Купить молоко завтра в 15:00, приоритет 8")
-     * @return VoiceTaskParsed с распарсенными данными
      */
-    public VoiceTaskParsed parseVoiceText(String text) {
+    public static VoiceTaskParsed parseVoiceText(String text) {
         if (text == null || text.isEmpty()) {
             return null;
         }
 
-        VoiceTaskParsed result = new VoiceTaskParsed();
+        VoiceTaskParsed parsed = new VoiceTaskParsed();
 
         // 1. Парсинг приоритета
         Integer priority = parsePriority(text);
-        result.setPriority(priority != null ? priority : 5); // По умолчанию 5
+        parsed.setPriority(priority != null ? priority : 5);
 
-        // 2. Парсинг срочности
-        Boolean isUrgent = isUrgent(text);
-        result.setIsUrgent(isUrgent);
+        // 2. Парсинг даты
+        LocalDateTime dueDate = parseDate(text);
+        parsed.setDueDate(dueDate);
 
-        // 3. Парсинг даты
-        LocalDateTime dueDate = parseDateWithNatty(text);
-        result.setDueDate(dueDate);
-
-        // 4. Очистка текста для названия задачи
+        // 3. Очистка текста (убрать дату и приоритет)
         String cleanedTitle = cleanText(text);
-        result.setTitle(cleanedTitle);
+        parsed.setTitle(cleanedTitle);
 
-        // 5. Описание (пока пусто, можно расширить)
-        result.setDescription("");
+        // 4. Description = исходный текст (можно доработать)
+        parsed.setDescription(text);
 
-        return result;
+        // 5. Проверка срочности
+        boolean isUrgent = isUrgent(text, priority);
+        parsed.setIsUrgent(isUrgent);
+
+        return parsed;
     }
 
     /**
-     * Парсинг даты с помощью Natty
-     * 
-     * Поддерживаемые форматы на русском:
-     * - "завтра в 15:00"
-     * - "через 3 дня"
-     * - "в понедельник"
-     * - "в 15:00"
-     * - "завтра"
-     * - "сегодня"
-     * 
-     * @param text Текст для парсинга
-     * @return LocalDateTime или null если не найдено
+     * Парсинг приоритета из текста
+     * Ищет: "приоритет 8", "важность 7", "priority 5"
      */
-    private LocalDateTime parseDateWithNatty(String text) {
-        try {
-            // Переводим русские даты на английские для Natty
-            String translatedText = translateRussianDates(text);
+    private static Integer parsePriority(String text) {
+        if (text == null) return null;
 
-            // Парсим с помощью Natty
-            List<DateGroup> groups = nattyParser.parse(translatedText);
+        // Русские варианты
+        Pattern pattern = Pattern.compile("(приоритет|важность)[\\s:]*([0-9]+)", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(text);
 
-            if (groups != null && !groups.isEmpty()) {
-                DateGroup dateGroup = groups.get(0);
-                List<Date> dates = dateGroup.getDates();
-
-                if (dates != null && !dates.isEmpty()) {
-                    Date date = dates.get(0);
-                    return date.toInstant()
-                            .atZone(ZoneId.systemDefault())
-                            .toLocalDateTime();
-                }
+        if (matcher.find()) {
+            try {
+                int priority = Integer.parseInt(matcher.group(2));
+                return Math.min(10, Math.max(0, priority)); // 0-10
+            } catch (NumberFormatException e) {
+                return null;
             }
-        } catch (Exception e) {
-            System.err.println("Ошибка при парсинге даты: " + e.getMessage());
+        }
+
+        // English
+        pattern = Pattern.compile("priority[\\s:]*([0-9]+)", Pattern.CASE_INSENSITIVE);
+        matcher = pattern.matcher(text);
+
+        if (matcher.find()) {
+            try {
+                int priority = Integer.parseInt(matcher.group(1));
+                return Math.min(10, Math.max(0, priority));
+            } catch (NumberFormatException e) {
+                return null;
+            }
         }
 
         return null;
     }
 
     /**
-     * Перевод русских дат на английские для Natty
-     * 
-     * Примеры:
-     * "завтра" → "tomorrow"
-     * "сегодня" → "today"
-     * "через 3 дня" → "in 3 days"
-     * "в понедельник" → "on Monday"
-     * 
-     * @param text Исходный текст
-     * @return Текст с переведёнными датами
+     * Парсинг даты из текста
+     * Ищет: "завтра", "через 3 дня", "в 15:00", "в понедельник"
      */
-    private String translateRussianDates(String text) {
-        // Замены русских дат на английские
-        text = text.replaceAll("\\bзавтра\\b", "tomorrow");
-        text = text.replaceAll("\\bсегодня\\b", "today");
-        text = text.replaceAll("\\bпосле завтрашнего дня\\b", "day after tomorrow");
+    private static LocalDateTime parseDate(String text) {
+        if (text == null) return null;
 
-        // Дни недели
-        text = text.replaceAll("\\bпонедельник\\b", "Monday");
-        text = text.replaceAll("\\bвторник\\b", "Tuesday");
-        text = text.replaceAll("\\bсреда\\b", "Wednesday");
-        text = text.replaceAll("\\bчетверг\\b", "Thursday");
-        text = text.replaceAll("\\bпятница\\b", "Friday");
-        text = text.replaceAll("\\bсуббота\\b", "Saturday");
-        text = text.replaceAll("\\bвоскресенье\\b", "Sunday");
+        LocalDateTime now = LocalDateTime.now();
+        text = text.toLowerCase();
 
-        // "через N дней/часов"
-        text = text.replaceAll("\\bчерез\\s+(\\d+)\\s+дн[её]й\\b", "in $1 days");
-        text = text.replaceAll("\\bчерез\\s+(\\d+)\\s+час[ов]*\\b", "in $1 hours");
-        text = text.replaceAll("\\bчерез\\s+(\\d+)\\s+минут[ы]*\\b", "in $1 minutes");
+        // "завтра" → +1 день
+        if (text.contains("завтра")) {
+            LocalDateTime tomorrow = now.plusDays(1);
+            // Ищем время в формате "в 15:00"
+            Pattern timePattern = Pattern.compile("в\\s+(\\d{1,2}):(\\d{2})");
+            Matcher timeMatcher = timePattern.matcher(text);
+            if (timeMatcher.find()) {
+                int hour = Integer.parseInt(timeMatcher.group(1));
+                int minute = Integer.parseInt(timeMatcher.group(2));
+                return tomorrow.withHour(hour).withMinute(minute).withSecond(0);
+            }
+            return tomorrow.withHour(9).withMinute(0).withSecond(0);
+        }
 
-        // "в N часов/часа"
-        text = text.replaceAll("\\bв\\s+(\\d+)\\s*:\\s*(\\d+)\\b", "at $1:$2");
+        // "через N дней" → +N дней
+        Pattern daysPattern = Pattern.compile("через\\s+(\\d+)\\s+(дн[яе]?)");
+        Matcher daysMatcher = daysPattern.matcher(text);
+        if (daysMatcher.find()) {
+            int days = Integer.parseInt(daysMatcher.group(1));
+            LocalDateTime future = now.plusDays(days);
+            // Ищем время
+            Pattern timePattern = Pattern.compile("в\\s+(\\d{1,2}):(\\d{2})");
+            Matcher timeMatcher = timePattern.matcher(text);
+            if (timeMatcher.find()) {
+                int hour = Integer.parseInt(timeMatcher.group(1));
+                int minute = Integer.parseInt(timeMatcher.group(2));
+                return future.withHour(hour).withMinute(minute).withSecond(0);
+            }
+            return future.withHour(9).withMinute(0).withSecond(0);
+        }
+
+        // "в N часов" или "в 15:00"
+        Pattern timePattern = Pattern.compile("в\\s+(\\d{1,2}):(\\d{2})");
+        Matcher timeMatcher = timePattern.matcher(text);
+        if (timeMatcher.find()) {
+            int hour = Integer.parseInt(timeMatcher.group(1));
+            int minute = Integer.parseInt(timeMatcher.group(2));
+            return now.withHour(hour).withMinute(minute).withSecond(0);
+        }
+
+        return null;
+    }
+
+    /**
+     * Очистить текст от дат и приоритета
+     */
+    private static String cleanText(String text) {
+        if (text == null) return "";
+
+        // Убрать приоритет
+        text = text.replaceAll("(приоритет|важность|priority)[\\s:]*[0-9]+", "").trim();
+
+        // Убрать дату
+        text = text.replaceAll("завтра", "").trim();
+        text = text.replaceAll("через\\s+\\d+\\s+дн[яе]?", "").trim();
+        text = text.replaceAll("в\\s+\\d{1,2}:\\d{2}", "").trim();
+        text = text.replaceAll("в\\s+\\d{1,2}\\s+часов", "").trim();
+
+        // Убрать лишние запятые и пробелы
+        text = text.replaceAll(",\\s*$", "").trim();
+        text = text.replaceAll("\\s+", " ").trim();
 
         return text;
     }
 
     /**
-     * Парсинг приоритета из текста
-     * 
-     * Примеры:
-     * "приоритет 8" → 8
-     * "priority 5" → 5
-     * "важность 7" → 7
-     * 
-     * @param text Текст для парсинга
-     * @return Приоритет (0-10) или null если не найдено
+     * Определить срочность задачи
      */
-    private Integer parsePriority(String text) {
-        if (text == null) {
-            return null;
+    private static boolean isUrgent(String text, Integer priority) {
+        if (text == null) return false;
+
+        text = text.toLowerCase();
+
+        // Высокий приоритет
+        if (priority != null && priority >= 7) {
+            return true;
         }
 
-        // Русский вариант
-        Matcher matcherRu = PRIORITY_PATTERN_RU.matcher(text);
-        if (matcherRu.find()) {
-            try {
-                int priority = Integer.parseInt(matcherRu.group(1));
-                return Math.min(10, Math.max(0, priority)); // Ограничиваем 0-10
-            } catch (NumberFormatException e) {
-                return null;
-            }
-        }
-
-        // Английский вариант
-        Matcher matcherEn = PRIORITY_PATTERN_EN.matcher(text);
-        if (matcherEn.find()) {
-            try {
-                int priority = Integer.parseInt(matcherEn.group(1));
-                return Math.min(10, Math.max(0, priority)); // Ограничиваем 0-10
-            } catch (NumberFormatException e) {
-                return null;
-            }
-        }
-
-        return null;
+        // Ключевые слова срочности
+        return text.contains("срочно") ||
+                text.contains("немедленно") ||
+                text.contains("критично") ||
+                text.contains("emergency") ||
+                text.contains("urgent");
     }
 
     /**
-     * Проверка срочности задачи
-     * 
-     * @param text Текст для проверки
-     * @return true если содержит маркеры срочности
+     * Проверить валидность распарсенных данных
      */
-    private Boolean isUrgent(String text) {
-        if (text == null) {
-            return false;
-        }
-
-        Matcher matcher = URGENT_PATTERN.matcher(text);
-        return matcher.find();
+    public static boolean isValidParsed(VoiceTaskParsed parsed) {
+        return parsed != null &&
+                parsed.getTitle() != null &&
+                !parsed.getTitle().isEmpty();
     }
 
     /**
-     * Очистка текста для получения названия задачи
-     * 
-     * Удаляет:
-     * - Даты и время
-     * - Приоритет
-     * - Лишние пробелы
-     * 
-     * @param text Исходный текст
-     * @return Очищенный текст (название задачи)
+     * Вспомогательный DTO класс
      */
-    private String cleanText(String text) {
-        if (text == null || text.isEmpty()) {
-            return "";
-        }
+    public static class VoiceTaskParsed {
+        private String title;
+        private String description;
+        private LocalDateTime dueDate;
+        private Integer priority;
+        private Boolean isUrgent;
 
-        String cleaned = text;
+        public VoiceTaskParsed() {}
 
-        // Удаляем приоритет и его вариации
-        cleaned = cleaned.replaceAll(
-                "(?:,?\\s*(?:приоритет|важность|priority|importance)\\s+\\d+)",
-                ""
-        );
+        // Getters and Setters
+        public String getTitle() { return title; }
+        public void setTitle(String title) { this.title = title; }
 
-        // Удаляем сроки и даты
-        cleaned = cleaned.replaceAll(
-                "(?:,?\\s*(?:завтра|сегодня|через\\s+\\d+\\s+(?:дн[её]й|часов|минут)))",
-                ""
-        );
+        public String getDescription() { return description; }
+        public void setDescription(String description) { this.description = description; }
 
-        // Удаляем время (HH:MM)
-        cleaned = cleaned.replaceAll("\\s+\\d{1,2}:\\d{2}\\b", "");
+        public LocalDateTime getDueDate() { return dueDate; }
+        public void setDueDate(LocalDateTime dueDate) { this.dueDate = dueDate; }
 
-        // Удаляем срочность маркеры
-        cleaned = cleaned.replaceAll(
-                "(?:,?\\s*(?:срочно|urgent|спешно|asap|немедленно|быстро|экстренно|!))",
-                ""
-        );
+        public Integer getPriority() { return priority; }
+        public void setPriority(Integer priority) { this.priority = priority; }
 
-        // Удаляем множественные пробелы
-        cleaned = cleaned.replaceAll("\\s+", " ");
-
-        // Удаляем пробелы и запятые в начале и конце
-        cleaned = cleaned.trim();
-        cleaned = cleaned.replaceAll("^[,\\s]+", "");
-        cleaned = cleaned.replaceAll("[,\\s]+$", "");
-
-        return cleaned;
-    }
-
-    /**
-     * Валидация распарсенных данных
-     * 
-     * @param parsed VoiceTaskParsed для валидации
-     * @return true если данные корректные
-     */
-    public Boolean isValidParsed(VoiceTaskParsed parsed) {
-        if (parsed == null) {
-            return false;
-        }
-
-        // Название не может быть пустым
-        if (parsed.getTitle() == null || parsed.getTitle().isEmpty()) {
-            return false;
-        }
-
-        // Приоритет должен быть в диапазоне 0-10
-        if (parsed.getPriority() == null || parsed.getPriority() < 0 || parsed.getPriority() > 10) {
-            return false;
-        }
-
-        return true;
+        public Boolean getIsUrgent() { return isUrgent; }
+        public void setIsUrgent(Boolean isUrgent) { this.isUrgent = isUrgent; }
     }
 }

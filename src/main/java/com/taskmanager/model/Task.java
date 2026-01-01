@@ -23,12 +23,27 @@ public class Task {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
+    @Column(nullable = true)
+    private LocalDateTime updatedAt;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private com.taskmanager.model.TaskStatus status = com.taskmanager.model.TaskStatus.NEW;
+    private TaskStatus status = TaskStatus.NEW;
 
     @Column(nullable = false)
-    private Integer priority = 0;
+    private Integer priority = 5;
+
+    // Конструкторы
+    public Task() {}
+
+    public Task(String title, String description) {
+        this.title = title;
+        this.description = description;
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+        this.status = TaskStatus.NEW;
+        this.priority = 5;
+    }
 
     // Getters and Setters
     public Long getId() { return id; }
@@ -46,9 +61,25 @@ public class Task {
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
-    public com.taskmanager.model.TaskStatus getStatus() { return status; }
-    public void setStatus(com.taskmanager.model.TaskStatus status) { this.status = status; }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    public TaskStatus getStatus() { return status; }
+    public void setStatus(TaskStatus status) { this.status = status; }
 
     public Integer getPriority() { return priority; }
-    public void setPriority(Integer priority) { this.priority = priority; }
+    public void setPriority(Integer priority) { 
+        this.priority = priority != null ? priority : 5; 
+    }
+
+    @Override
+    public String toString() {
+        return "Task{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", status=" + status +
+                ", priority=" + priority +
+                ", dueDate=" + dueDate +
+                '}';
+    }
 }
