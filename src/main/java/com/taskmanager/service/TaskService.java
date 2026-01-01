@@ -7,6 +7,7 @@ import com.taskmanager.dao.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -39,11 +40,14 @@ public class TaskService {
     }
 
     /**
+     * ✅ ИСПРАВЛЕНО: теперь принимает TITLE и DESCRIPTION отдельно
      * Создать новую задачу
-     * ✅ ИСПРАВЛЕНО: priority теперь Integer вместо String
      */
-    public Task createTask(String description, Integer priority, LocalDateTime dueDate, RecurrenceType recurrenceType) {
-        Task task = new Task(description, priority, dueDate, recurrenceType);
+    public Task createTask(String title, String description, Integer priority, LocalDateTime dueDate, RecurrenceType recurrenceType) {
+        // Объединяем title и description в одно поле
+        String fullDescription = (title != null ? title : "Без названия") + "\n" + (description != null ? description : "");
+
+        Task task = new Task(fullDescription, priority, dueDate, recurrenceType);
         return taskRepository.save(task);
     }
 

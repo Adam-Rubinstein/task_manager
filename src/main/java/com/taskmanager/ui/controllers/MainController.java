@@ -14,6 +14,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -149,6 +150,7 @@ public class MainController {
      */
     @FXML
     private void handleCreateTask() {
+        String title = taskTitleInput.getText().trim();
         String description = taskDescriptionInput.getText().trim();
         Integer priority = prioritySpinner.getValue();
         LocalDateTime dueDate = dueDatePicker.getValue() != null
@@ -158,28 +160,40 @@ public class MainController {
                 ? recurrenceCombo.getValue()
                 : RecurrenceType.NONE;
 
-        if (description.isEmpty()) {
-            showAlert("Ошибка", "Введите описание задачи!");
+        // ✅ НОВАЯ ВАЛИДАЦИЯ: проверяем НАЗВАНИЕ (обязательное поле)
+        if (title.isEmpty()) {
+            showAlert("Ошибка", "Введите название задачи!");
             return;
+        }
+
+        // Описание может быть пустым
+        if (description.isEmpty()) {
+            description = "Без описания";
         }
 
         try {
             // ✅ ИСПРАВЛЕННЫЙ ПОРЯДОК ПАРАМЕТРОВ:
-            // createTask(String description, Integer priority, LocalDateTime dueDate, RecurrenceType recurrenceType)
+            // createTask(String title, String description, Integer priority, LocalDateTime dueDate, RecurrenceType recurrenceType)
             Task newTask = taskService.createTask(
-                    description,      // 1. String description
-                    priority,         // 2. Integer priority
-                    dueDate,          // 3. LocalDateTime dueDate
-                    recurrenceType    // 4. RecurrenceType recurrenceType
+                    title,              // 1. String title (название)
+                    description,        // 2. String description (описание)
+                    priority,           // 3. Integer priority
+                    dueDate,            // 4. LocalDateTime dueDate
+                    recurrenceType      // 5. RecurrenceType recurrenceType
             );
 
             tasksList.add(newTask);
+
+            // Очистить форму после успешного создания
+            taskTitleInput.clear();
             taskDescriptionInput.clear();
             prioritySpinner.getValueFactory().setValue(5);
             dueDatePicker.setValue(null);
             recurrenceCombo.setValue(RecurrenceType.NONE);
             intervalSpinner.getValueFactory().setValue(7);
+
             showAlert("Успех", "Задача создана!");
+
         } catch (Exception e) {
             showAlert("Ошибка", "Не удалось создать задачу: " + e.getMessage());
         }
@@ -191,6 +205,7 @@ public class MainController {
     @FXML
     private void handleDeleteTask() {
         Task selected = tasksTable.getSelectionModel().getSelectedItem();
+
         if (selected == null) {
             showAlert("Ошибка", "Выберите задачу для удаления!");
             return;
@@ -206,18 +221,21 @@ public class MainController {
     }
 
     /**
-     * Обновить задачу
+     * Обновить задачу (двойной клик по строке)
      */
     @FXML
     private void handleTaskDoubleClick() {
         Task selected = tasksTable.getSelectionModel().getSelectedItem();
+
         if (selected != null) {
             // Заполнить форму выбранной задачей
             taskDescriptionInput.setText(selected.getDescription());
             prioritySpinner.getValueFactory().setValue(selected.getPriority());
+
             if (selected.getDueDate() != null) {
                 dueDatePicker.setValue(selected.getDueDate().toLocalDate());
             }
+
             recurrenceCombo.setValue(selected.getRecurrenceType());
             intervalSpinner.getValueFactory().setValue(selected.getRecurrenceInterval());
         }
@@ -229,6 +247,7 @@ public class MainController {
     @FXML
     private void handleFilterByStatus() {
         TaskStatus selected = statusFilter.getValue();
+
         if (selected == null) {
             loadAllTasks();
             return;
@@ -249,6 +268,7 @@ public class MainController {
     @FXML
     private void handleRecurrenceChange() {
         RecurrenceType selected = recurrenceCombo.getValue();
+
         if (selected == null || selected == RecurrenceType.NONE) {
             intervalSpinner.setDisable(true);
         } else {
@@ -261,11 +281,13 @@ public class MainController {
      */
     @FXML
     private void handleMarkAlertAsRead() {
-        int selected = alertsListView.getSelectionModel().getSelectedIndex();
-        if (selected >= 0) {
+        int selectedIndex = alertsListView.getSelectionModel().getSelectedIndex();
+
+        if (selectedIndex >= 0) {
             List<Alert> unread = alertService.getUnreadAlerts();
-            if (selected < unread.size()) {
-                alertService.markAsRead(unread.get(selected).getId());
+
+            if (selectedIndex < unread.size()) {
+                alertService.markAsRead(unread.get(selectedIndex).getId());
                 updateAlertsCount();
             }
         }
@@ -301,10 +323,12 @@ public class MainController {
         try {
             List<Alert> unread = alertService.getUnreadAlerts();
             alertsCountLabel.setText("Оповещения: " + unread.size());
+
             ObservableList<String> alertsStrings = FXCollections.observableArrayList();
             for (Alert alert : unread) {
                 alertsStrings.add(alert.getMessage() + " [" + alert.getType() + "]");
             }
+
             alertsListView.setItems(alertsStrings);
         } catch (Exception e) {
             alertsCountLabel.setText("Ошибка загрузки оповещений");
@@ -313,7 +337,8 @@ public class MainController {
 
     /**
      * ⭐ ИСПРАВЛЕННЫЙ МЕТОД - Показать диалоговое окно
-     * Использует полное имя javafx.scene.control.Alert чтобы избежать конфликта с моделью Alert
+     * Использует полное имя javafx.scene.control.Alert,
+     * чтобы избежать конфликта с моделью Alert
      */
     private void showAlert(String title, String message) {
         javafx.scene.control.Alert jfxAlert = new javafx.scene.control.Alert(
