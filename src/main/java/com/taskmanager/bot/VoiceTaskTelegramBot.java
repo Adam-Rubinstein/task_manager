@@ -33,7 +33,6 @@ import java.util.List;
  */
 @Component
 public class VoiceTaskTelegramBot extends TelegramLongPollingBot {
-
     private static final Logger log = LoggerFactory.getLogger(VoiceTaskTelegramBot.class);
 
     @Value("${telegram.bot.token}")
