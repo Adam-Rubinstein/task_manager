@@ -4,38 +4,37 @@ import com.taskmanager.dto.VoiceTaskParsed;
 import com.taskmanager.model.Task;
 import com.taskmanager.service.TaskService;
 import com.taskmanager.service.VoiceParsingService;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
-import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.Voice;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 /**
- * VoiceTaskTelegramBot - Telegram бот для голосовых задач
- * 
- * Функции:
- * - Получение голосовых сообщений
- * - Распознавание текста (речь -> текст)
- * - Парсинг дата, приоритета из текста
- * - Создание задач
- * - Отправка результата в Telegram
+ * VoiceTaskTelegramBot - Telegram бот для управления задачами
+ * Принимает текстовые сообщения и создает задачи в БД
+ *
+ * Поддерживаемые команды:
+ * /start - приветствие
+ * /stats - статистика
+ * /list - список последних задач
+ * /today - задачи на сегодня
+ * /help - справка
+ *
+ * Обычный текст → создание новой задачи
  */
-@Slf4j
 @Component
 public class VoiceTaskTelegramBot extends TelegramLongPollingBot {
+
+    private static final Logger log = LoggerFactory.getLogger(VoiceTaskTelegramBot.class);
 
     @Value("${telegram.bot.token}")
     private String botToken;
@@ -48,9 +47,6 @@ public class VoiceTaskTelegramBot extends TelegramLongPollingBot {
 
     @Autowired
     private VoiceParsingService voiceParsingService;
-
-    @Autowired
-    private SpeechRecognitionService speechRecognitionService;
 
     @Override
     public String getBotUsername() {
@@ -65,312 +61,236 @@ public class VoiceTaskTelegramBot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         try {
-            // Обработка текстовых сообщений
             if (update.hasMessage() && update.getMessage().hasText()) {
-                handleTextMessage(update);
-            }
-            // Обработка голосовых сообщений
-            else if (update.hasMessage() && update.getMessage().hasVoice()) {
-                handleVoiceMessage(update);
-            }
-            // Обработка команд
-            else if (update.hasMessage() && update.getMessage().isCommand()) {
-                handleCommand(update);
+                handleMessage(update);
             }
         } catch (Exception e) {
-            log.error("Ошибка при обработке update: {}", e.getMessage(), e);
-            sendErrorMessage(update.getMessage().getChatId(), "❌ Ошибка обработки: " + e.getMessage());
+            log.error("Ошибка при обработке сообщения: {}", e.getMessage(), e);
         }
     }
 
     /**
-     * Обработка текстового сообщения
+     * Основной обработчик сообщений
+     * Маршрутизирует команды и текст задач
      */
-    private void handleTextMessage(Update update) {
+    private void handleMessage(Update update) throws TelegramApiException {
         long chatId = update.getMessage().getChatId();
         String text = update.getMessage().getText();
-        long userId = update.getMessage().getFrom().getId();
 
-        log.info("📝 Текстовое сообщение от {}: {}", userId, text);
+        log.info("📨 Получено сообщение от {}: {}", chatId, text);
 
-        // Парсим текст
-        VoiceTaskParsed parsed = voiceParsingService.parseVoiceText(text);
-        
-        if (parsed == null || !voiceParsingService.isValidParsed(parsed)) {
-            sendMessage(chatId, "❌ Не удалось распарсить текст. Попробуй снова.");
-            return;
+        if (text.startsWith("/")) {
+            handleCommand(chatId, text);
+        } else {
+            handleTaskCreation(chatId, text);
         }
-
-        // Создаём задачу
-        Task task = taskService.createTaskFromVoice(parsed);
-        
-        if (task == null) {
-            sendMessage(chatId, "❌ Не удалось создать задачу.");
-            return;
-        }
-
-        // Отправляем результат
-        String responseMessage = formatTaskMessage(task);
-        sendMessage(chatId, responseMessage);
-        
-        log.info("✅ Задача создана: {} (ID: {})", task.getTitle(), task.getId());
     }
 
     /**
-     * Обработка голосового сообщения
+     * Обработка команд бота
      */
-    private void handleVoiceMessage(Update update) throws TelegramApiException {
-        long chatId = update.getMessage().getChatId();
-        Voice voice = update.getMessage().getVoice();
-        long userId = update.getMessage().getFrom().getId();
+    private void handleCommand(long chatId, String command) throws TelegramApiException {
+        String response;
+        String cmd = command.toLowerCase();
 
-        log.info("🎤 Голосовое сообщение от {}, длительность: {}s", userId, voice.getDuration());
+        if (cmd.equals("/start")) {
+            response = "👋 Привет! Я бот для управления задачами.\n\n" +
+                    "📝 Отправь мне текст задачи:\n" +
+                    "• Купить молоко завтра в 15:00, приоритет 8\n" +
+                    "• Встреча через 3 дня\n" +
+                    "• Отчет срочный\n\n" +
+                    "⚙️ Команды:\n" +
+                    "/stats - статистика\n" +
+                    "/list - список задач\n" +
+                    "/today - задачи на сегодня\n" +
+                    "/help - справка";
 
-        // Отправляем "печатает..."
-        sendMessage(chatId, "⏳ Обрабатываю голосовое сообщение...");
+        } else if (cmd.equals("/stats")) {
+            response = getStatistics();
 
+        } else if (cmd.equals("/list")) {
+            response = getTasksList();
+
+        } else if (cmd.equals("/today")) {
+            response = getTodayTasks();
+
+        } else if (cmd.equals("/help")) {
+            response = "📋 Справка:\n\n" +
+                    "✏️ Отправь задачу в формате:\n" +
+                    "'Текст задачи [завтра/через N дней] [в HH:MM], [приоритет N]'\n\n" +
+                    "📌 Примеры:\n" +
+                    "• Купить молоко\n" +
+                    "• Встреча завтра в 15:00\n" +
+                    "• Отчет через 3 дня, приоритет 8\n" +
+                    "• Срочное совещание завтра в 10:00, приоритет 9\n\n" +
+                    "Все просто! 😊";
+
+        } else {
+            response = "❓ Неизвестная команда. Введи /help для справки";
+        }
+
+        sendMessage(chatId, response);
+    }
+
+    /**
+     * Создание новой задачи из текста
+     */
+    private void handleTaskCreation(long chatId, String text) throws TelegramApiException {
         try {
-            // Скачиваем файл с Telegram серверов
-            String filePath = downloadVoiceFile(voice.getFileId());
-            
-            // Распознаём речь -> текст
-            String recognizedText = speechRecognitionService.recognizeSpeech(filePath);
-            
-            if (recognizedText == null || recognizedText.isEmpty()) {
-                sendMessage(chatId, "❌ Не удалось распознать речь. Попробуй снова.");
-                return;
-            }
+            // Парсим текст задачи
+            VoiceTaskParsed parsed = voiceParsingService.parseVoiceText(text);
 
-            log.info("🎯 Распознанный текст: {}", recognizedText);
-
-            // Парсим текст (извлекаем дату, приоритет)
-            VoiceTaskParsed parsed = voiceParsingService.parseVoiceText(recognizedText);
-            
             if (parsed == null || !voiceParsingService.isValidParsed(parsed)) {
-                sendMessage(chatId, "❌ Не удалось распарсить текст: " + recognizedText);
+                sendMessage(chatId, "❌ Не удалось распарсить текст. Попробуй снова.\n\nПример: 'Купить молоко завтра в 15:00'");
                 return;
             }
 
-            // Создаём задачу
+            // Создаём задачу в БД
             Task task = taskService.createTaskFromVoice(parsed);
-            
+
             if (task == null) {
-                sendMessage(chatId, "❌ Не удалось создать задачу.");
+                sendMessage(chatId, "❌ Не удалось создать задачу. Попробуй снова.");
                 return;
             }
 
-            // Отправляем результат с распознанным текстом
-            String responseMessage = String.format(
-                "✅ Задача создана!\\n\\n" +
-                "🎯 Распознано: %s\\n" +
-                "📝 Задача: %s\\n" +
-                "📅 Срок: %s\\n" +
-                "🔴 Приоритет: %d%s",
-                recognizedText,
-                task.getTitle(),
-                formatDate(task.getDueDate()),
-                task.getPriority(),
-                task.getIsUrgent() ? " ⚡ СРОЧНО" : ""
-            );
-            
-            sendMessage(chatId, responseMessage);
-            
-            log.info("✅ Голосовая задача создана: {} (ID: {})", task.getTitle(), task.getId());
+            // Отправляем результат пользователю
+            String response = formatTaskResponse(task);
+            sendMessage(chatId, response);
+            log.info("✅ Задача создана: '{}' (ID: {}, Приоритет: {})",
+                    task.getTitle(), task.getId(), task.getPriority());
 
         } catch (Exception e) {
-            log.error("Ошибка при обработке голоса: {}", e.getMessage(), e);
-            sendMessage(chatId, "❌ Ошибка при обработке голоса: " + e.getMessage());
+            log.error("❌ Ошибка при создании задачи: {}", e.getMessage(), e);
+            sendMessage(chatId, "❌ Ошибка: " + e.getMessage());
         }
     }
 
     /**
-     * Обработка команд (/start, /stats, /list, etc.)
+     * Получить статистику по задачам
      */
-    private void handleCommand(Update update) {
-        long chatId = update.getMessage().getChatId();
-        String command = update.getMessage().getText();
-
-        log.info("⚙️ Команда: {}", command);
-
-        switch (command.toLowerCase()) {
-            case "/start":
-                sendMessage(chatId, 
-                    "👋 Привет! Я бот для управления задачами.\\n\\n" +
-                    "Я могу:\\n" +
-                    "🎤 Распознавать голосовые сообщения\\n" +
-                    "📝 Создавать задачи из текста\\n" +
-                    "📅 Парсить даты и приоритеты\\n\\n" +
-                    "Команды:\\n" +
-                    "/stats - статистика задач\\n" +
-                    "/list - список задач\\n" +
-                    "/today - задачи на сегодня\\n" +
-                    "/overdue - просроченные задачи\\n" +
-                    "/help - справка"
-                );
-                break;
-
-            case "/stats":
-                sendStatsMessage(chatId);
-                break;
-
-            case "/list":
-                sendListMessage(chatId);
-                break;
-
-            case "/today":
-                sendTodayMessage(chatId);
-                break;
-
-            case "/overdue":
-                sendOverdueMessage(chatId);
-                break;
-
-            case "/help":
-                sendMessage(chatId,
-                    "📋 Справка:\\n\\n" +
-                    "Отправь голосовое или текстовое сообщение с описанием задачи:\\n\\n" +
-                    "Примеры:\\n" +
-                    "• Купить молоко завтра в 15:00, приоритет 8\\n" +
-                    "• Подготовить отчет через 3 дня, срочно\\n" +
-                    "• Встреча в 14:00 сегодня, важность 7\\n\\n" +
-                    "Я распознаю:\\n" +
-                    "📅 Даты: завтра, через N дней, в HH:MM\\n" +
-                    "🔴 Приоритет: 0-10 (по умолчанию 5)\\n" +
-                    "⚡ Срочность: слова 'срочно', 'немедленно', etc."
-                );
-                break;
-
-            default:
-                sendMessage(chatId, "❓ Неизвестная команда. Введи /help для справки.");
-        }
-    }
-
-    /**
-     * Отправить статистику
-     */
-    private void sendStatsMessage(long chatId) {
+    private String getStatistics() {
         try {
             long total = taskService.getTotalTaskCount();
             long active = taskService.getActiveTaskCount();
             long completed = taskService.getCompletedTaskCount();
             long overdue = taskService.getOverdueTaskCount();
 
-            String stats = String.format(
-                "📊 Статистика задач:\\n\\n" +
-                "📈 Всего: %d\\n" +
-                "🔵 Активных: %d\\n" +
-                "✅ Завершено: %d\\n" +
-                "⚠️ Просроченных: %d",
-                total, active, completed, overdue
+            return String.format(
+                    "📊 Статистика:\n\n" +
+                            "📈 Всего задач: %d\n" +
+                            "🔵 Активных: %d\n" +
+                            "✅ Завершено: %d\n" +
+                            "⚠️ Просроченных: %d",
+                    total, active, completed, overdue
             );
-            sendMessage(chatId, stats);
         } catch (Exception e) {
-            sendMessage(chatId, "❌ Ошибка при получении статистики");
+            log.error("❌ Ошибка при получении статистики: {}", e.getMessage());
+            return "❌ Ошибка при получении статистики";
         }
     }
 
     /**
-     * Отправить список задач
+     * Получить список последних 5 задач
      */
-    private void sendListMessage(long chatId) {
+    private String getTasksList() {
         try {
-            var tasks = taskService.getLatestTasks(5);
-            
+            List<Task> tasks = taskService.getLatestTasks(5);
+
             if (tasks.isEmpty()) {
-                sendMessage(chatId, "📭 Задач нет");
-                return;
+                return "📭 Задач нет";
             }
 
-            StringBuilder sb = new StringBuilder("📋 Последние 5 задач:\\n\\n");
-            for (Task task : tasks) {
-                sb.append(formatTaskBrief(task)).append("\\n");
+            StringBuilder sb = new StringBuilder("📋 Последние 5 задач:\n\n");
+            for (int i = 0; i < tasks.size(); i++) {
+                Task task = tasks.get(i);
+                sb.append(String.format("%d. %s\n", i + 1, task.getTitle()));
+
+                if (task.getDueDate() != null) {
+                    sb.append("   📅 ").append(formatDate(task.getDueDate())).append("\n");
+                }
+
+                sb.append("   🔴 Приоритет: ").append(task.getPriority());
+
+                if (task.getIsUrgent() != null && task.getIsUrgent()) {
+                    sb.append(" ⚡ СРОЧНО");
+                }
+
+                sb.append("\n   📌 Статус: ").append(task.getStatus()).append("\n\n");
             }
 
-            sendMessage(chatId, sb.toString());
+            return sb.toString();
         } catch (Exception e) {
-            sendMessage(chatId, "❌ Ошибка при получении списка");
+            log.error("❌ Ошибка при получении списка: {}", e.getMessage());
+            return "❌ Ошибка при получении списка";
         }
     }
 
     /**
-     * Отправить задачи на сегодня
+     * Получить задачи на сегодня
      */
-    private void sendTodayMessage(long chatId) {
+    private String getTodayTasks() {
         try {
-            var tasks = taskService.getTasksForToday();
-            
+            List<Task> tasks = taskService.getTasksForToday();
+
             if (tasks.isEmpty()) {
-                sendMessage(chatId, "✅ Задач на сегодня нет");
-                return;
+                return "✅ Задач на сегодня нет";
             }
 
-            StringBuilder sb = new StringBuilder(String.format("📅 Задачи на сегодня (%d):\\n\\n", tasks.size()));
+            StringBuilder sb = new StringBuilder(String.format("📅 Задачи на сегодня (%d):\n\n", tasks.size()));
+            int index = 1;
+
             for (Task task : tasks) {
-                sb.append(formatTaskBrief(task)).append("\\n");
+                sb.append(index++).append(". ").append(task.getTitle()).append("\n");
+
+                if (task.getDueDate() != null) {
+                    sb.append("   ⏰ ").append(formatTime(task.getDueDate())).append("\n");
+                }
+
+                sb.append("   🔴 Приоритет: ").append(task.getPriority());
+
+                if (task.getIsUrgent() != null && task.getIsUrgent()) {
+                    sb.append(" ⚡");
+                }
+
+                sb.append("\n\n");
             }
 
-            sendMessage(chatId, sb.toString());
+            return sb.toString();
         } catch (Exception e) {
-            sendMessage(chatId, "❌ Ошибка при получении задач");
+            log.error("❌ Ошибка при получении задач на сегодня: {}", e.getMessage());
+            return "❌ Ошибка при получении задач";
         }
     }
 
     /**
-     * Отправить просроченные задачи
+     * Форматировать ответ о созданной задаче
      */
-    private void sendOverdueMessage(long chatId) {
-        try {
-            var tasks = taskService.getOverdueTasks();
-            
-            if (tasks.isEmpty()) {
-                sendMessage(chatId, "✅ Просроченных задач нет");
-                return;
-            }
+    private String formatTaskResponse(Task task) {
+        StringBuilder response = new StringBuilder();
+        response.append("✅ Задача создана!\n\n");
+        response.append("📝 ").append(task.getTitle()).append("\n");
 
-            StringBuilder sb = new StringBuilder(String.format("⚠️ Просроченные задачи (%d):\\n\\n", tasks.size()));
-            for (Task task : tasks) {
-                sb.append(formatTaskBrief(task)).append("\\n");
-            }
-
-            sendMessage(chatId, sb.toString());
-        } catch (Exception e) {
-            sendMessage(chatId, "❌ Ошибка при получении задач");
+        if (task.getDueDate() != null) {
+            response.append("📅 Срок: ").append(formatDate(task.getDueDate())).append("\n");
+        } else {
+            response.append("📅 Срок: не установлена\n");
         }
+
+        response.append("🔴 Приоритет: ").append(task.getPriority());
+
+        if (task.getIsUrgent() != null && task.getIsUrgent()) {
+            response.append(" ⚡ СРОЧНО");
+        }
+
+        response.append("\n");
+        response.append("🆔 ID: ").append(task.getId()).append("\n");
+        response.append("📌 Статус: ").append(task.getStatus());
+
+        return response.toString();
     }
 
     /**
-     * Форматировать сообщение о задаче (полное)
-     */
-    private String formatTaskMessage(Task task) {
-        return String.format(
-            "✅ Задача создана!\\n\\n" +
-            "📝 %s\\n" +
-            "📅 Срок: %s\\n" +
-            "🔴 Приоритет: %d%s\\n" +
-            "🆔 ID: %d",
-            task.getTitle(),
-            formatDate(task.getDueDate()),
-            task.getPriority(),
-            task.getIsUrgent() ? " ⚡ СРОЧНО" : "",
-            task.getId()
-        );
-    }
-
-    /**
-     * Форматировать сообщение о задаче (краткое)
-     */
-    private String formatTaskBrief(Task task) {
-        return String.format(
-            "%s %s | Приоритет: %d%s",
-            task.getTitle(),
-            formatDate(task.getDueDate()),
-            task.getPriority(),
-            task.getIsUrgent() ? " ⚡" : ""
-        );
-    }
-
-    /**
-     * Форматировать дату
+     * Форматировать дату с временем (dd.MM.yyyy HH:mm)
      */
     private String formatDate(LocalDateTime date) {
         if (date == null) return "не установлена";
@@ -378,55 +298,21 @@ public class VoiceTaskTelegramBot extends TelegramLongPollingBot {
     }
 
     /**
-     * Скачать голосовой файл с Telegram серверов
+     * Форматировать время (HH:mm)
      */
-    private String downloadVoiceFile(String fileId) throws Exception {
-        GetFile getFile = new GetFile();
-        getFile.setFileId(fileId);
-        
-        var file = execute(getFile);
-        String filePath = file.getFilePath();
-        String downloadUrl = "https://api.telegram.org/file/bot" + botToken + "/" + filePath;
-
-        // Скачиваем файл
-        URL url = new URL(downloadUrl);
-        URLConnection conn = url.openConnection();
-        
-        File outputFile = new File("temp_voice_" + System.currentTimeMillis() + ".oga");
-        
-        try (InputStream in = conn.getInputStream();
-             var out = new java.io.FileOutputStream(outputFile)) {
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = in.read(buffer)) != -1) {
-                out.write(buffer, 0, bytesRead);
-            }
-        }
-
-        log.info("📥 Файл скачан: {}", outputFile.getAbsolutePath());
-        return outputFile.getAbsolutePath();
+    private String formatTime(LocalDateTime date) {
+        if (date == null) return "не установлено";
+        return date.format(DateTimeFormatter.ofPattern("HH:mm"));
     }
 
     /**
      * Отправить сообщение в Telegram
      */
-    private void sendMessage(long chatId, String text) {
-        try {
-            SendMessage message = new SendMessage();
-            message.setChatId(chatId);
-            message.setText(text);
-            message.enableMarkdown(true);
-            
-            execute(message);
-        } catch (TelegramApiException e) {
-            log.error("Ошибка при отправке сообщения: {}", e.getMessage());
-        }
-    }
-
-    /**
-     * Отправить сообщение об ошибке
-     */
-    private void sendErrorMessage(long chatId, String error) {
-        sendMessage(chatId, "❌ Ошибка: " + error + "\\n\\nПопробуй снова или введи /help");
+    private void sendMessage(long chatId, String text) throws TelegramApiException {
+        SendMessage message = new SendMessage();
+        message.setChatId(chatId);
+        message.setText(text);
+        execute(message);
+        log.debug("📤 Сообщение отправлено в чат {}", chatId);
     }
 }

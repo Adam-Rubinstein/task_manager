@@ -49,13 +49,6 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- Lombok (для @Getter, @Setter, @Data) -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <optional>true</optional>
-        </dependency>
-
         <!-- ============ TELEGRAM BOT ============ -->
         <!-- Основная библиотека Telegram Bot API -->
         <dependency>
@@ -117,14 +110,6 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                        </exclude>
-                    </excludes>
-                </configuration>
             </plugin>
 
             <!-- JavaFX Maven Plugin -->
