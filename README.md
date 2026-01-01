@@ -1,163 +1,113 @@
 # Voice Task Manager
 
-Приложение для управления задачами с поддержкой голосового ввода, автоматического парсинга, повторяющихся задач и синхронизации между устройствами.
-
-## 🎯 Основные функции
-
-- ✅ Ввод задач через текст или голос
-- ✅ Автоматическое распознавание дат и сроков на русском языке
-- ✅ Поддержка повторяющихся задач (ежедневно, еженедельно, ежемесячно)
-- ✅ Система приоритетов (0-10)
-- ✅ Уведомления и напоминания (Desktop + звук + Telegram)
-- ✅ Синхронизация между несколькими устройствами
-- ✅ История аудио (30 дней)
-- ✅ Цветовая кодировка по срокам выполнения
-- ✅ Полнотекстовый поиск по описанию и названию
-- ✅ Фильтрация и сортировка задач
-
-## 🛠️ Технологический стек
-
-- **Java 21** - основной язык
-- **JavaFX** - UI фреймворк
-- **Maven** - управление зависимостями
-- **PostgreSQL** - БД
-- **Hibernate/JPA** - ORM
-- **Natty** - парсинг дат на естественном языке
-- **GitHub** - версионирование
-
-## 📋 Структура проекта
-
-```
-voice-task-manager/
-├── pom.xml
-├── README.md
-├── .gitignore
-├── .github/
-│   └── workflows/
-│       ├── build.yml
-│       └── tests.yml
-├── src/
-│   ├── main/
-│   │   ├── java/com/taskmanager/
-│   │   │   ├── Application.java
-│   │   │   ├── config/
-│   │   │   ├── model/
-│   │   │   ├── dao/
-│   │   │   ├── service/
-│   │   │   ├── ui/
-│   │   │   └── utils/
-│   │   └── resources/
-│   │       ├── fxml/
-│   │       ├── css/
-│   │       └── application.properties
-│   └── test/
-│       └── java/com/taskmanager/
-└── docs/
-    ├── ARCHITECTURE.md
-    ├── API.md
-    └── SETUP.md
-```
-
-## 🚀 Установка и запуск
-
-### Требования
-- Java 21+
-- PostgreSQL 12+
-- Maven 3.6+
-- Git
-
-### Шаги установки
-
-1. **Клонирование репозитория**
-```bash
-git clone https://github.com/yourusername/voice-task-manager.git
-cd voice-task-manager
-```
-
-2. **Создание базы данных PostgreSQL**
-```sql
-CREATE DATABASE taskmanager;
-```
-
-3. **Конфигурация базы данных**
-Отредактировать `src/main/resources/application.properties`:
-```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/taskmanager
-spring.datasource.username=postgres
-spring.datasource.password=your_password
-```
-
-4. **Сборка проекта**
-```bash
-mvn clean install
-```
-
-5. **Запуск приложения**
-```bash
-mvn javafx:run
-```
-
-Или запуск JAR:
-```bash
-java -jar target/voice-task-manager-1.0.0-jar-with-dependencies.jar
-```
-
-## 📖 Документация
-
-- [Архитектура проекта](docs/ARCHITECTURE.md)
-- [API сервисов](docs/API.md)
-- [Руководство по установке](docs/SETUP.md)
-
-## 🔄 Рабочий процесс Git
-
-```
-main (production)
-  ↑
-  ├── develop (development)
-  │   ├── feature/voice-input
-  │   ├── feature/date-parsing
-  │   ├── feature/ui-javafx
-  │   └── bugfix/synchronization
-```
-
-## 📝 Разработка
-
-### Запуск тестов
-```bash
-mvn test
-```
-
-### Проверка кода
-```bash
-mvn clean compile
-```
-
-### Сборка с зависимостями
-```bash
-mvn clean package assembly:single
-```
-
-## 🤝 Вклад в проект
-
-1. Создайте feature ветку (`git checkout -b feature/amazing-feature`)
-2. Коммитьте изменения (`git commit -m 'Add amazing feature'`)
-3. Пушьте в ветку (`git push origin feature/amazing-feature`)
-4. Откройте Pull Request
-
-## 📄 Лицензия
-
-MIT License - см. LICENSE файл
-
-## 👨‍💻 Автор
-
-Разработано как учебный проект для управления задачами с голосовым вводом.
-
-## 📞 Контакты и поддержка
-
-- GitHub Issues - для отчета об ошибках
-- GitHub Discussions - для обсуждений
+Настольное Java‑приложение для управления задачами с приоритизацией, напоминаниями и хранением связанных аудиозаметок.  
+UI написан на **JavaFX**, бизнес‑логика и доступ к данным — на **Spring Boot + Spring Data JPA**, данные хранятся в **PostgreSQL**.
 
 ---
 
-**Версия:** 1.0.0  
-**Последнее обновление:** 31 декабря 2024
+## 🎯 Текущие возможности
+
+Реализовано:
+
+- Создание задач с полями:
+    - название;
+    - описание;
+    - срок выполнения (дата/время);
+    - статус (`NEW` и др.);
+    - приоритет (0–10).
+- Просмотр списка задач в таблице JavaFX.
+- Фильтрация задач по статусу.
+- Удаление задач.
+- Сохранение задач, напоминаний и аудио в PostgreSQL через Spring Data JPA.
+- Система оповещений:
+    - хранение уведомлений в таблице `alerts`;
+    - счётчик непрочитанных оповещений в UI;
+    - список непрочитанных оповещений;
+    - пометка оповещений как прочитанных;
+    - периодическое обновление оповещений в UI в фоновом потоке.
+- Хранение аудиофайлов (байтовые данные + метаданные) в таблице `audio_files`.
+
+В планах (пока не реализовано / частично подготовлено в схеме БД):
+
+- Голосовой ввод задач и автоматический парсинг текста.
+- Повторяющиеся задачи (ежедневно/еженедельно/ежемесячно и т.п.).
+- Теги и продвинутый полнотекстовый поиск.
+- Синхронизация задач между несколькими устройствами.
+
+---
+
+## 🛠 Технологический стек
+
+- **Язык:** Java 21
+- **Фреймворки:**
+    - Spring Boot 3.2 (ядро приложения, DI, JPA);
+    - Spring Data JPA (доступ к данным);
+    - JavaFX 21 (графический интерфейс).
+- **База данных:** PostgreSQL 12+
+- **ORM:** Hibernate 6
+- **Пул соединений:** HikariCP
+- **Доп. библиотеки (заложены под развитие):**
+    - Natty — парсинг дат из текста;
+    - Gson — работа с JSON;
+    - Apache Commons IO — операции с файлами.
+- **Сборка:** Maven
+
+---
+
+## 📂 Структура проекта
+
+```text
+task_manager/                      # Корень репозитория
+├── pom.xml                        # Maven-конфигурация
+├── README.md                      # Этот файл
+├── LICENSE                        # Лицензия (MIT)
+├── auto-commit.ps1                # Скрипт автоматических коммитов (опционально)
+├── auto-commit.bat                # Батник для запуска автокоммита
+│
+├── docs/                          # Документация
+│   ├── ARCHITECTURE.md            # Архитектура приложения
+│   └── SETUP.md                   # Подробная инструкция по установке и запуску
+│
+├── src/
+│   ├── main/
+│   │   ├── java/com/taskmanager/
+│   │   │   ├── TaskManagerApp.java        # Точка входа (@SpringBootApplication + JavaFX)
+│   │   │   │
+│   │   │   ├── config/
+│   │   │   │   └── DatabaseConfig.java    # Конфигурация БД (минимальная, через Spring Boot)
+│   │   │   │
+│   │   │   ├── dao/                       # Слой доступа к данным (Spring Data JPA)
+│   │   │   │   ├── TaskRepository.java
+│   │   │   │   ├── AlertRepository.java
+│   │   │   │   └── AudioFileRepository.java
+│   │   │   │
+│   │   │   ├── model/                     # JPA-сущности и enum-ы
+│   │   │   │   ├── Task.java
+│   │   │   │   ├── Alert.java
+│   │   │   │   ├── AudioFile.java
+│   │   │   │   ├── TaskStatus.java
+│   │   │   │   ├── AlertType.java
+│   │   │   │   └── RecurrenceType.java    # Зарезервировано под повторяющиеся задачи
+│   │   │   │
+│   │   │   ├── service/                   # Бизнес-логика
+│   │   │   │   ├── TaskService.java       # Операции с задачами
+│   │   │   │   ├── AlertService.java      # Оповещения
+│   │   │   │   └── AudioFileService.java  # Работа с аудиофайлами
+│   │   │   │
+│   │   │   └── ui/controllers/
+│   │   │       └── MainController.java    # Главный JavaFX-контроллер
+│   │   │
+│   │   └── resources/
+│   │       ├── fxml/
+│   │       │   └── main-view.fxml         # Описание UI
+│   │       ├── css/
+│   │       │   └── style.css              # Стили JavaFX
+│   │       ├── db/
+│   │       │   └── schema.sql             # SQL-схема для PostgreSQL
+│   │       ├── application.properties     # Основной Spring Boot конфиг
+│   │       └── application-example.properties # Пример конфига (для копирования)
+│   │
+│   └── test/
+│       └── java/                          # Тесты (можно расширять)
+│
+└── target/                                # Скомпилированные артефакты (Maven создаёт сам)
