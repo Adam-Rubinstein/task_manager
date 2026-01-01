@@ -1,75 +1,101 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.DatePicker?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.Separator?>
-<?import javafx.scene.control.Spinner?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextArea?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.layout.Priority?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
-<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.taskmanager.ui.controllers.MainController">
-    <top>
-        <VBox spacing="10" style="-fx-padding: 10;">
-            <Label style="-fx-font-size: 18; -fx-font-weight: bold;" text="Voice Task Manager" />
+<VBox prefHeight="750.0" prefWidth="1100.0" xmlns="http://javafx.com/javafx/21.0.2"
+      xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.taskmanager.ui.controllers.MainController">
+
+    <!-- Меню бар -->
+    <MenuBar>
+        <menus>
+            <Menu text="Файл">
+                <items>
+                    <MenuItem text="Выход" onAction="#handleExit"/>
+                </items>
+            </Menu>
+        </menus>
+    </MenuBar>
+
+    <!-- Основной контент -->
+    <HBox VBox.vgrow="ALWAYS" spacing="10.0" style="-fx-padding: 10;">
+
+        <!-- Левая панель - Создание/редактирование задач (ПРОКРУЧИВАЕМАЯ) -->
+        <ScrollPane prefWidth="350.0" fitToWidth="true" style="-fx-padding: 0;">
+            <VBox spacing="8.0" style="-fx-border-color: #cccccc; -fx-padding: 10; -fx-font-size: 12;">
+
+                <Label text="СОЗДАНИЕ ЗАДАЧИ" style="-fx-font-size: 14; -fx-font-weight: bold;" />
+
+                <!-- НАЗВАНИЕ ЗАДАЧИ (ОБЯЗАТЕЛЬНОЕ) -->
+                <Label text="Название:" style="-fx-text-fill: #ff0000; -fx-font-weight: bold;" />
+                <TextField fx:id="taskNameInput" promptText="Введите название задачи..." prefHeight="30.0" />
+
+                <!-- Описание задачи (УМЕНЬШЕНО) -->
+                <Label text="Описание:" />
+                <TextArea fx:id="taskDescriptionInput" promptText="Введите описание..." wrapText="true"
+                          prefHeight="50.0" />
+
+                <!-- Приоритет -->
+                <Label text="Приоритет (0-10):" />
+                <Spinner fx:id="prioritySpinner" prefWidth="Infinity" />
+
+                <!-- Дата выполнения -->
+                <Label text="Дата выполнения:" />
+                <DatePicker fx:id="dueDatePicker" prefWidth="Infinity" />
+
+                <!-- Тип повтора -->
+                <Label text="Тип повтора:" />
+                <ComboBox fx:id="recurrenceCombo" prefWidth="Infinity"
+                          onAction="#handleRecurrenceChange" />
+
+                <!-- Интервал повтора -->
+                <Label text="Интервал повтора (дней):" />
+                <Spinner fx:id="intervalSpinner" prefWidth="Infinity" />
+
+                <!-- ПУСТОЕ МЕСТО - ОТСТУП -->
+                <Region VBox.vgrow="ALWAYS" />
+
+                <!-- Кнопки - ВСЕГДА ВИДНЫ -->
+                <Separator />
+                <HBox spacing="5.0">
+                    <Button fx:id="createTaskButton" text="Создать" onAction="#handleCreateTask"
+                            prefWidth="Infinity" style="-fx-font-size: 12; -fx-padding: 8; -fx-font-weight: bold;" />
+                    <Button fx:id="deleteTaskButton" text="Удалить" onAction="#handleDeleteTask"
+                            prefWidth="Infinity" style="-fx-font-size: 12; -fx-padding: 8; -fx-font-weight: bold;" />
+                </HBox>
+            </VBox>
+        </ScrollPane>
+
+        <!-- Правая панель - Список и фильтры -->
+        <VBox HBox.hgrow="ALWAYS" spacing="10.0" style="-fx-padding: 10;">
+
+            <!-- Фильтрация -->
+            <HBox spacing="10.0">
+                <Label text="Фильтр по статусу:" />
+                <ComboBox fx:id="statusFilter" prefWidth="200.0"
+                          onAction="#handleFilterByStatus" />
+            </HBox>
+
+            <!-- Таблица задач -->
+            <Label text="СПИСОК ЗАДАЧ" style="-fx-font-size: 14; -fx-font-weight: bold;" />
+            <TableView fx:id="tasksTable" prefHeight="250.0" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="titleColumn" text="Название" prefWidth="150.0" />
+                    <TableColumn fx:id="statusColumn" text="Статус" prefWidth="80.0" />
+                    <TableColumn fx:id="priorityColumn" text="Приоритет" prefWidth="80.0" />
+                    <TableColumn fx:id="dueDateColumn" text="Срок" prefWidth="120.0" />
+                </columns>
+            </TableView>
+
+            <!-- Оповещения -->
+            <Label text="ОПОВЕЩЕНИЯ" style="-fx-font-size: 14; -fx-font-weight: bold;" />
+            <HBox spacing="10.0">
+                <Label fx:id="alertsCountLabel" text="Оповещения: 0" style="-fx-text-fill: #ff0000;" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Button text="Прочитано" onAction="#handleMarkAlertAsRead" />
+            </HBox>
+            <ListView fx:id="alertsListView" prefHeight="80.0" VBox.vgrow="SOMETIMES" />
         </VBox>
-    </top>
-    <center>
-        <BorderPane>
-            <left>
-                <VBox spacing="10" style="-fx-padding: 10; -fx-min-width: 350;">
-                    <Label style="-fx-font-weight: bold;" text="Создать задачу" />
-
-                    <TextField fx:id="taskTitleInput" promptText="Название задачи" />
-
-                    <TextArea fx:id="taskDescriptionInput" prefRowCount="3" promptText="Описание (Shift+Enter для переноса строки)..." wrapText="true" />
-
-                    <Label text="Приоритет:" />
-                    <Spinner fx:id="prioritySpinner" prefWidth="80" />
-
-                    <Label text="Дата выполнения:" />
-                    <DatePicker fx:id="dueDatePicker" />
-
-                    <Label text="Повтор:" />
-                    <ComboBox fx:id="recurrenceCombo" prefWidth="200" promptText="Выберите повтор..." />
-
-                    <Button fx:id="createTaskButton" onAction="#handleCreateTask" style="-fx-padding: 8;" text="✓ Создать" />
-
-                    <Separator />
-
-                    <Label style="-fx-font-weight: bold;" text="Фильтр" />
-                    <ComboBox fx:id="statusFilter" onAction="#handleFilterByStatus" prefWidth="200" promptText="По статусу..." />
-                </VBox>
-            </left>
-            <center>
-                <VBox spacing="10" style="-fx-padding: 10;">
-                    <Label style="-fx-font-weight: bold;" text="Мои задачи (Двойной клик для редактирования)" />
-                    <TableView fx:id="tasksTable" prefHeight="300" VBox.vgrow="ALWAYS">
-                        <columns>
-                            <TableColumn fx:id="titleColumn" prefWidth="200" text="Название" />
-                            <TableColumn fx:id="statusColumn" prefWidth="100" text="Статус" />
-                            <TableColumn fx:id="priorityColumn" prefWidth="80" text="Приоритет" />
-                            <TableColumn fx:id="dueDateColumn" prefWidth="150" text="Дата выполнения" />
-                        </columns>
-                    </TableView>
-                    <Button fx:id="deleteTaskButton" onAction="#handleDeleteTask" text="🗑️ Удалить" />
-                </VBox>
-            </center>
-            <right>
-                <VBox spacing="10" style="-fx-padding: 10; -fx-min-width: 250;">
-                    <Label fx:id="alertsCountLabel" style="-fx-font-weight: bold;" text="Оповещения: 0" />
-                    <ListView fx:id="alertsListView" prefHeight="200" VBox.vgrow="ALWAYS" />
-                </VBox>
-            </right>
-        </BorderPane>
-    </center>
-</BorderPane>
+    </HBox>
+</VBox>

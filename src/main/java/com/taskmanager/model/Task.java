@@ -7,18 +7,15 @@ import java.time.LocalDateTime;
  * Task - сущность задачи в системе
  */
 @Entity
-@Table(name = "tasks")
+@Table(name = "task")
 public class Task {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String title;
-
-    @Column(columnDefinition = "TEXT")
-    private String description;
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String description = "";
 
     @Column(nullable = true)
     private LocalDateTime dueDate;
@@ -36,21 +33,112 @@ public class Task {
     @Column(nullable = false)
     private Integer priority = 5;
 
+    // ==================== НОВЫЕ ПОЛЯ ДЛЯ РЕКУРСИИ ====================
+
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Boolean isUrgent = false;
+    private RecurrenceType recurrenceType = RecurrenceType.NONE;
+
+    @Column(nullable = false)
+    private Integer recurrenceInterval = 0; // Дни для CUSTOM
 
     // ==================== Конструкторы ====================
 
-    public Task() {}
+    /**
+     * ⭐ КОНСТРУКТОР ПО УМОЛЧАНИЮ (ОБЯЗАТЕЛЕН для Hibernate!)
+     */
+    public Task() {
+        this.description = "";
+        this.priority = 5;
+        this.status = TaskStatus.NEW;
+        this.recurrenceType = RecurrenceType.NONE;
+        this.recurrenceInterval = 0;
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
 
-    public Task(String title, String description) {
-        this.title = title;
-        this.description = description;
+    /**
+     * Конструктор с полными параметрами
+     */
+    public Task(String description, Integer priority, LocalDateTime dueDate, RecurrenceType recurrenceType) {
+        this.description = description != null ? description : "";
+        this.priority = priority != null ? priority : 5;
+        this.dueDate = dueDate;
+        this.recurrenceType = recurrenceType != null ? recurrenceType : RecurrenceType.NONE;
+        this.recurrenceInterval = 0;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
         this.status = TaskStatus.NEW;
-        this.priority = 5;
-        this.isUrgent = false;
+    }
+
+    // ==================== БИЗНЕС-ЛОГИКА ====================
+
+    /**
+     * Извлечь название из первой строки описания
+     */
+    public String getTitle() {
+        if (description == null || description.isEmpty()) {
+            return "Без названия";
+        }
+
+        int newlineIndex = description.indexOf('\n');
+        if (newlineIndex == -1) {
+            return description;
+        }
+
+        return description.substring(0, newlineIndex).trim();
+    }
+
+    /**
+     * Проверить, является ли задача просроченной
+     */
+    public boolean isOverdue() {
+        if (dueDate == null || status == TaskStatus.COMPLETED) {
+            return false;
+        }
+
+        return LocalDateTime.now().isAfter(dueDate);
+    }
+
+    /**
+     * Проверить, является ли задача на сегодня или завтра
+     */
+    public boolean isTodayOrTomorrow() {
+        if (dueDate == null || status == TaskStatus.COMPLETED) {
+            return false;
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime today = now.withHour(0).withMinute(0).withSecond(0);
+        LocalDateTime tomorrow = today.plusDays(1);
+        LocalDateTime taskDay = dueDate.withHour(0).withMinute(0).withSecond(0);
+
+        return (taskDay.equals(today) || taskDay.equals(tomorrow));
+    }
+
+    /**
+     * Проверить, является ли задача на неделю
+     */
+    public boolean isThisWeek() {
+        if (dueDate == null || status == TaskStatus.COMPLETED) {
+            return false;
+        }
+
+        if (isOverdue() || isTodayOrTomorrow()) {
+            return false;
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime weekLater = now.plusDays(7);
+
+        return !dueDate.isAfter(weekLater);
+    }
+
+    /**
+     * Имеет ли задача рекурсию
+     */
+    public boolean hasRecurrence() {
+        return recurrenceType != null && !recurrenceType.equals(RecurrenceType.NONE);
     }
 
     // ==================== Getters and Setters ====================
@@ -63,20 +151,12 @@ public class Task {
         this.id = id;
     }
 
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
     public String getDescription() {
         return description;
     }
 
     public void setDescription(String description) {
-        this.description = description;
+        this.description = description != null ? description : "";
     }
 
     public LocalDateTime getDueDate() {
@@ -109,6 +189,7 @@ public class Task {
 
     public void setStatus(TaskStatus status) {
         this.status = status;
+        this.updatedAt = LocalDateTime.now();
     }
 
     public Integer getPriority() {
@@ -119,12 +200,20 @@ public class Task {
         this.priority = priority != null ? priority : 5;
     }
 
-    public Boolean getIsUrgent() {
-        return isUrgent;
+    public RecurrenceType getRecurrenceType() {
+        return recurrenceType;
     }
 
-    public void setIsUrgent(Boolean isUrgent) {
-        this.isUrgent = isUrgent != null ? isUrgent : false;
+    public void setRecurrenceType(RecurrenceType recurrenceType) {
+        this.recurrenceType = recurrenceType != null ? recurrenceType : RecurrenceType.NONE;
+    }
+
+    public Integer getRecurrenceInterval() {
+        return recurrenceInterval;
+    }
+
+    public void setRecurrenceInterval(Integer recurrenceInterval) {
+        this.recurrenceInterval = recurrenceInterval != null ? recurrenceInterval : 0;
     }
 
     // ==================== toString ====================
@@ -133,11 +222,11 @@ public class Task {
     public String toString() {
         return "Task{" +
                 "id=" + id +
-                ", title='" + title + '\'' +
+                ", title='" + getTitle() + '\'' +
                 ", status=" + status +
                 ", priority=" + priority +
-                ", isUrgent=" + isUrgent +
                 ", dueDate=" + dueDate +
+                ", recurrenceType=" + recurrenceType +
                 '}';
     }
 }

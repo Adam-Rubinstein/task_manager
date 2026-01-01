@@ -28,21 +28,51 @@ public class Alert {
     private Boolean isRead = false;
 
     // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
 
-    public Long getTaskId() { return taskId; }
-    public void setTaskId(Long taskId) { this.taskId = taskId; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public LocalDateTime getAlertTime() { return alertTime; }
-    public void setAlertTime(LocalDateTime alertTime) { this.alertTime = alertTime; }
+    public Long getTaskId() {
+        return taskId;
+    }
 
-    public AlertType getType() { return type; }
-    public void setType(AlertType type) { this.type = type; }
+    public void setTaskId(Long taskId) {
+        this.taskId = taskId;
+    }
 
-    public String getMessage() { return message; }
-    public void setMessage(String message) { this.message = message; }
+    public LocalDateTime getAlertTime() {
+        return alertTime;
+    }
 
-    public Boolean getIsRead() { return isRead; }
-    public void setIsRead(Boolean isRead) { this.isRead = isRead; }
+    public void setAlertTime(LocalDateTime alertTime) {
+        this.alertTime = alertTime;
+    }
+
+    public AlertType getType() {
+        return type;
+    }
+
+    public void setType(AlertType type) {
+        this.type = type;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public Boolean getIsRead() {
+        return isRead;
+    }
+
+    public void setIsRead(Boolean isRead) {
+        this.isRead = isRead;
+    }
 }
