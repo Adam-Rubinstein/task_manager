@@ -1,5 +1,8 @@
 package com.taskmanager.service;
 
+import com.taskmanager.dto.VoiceTaskParsed;
+import org.springframework.stereotype.Service;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.regex.Matcher;
@@ -9,6 +12,7 @@ import java.util.regex.Pattern;
  * VoiceParsingService - Парсинг голосового текста
  * ФАЗА 2: Извлечение дат, времени и приоритета из текста
  */
+@Service
 public class VoiceParsingService {
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
@@ -16,7 +20,7 @@ public class VoiceParsingService {
     /**
      * Основной метод парсинга голосового текста
      */
-    public static VoiceTaskParsed parseVoiceText(String text) {
+    public VoiceTaskParsed parseVoiceText(String text) {
         if (text == null || text.isEmpty()) {
             return null;
         }
@@ -49,7 +53,7 @@ public class VoiceParsingService {
      * Парсинг приоритета из текста
      * Ищет: "приоритет 8", "важность 7", "priority 5"
      */
-    private static Integer parsePriority(String text) {
+    private Integer parsePriority(String text) {
         if (text == null) return null;
 
         // Русские варианты
@@ -85,7 +89,7 @@ public class VoiceParsingService {
      * Парсинг даты из текста
      * Ищет: "завтра", "через 3 дня", "в 15:00", "в понедельник"
      */
-    private static LocalDateTime parseDate(String text) {
+    private LocalDateTime parseDate(String text) {
         if (text == null) return null;
 
         LocalDateTime now = LocalDateTime.now();
@@ -137,7 +141,7 @@ public class VoiceParsingService {
     /**
      * Очистить текст от дат и приоритета
      */
-    private static String cleanText(String text) {
+    public String cleanText(String text) {
         if (text == null) return "";
 
         // Убрать приоритет
@@ -159,7 +163,7 @@ public class VoiceParsingService {
     /**
      * Определить срочность задачи
      */
-    private static boolean isUrgent(String text, Integer priority) {
+    private boolean isUrgent(String text, Integer priority) {
         if (text == null) return false;
 
         text = text.toLowerCase();
@@ -180,38 +184,9 @@ public class VoiceParsingService {
     /**
      * Проверить валидность распарсенных данных
      */
-    public static boolean isValidParsed(VoiceTaskParsed parsed) {
+    public boolean isValidParsed(VoiceTaskParsed parsed) {
         return parsed != null &&
                 parsed.getTitle() != null &&
                 !parsed.getTitle().isEmpty();
-    }
-
-    /**
-     * Вспомогательный DTO класс
-     */
-    public static class VoiceTaskParsed {
-        private String title;
-        private String description;
-        private LocalDateTime dueDate;
-        private Integer priority;
-        private Boolean isUrgent;
-
-        public VoiceTaskParsed() {}
-
-        // Getters and Setters
-        public String getTitle() { return title; }
-        public void setTitle(String title) { this.title = title; }
-
-        public String getDescription() { return description; }
-        public void setDescription(String description) { this.description = description; }
-
-        public LocalDateTime getDueDate() { return dueDate; }
-        public void setDueDate(LocalDateTime dueDate) { this.dueDate = dueDate; }
-
-        public Integer getPriority() { return priority; }
-        public void setPriority(Integer priority) { this.priority = priority; }
-
-        public Boolean getIsUrgent() { return isUrgent; }
-        public void setIsUrgent(Boolean isUrgent) { this.isUrgent = isUrgent; }
     }
 }

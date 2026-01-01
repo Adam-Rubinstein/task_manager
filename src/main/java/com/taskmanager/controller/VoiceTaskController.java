@@ -11,19 +11,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 /**
  * VoiceTaskController - REST API для Voice Input (ФАЗА 2)
- * 
+ *
  * 7 endpoints для Telegram бота:
- * POST   /api/voice/create-task  - создание задачи из текста
- * GET    /api/voice/stats         - статистика
- * GET    /api/voice/today         - задачи на сегодня
- * GET    /api/voice/overdue       - просроченные
- * GET    /api/voice/list          - последние N задач
- * GET    /api/voice/search        - поиск по ключевому слову
- * GET    /api/voice/active        - активные задачи
+ * POST /api/voice/create-task - создание задачи из текста
+ * GET  /api/voice/stats - статистика
+ * GET  /api/voice/today - задачи на сегодня
+ * GET  /api/voice/overdue - просроченные
+ * GET  /api/voice/list - последние N задач
+ * GET  /api/voice/search - поиск по ключевому слову
+ * GET  /api/voice/active - активные задачи
  */
 @RestController
 @RequestMapping("/api/voice")
@@ -39,20 +40,20 @@ public class VoiceTaskController {
     /**
      * POST /api/voice/create-task
      * Создание задачи из текста голосового сообщения
-     * 
+     *
      * Request:
      * {
      *   "text": "Купить молоко завтра в 15:00, приоритет 8",
      *   "telegramUserId": 123456789
      * }
-     * 
+     *
      * Response (успех):
      * {
      *   "success": true,
      *   "message": "✅ Задача 'Купить молоко' создана на 02.01.2026 15:00",
      *   "task": { id, title, dueDate, priority, status, ... }
      * }
-     * 
+     *
      * Response (ошибка):
      * {
      *   "success": false,
@@ -63,7 +64,6 @@ public class VoiceTaskController {
     @PostMapping("/create-task")
     public ResponseEntity<VoiceTaskResponse> createTaskFromVoice(
             @RequestBody VoiceTaskRequest request) {
-
         try {
             // Валидация входных данных
             if (request == null || request.getText() == null || request.getText().isEmpty()) {
@@ -78,7 +78,6 @@ public class VoiceTaskController {
 
             // Парсинг текста
             VoiceTaskParsed parsed = voiceParsingService.parseVoiceText(request.getText());
-
             if (parsed == null || !voiceParsingService.isValidParsed(parsed)) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body(new VoiceTaskResponse(
@@ -91,7 +90,6 @@ public class VoiceTaskController {
 
             // Создание задачи
             Task createdTask = taskService.createTaskFromVoice(parsed);
-
             if (createdTask == null) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .body(new VoiceTaskResponse(
@@ -106,21 +104,18 @@ public class VoiceTaskController {
             String dateStr = createdTask.getDueDate() != null
                     ? createdTask.getDueDate().format(java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"))
                     : "неизвестно";
-            
             String message = String.format(
                     "✅ Задача '%s' создана на %s\\n🔴 Приоритет: %d",
                     createdTask.getTitle(),
                     dateStr,
                     createdTask.getPriority()
             );
-
             return ResponseEntity.ok(new VoiceTaskResponse(
                     true,
                     message,
                     createdTask,
                     null
             ));
-
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new VoiceTaskResponse(
@@ -135,7 +130,7 @@ public class VoiceTaskController {
     /**
      * GET /api/voice/stats
      * Получить статистику по задачам
-     * 
+     *
      * Response:
      * {
      *   "totalTasks": 5,
@@ -157,8 +152,7 @@ public class VoiceTaskController {
             stats.setActiveTasks(taskService.getActiveTaskCount());
             stats.setOverdueCount(taskService.getOverdueTaskCount());
             stats.setInProgressTasks(0); // Пока нет, можно добавить метод если надо
-            stats.setCancelledTasks(0);  // Пока нет, можно добавить метод если надо
-
+            stats.setCancelledTasks(0); // Пока нет, можно добавить метод если надо
             return ResponseEntity.ok(stats);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -168,7 +162,7 @@ public class VoiceTaskController {
     /**
      * GET /api/voice/today
      * Получить задачи на сегодня
-     * 
+     *
      * Response:
      * [
      *   { id: 1, title: "...", dueDate: "...", priority: 8, status: "NEW" },
@@ -188,7 +182,7 @@ public class VoiceTaskController {
     /**
      * GET /api/voice/overdue
      * Получить просроченные задачи
-     * 
+     *
      * Response:
      * [
      *   { id: 1, title: "...", dueDate: "...", priority: 8, status: "NEW" },
@@ -208,10 +202,10 @@ public class VoiceTaskController {
     /**
      * GET /api/voice/list?limit=10
      * Получить последние N задач
-     * 
+     *
      * Parameters:
      * - limit (optional, default 10): количество задач
-     * 
+     *
      * Response:
      * [
      *   { id: 1, title: "...", dueDate: "...", priority: 8, status: "NEW" },
@@ -232,10 +226,10 @@ public class VoiceTaskController {
     /**
      * GET /api/voice/search?q=молоко
      * Поиск задач по ключевому слову
-     * 
+     *
      * Parameters:
      * - q (required): ключевое слово для поиска
-     * 
+     *
      * Response:
      * [
      *   { id: 1, title: "Купить молоко", dueDate: "...", priority: 8, status: "NEW" },
@@ -260,7 +254,7 @@ public class VoiceTaskController {
     /**
      * GET /api/voice/active
      * Получить активные (не завершённые) задачи
-     * 
+     *
      * Response:
      * [
      *   { id: 1, title: "...", dueDate: "...", priority: 8, status: "NEW" },
