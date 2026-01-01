@@ -33,6 +33,9 @@ public class Task {
     @Column(nullable = false)
     private Integer priority = 5;
 
+    @Column(nullable = false)
+    private Boolean isUrgent = false;
+
     // Конструкторы
     public Task() {}
 
@@ -43,6 +46,7 @@ public class Task {
         this.updatedAt = LocalDateTime.now();
         this.status = TaskStatus.NEW;
         this.priority = 5;
+        this.isUrgent = false;
     }
 
     // Getters and Setters
@@ -72,6 +76,11 @@ public class Task {
         this.priority = priority != null ? priority : 5; 
     }
 
+    public Boolean getIsUrgent() { return isUrgent; }
+    public void setIsUrgent(Boolean isUrgent) {
+        this.isUrgent = isUrgent != null ? isUrgent : false;
+    }
+
     @Override
     public String toString() {
         return "Task{" +
@@ -79,6 +88,7 @@ public class Task {
                 ", title='" + title + '\'' +
                 ", status=" + status +
                 ", priority=" + priority +
+                ", isUrgent=" + isUrgent +
                 ", dueDate=" + dueDate +
                 '}';
     }
