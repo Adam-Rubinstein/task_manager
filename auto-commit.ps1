@@ -1,4 +1,4 @@
-param([int]$interval = 600)  # 600 сек = 10 минут (по умолчанию)
+param([int]$interval = 600)
 
 $projectPath = Get-Location
 Write-Host "🚀 Автокоммит запущен в: $projectPath"
