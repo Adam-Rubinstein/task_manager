@@ -97,6 +97,14 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- JAXB для Hibernate -->
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>2.3.1</version>
+        </dependency>
+
+
         <!-- ============ Logging ============ -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
