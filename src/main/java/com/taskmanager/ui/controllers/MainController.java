@@ -13,12 +13,14 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
@@ -36,7 +38,7 @@ public class MainController {
     private AudioFileService audioFileService;
 
     // ==================== ФОРМАТЕР ДАТЫ ====================
-    private static final DateTimeFormatter dateFormatter =
+    private static final DateTimeFormatter tableFormatter =
             DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 
     // ==================== UI COMPONENTS ====================
@@ -52,6 +54,9 @@ public class MainController {
 
     @FXML
     private DatePicker dueDatePicker;
+
+    @FXML
+    private TextField dueTimeInput;
 
     @FXML
     private ComboBox<RecurrenceType> recurrenceCombo;
@@ -112,7 +117,18 @@ public class MainController {
         recurrenceCombo.setItems(FXCollections.observableArrayList(RecurrenceType.values()));
         recurrenceCombo.setValue(RecurrenceType.NONE);
 
-        // Фильтр со всеми статусами
+        // Инициализация DatePicker
+        dueDatePicker.setValue(LocalDate.now().plusDays(1));
+
+        // Инициализация TextField для времени
+        dueTimeInput.setText("09:00");
+        dueTimeInput.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (!newVal.matches("[0-9:]*")) {
+                dueTimeInput.setText(newVal.replaceAll("[^0-9:]", ""));
+            }
+        });
+
+        // Фильтр со всеми вариантами
         statusFilter.setItems(FXCollections.observableArrayList(
                 "ALL",
                 "NEW",
@@ -120,7 +136,7 @@ public class MainController {
                 "COMPLETED",
                 "CANCELLED"
         ));
-        statusFilter.setValue("ALL");  // По умолчанию ALL
+        statusFilter.setValue("ALL");
         statusFilter.setOnAction(e -> handleFilterByStatus());
 
         // Инициализация таблицы задач
@@ -143,13 +159,13 @@ public class MainController {
         dueDateColumn.setCellValueFactory(cellData -> {
             Task task = cellData.getValue();
             if (task.getDueDate() != null) {
-                String formattedDate = task.getDueDate().format(dateFormatter);
+                String formattedDate = task.getDueDate().format(tableFormatter);
                 return new javafx.beans.property.SimpleStringProperty(formattedDate);
             }
             return new javafx.beans.property.SimpleStringProperty("-");
         });
 
-        // ✅ Применить стиль подсвечивания задач на основе категории
+        // Применить стиль подсвечивания задач на основе категории
         tasksTable.setRowFactory(tableView -> new TableRow<Task>() {
             @Override
             protected void updateItem(Task task, boolean empty) {
@@ -160,18 +176,20 @@ public class MainController {
                     return;
                 }
 
-                // Определяем цвет подсвечивания
+                // Если строка выделена – оставляем стандартное синее выделение JavaFX
+                if (isSelected()) {
+                    setStyle("");
+                    return;
+                }
+
+                // Фоновый цвет только для НЕвыбранных строк
                 if (task.isOverdue()) {
-                    // 🔴 Просроченные - красное полупрозрачное выделение
                     setStyle("-fx-background-color: rgba(255, 100, 100, 0.15);");
                 } else if (task.isTodayOrTomorrow()) {
-                    // 🟡 Сегодня-завтра - жёлтое полупрозрачное выделение
                     setStyle("-fx-background-color: rgba(255, 200, 100, 0.15);");
                 } else if (task.isThisWeek()) {
-                    // 🟦 Неделя - голубое полупрозрачное выделение
                     setStyle("-fx-background-color: rgba(100, 150, 255, 0.15);");
                 } else {
-                    // Нет выделения для остальных
                     setStyle("");
                 }
             }
@@ -179,7 +197,7 @@ public class MainController {
 
         intervalContainer.setVisible(false);
 
-        // ✅ ИСПРАВЛЕНО: Загрузить задачи при запуске (NEW + IN_PROGRESS по умолчанию)
+        // Загрузить задачи при запуске (NEW + IN_PROGRESS по умолчанию)
         loadTasksByStatuses(TaskStatus.NEW, TaskStatus.IN_PROGRESS);
         updateAlertsCount();
 
@@ -207,12 +225,37 @@ public class MainController {
         String title = taskNameInput.getText().trim();
         String description = taskDescriptionInput.getText().trim();
         Integer priority = prioritySpinner.getValue();
-        LocalDateTime dueDate = dueDatePicker.getValue() != null
-                ? dueDatePicker.getValue().atStartOfDay()
-                : LocalDateTime.now().plusDays(1);
         RecurrenceType recurrenceType = recurrenceCombo.getValue() != null
                 ? recurrenceCombo.getValue()
                 : RecurrenceType.NONE;
+
+        // Собираем дату + время
+        LocalDateTime dueDate;
+        if (dueDatePicker.getValue() != null) {
+            int hour = 9, minute = 0;
+
+            String timeStr = dueTimeInput.getText().trim();
+            if (!timeStr.isEmpty()) {
+                try {
+                    String[] parts = timeStr.split(":");
+                    if (parts.length == 2) {
+                        hour = Integer.parseInt(parts[0]);
+                        minute = Integer.parseInt(parts[1]);
+
+                        if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+                            showAlert("Ошибка", "Неправильное время! Часы: 0-23, минуты: 0-59");
+                            return;
+                        }
+                    }
+                } catch (NumberFormatException e) {
+                    showAlert("Ошибка", "Неправильный формат времени! Используйте: HH:mm");
+                    return;
+                }
+            }
+            dueDate = dueDatePicker.getValue().atTime(hour, minute);
+        } else {
+            dueDate = LocalDateTime.now().plusDays(1).withHour(9).withMinute(0);
+        }
 
         if (title.isEmpty()) {
             if (description.isEmpty()) {
@@ -245,7 +288,8 @@ public class MainController {
             taskNameInput.clear();
             taskDescriptionInput.clear();
             prioritySpinner.getValueFactory().setValue(5);
-            dueDatePicker.setValue(null);
+            dueDatePicker.setValue(LocalDate.now().plusDays(1));
+            dueTimeInput.setText("09:00");
             recurrenceCombo.setValue(RecurrenceType.NONE);
             intervalSpinner.getValueFactory().setValue(7);
 
@@ -256,6 +300,9 @@ public class MainController {
         }
     }
 
+    /**
+     * Удалить задачу с подтверждением
+     */
     @FXML
     private void handleDeleteTask() {
         Task selected = tasksTable.getSelectionModel().getSelectedItem();
@@ -288,7 +335,7 @@ public class MainController {
     }
 
     /**
-     * Открыть окно с деталями задачи (редактируемое, большего размера, без кнопки закрыть)
+     * Открыть окно с деталями задачи (редактируемое)
      */
     private void openTaskDetailWindow(Task task) {
         try {
@@ -310,7 +357,6 @@ public class MainController {
             Label descLabel = new Label("Остальное описание:");
             descLabel.setStyle("-fx-font-weight: bold;");
 
-            // Берём описание без первой строки (название)
             String fullDescription = task.getDescription();
             String descriptionWithoutTitle = fullDescription;
 
@@ -342,12 +388,33 @@ public class MainController {
             prioritySpinner2.setStyle("-fx-padding: 5;");
 
             // === ДАТА ВЫПОЛНЕНИЯ ===
-            Label dueDateLabel = new Label("Срок выполнения:");
+            Label dueDateLabel = new Label("Дата выполнения:");
             dueDateLabel.setStyle("-fx-font-weight: bold;");
             DatePicker dueDatePicker2 = new DatePicker(
-                    task.getDueDate() != null ? task.getDueDate().toLocalDate() : null
+                    task.getDueDate() != null ? task.getDueDate().toLocalDate() : LocalDate.now()
             );
             dueDatePicker2.setStyle("-fx-padding: 5;");
+
+            // === ВРЕМЯ ВЫПОЛНЕНИЯ ===
+            Label timeLabel = new Label("Время (HH:mm):");
+            timeLabel.setStyle("-fx-font-weight: bold;");
+            TextField dueTimeField = new TextField();
+            if (task.getDueDate() != null) {
+                dueTimeField.setText(String.format("%02d:%02d", task.getDueDate().getHour(), task.getDueDate().getMinute()));
+            } else {
+                dueTimeField.setText("09:00");
+            }
+            dueTimeField.setStyle("-fx-padding: 5;");
+            dueTimeField.setPrefWidth(80);
+
+            dueTimeField.textProperty().addListener((obs, oldVal, newVal) -> {
+                if (!newVal.matches("[0-9:]*")) {
+                    dueTimeField.setText(newVal.replaceAll("[^0-9:]", ""));
+                }
+            });
+
+            HBox timeBox = new HBox(8);
+            timeBox.getChildren().addAll(dueDatePicker2, timeLabel, dueTimeField);
 
             // === ТИП ПОВТОРА ===
             Label recurrenceLabel = new Label("Тип повтора:");
@@ -364,15 +431,14 @@ public class MainController {
             Spinner<Integer> intervalSpinner2 = new Spinner<>(1, 365, task.getRecurrenceInterval());
             intervalSpinner2.setStyle("-fx-padding: 5;");
 
-            // === КНОПКИ (только Сохранить) ===
-            javafx.scene.layout.HBox buttonsBox = new javafx.scene.layout.HBox(10);
+            // === КНОПКА СОХРАНИТЬ ===
+            HBox buttonsBox = new HBox(10);
             buttonsBox.setStyle("-fx-alignment: center;");
 
             Button saveButton = new Button("💾 Сохранить изменения");
             saveButton.setStyle("-fx-font-size: 12; -fx-padding: 8 16; -fx-font-weight: bold;");
             saveButton.setOnAction(e -> {
                 try {
-                    // Собираем описание из названия и остального текста
                     String newTitle = titleField.getText().trim();
                     String newDescRest = descArea.getText().trim();
 
@@ -381,27 +447,48 @@ public class MainController {
                         return;
                     }
 
-                    // Собираем полное описание: название + новая строка + остальное
                     String newFullDescription = newTitle;
                     if (!newDescRest.isEmpty()) {
                         newFullDescription = newTitle + "\n" + newDescRest;
                     }
 
-                    // Обновляем задачу
+                    // Собираем дату + время
+                    LocalDateTime newDueDate = null;
+                    if (dueDatePicker2.getValue() != null) {
+                        int hour = 9, minute = 0;
+
+                        String timeStr = dueTimeField.getText().trim();
+                        if (!timeStr.isEmpty()) {
+                            try {
+                                String[] parts = timeStr.split(":");
+                                if (parts.length == 2) {
+                                    hour = Integer.parseInt(parts[0]);
+                                    minute = Integer.parseInt(parts[1]);
+
+                                    if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+                                        showAlert("Ошибка", "Неправильное время! Часы: 0-23, минуты: 0-59");
+                                        return;
+                                    }
+                                }
+                            } catch (NumberFormatException ex) {
+                                showAlert("Ошибка", "Неправильный формат времени! Используйте: HH:mm");
+                                return;
+                            }
+                        }
+                        newDueDate = dueDatePicker2.getValue().atTime(hour, minute);
+                    }
+
                     task.setDescription(newFullDescription);
                     task.setStatus(statusCombo.getValue());
                     task.setPriority(prioritySpinner2.getValue());
-                    if (dueDatePicker2.getValue() != null) {
-                        task.setDueDate(dueDatePicker2.getValue().atStartOfDay());
+                    if (newDueDate != null) {
+                        task.setDueDate(newDueDate);
                     }
                     task.setRecurrenceType(recurrenceCombo2.getValue());
                     task.setRecurrenceInterval(intervalSpinner2.getValue());
                     task.setUpdatedAt(LocalDateTime.now());
 
-                    // Сохраняем в БД
                     taskService.updateTask(task);
-
-                    // Обновляем таблицу
                     tasksTable.refresh();
 
                     showAlert("Успех", "Задача обновлена!");
@@ -414,8 +501,8 @@ public class MainController {
             buttonsBox.getChildren().add(saveButton);
 
             // === СОБИРАЕМ ВСЁ В VBox ===
-            javafx.scene.control.ScrollPane scrollPane = new javafx.scene.control.ScrollPane();
-            javafx.scene.layout.VBox contentVBox = new javafx.scene.layout.VBox(10);
+            ScrollPane scrollPane = new ScrollPane();
+            VBox contentVBox = new VBox(10);
             contentVBox.setStyle("-fx-padding: 10;");
 
             contentVBox.getChildren().addAll(
@@ -430,7 +517,7 @@ public class MainController {
                     priorityLabel,
                     prioritySpinner2,
                     dueDateLabel,
-                    dueDatePicker2,
+                    timeBox,
                     recurrenceLabel,
                     recurrenceCombo2,
                     intervalLabel,
@@ -488,13 +575,11 @@ public class MainController {
         String selected = statusFilter.getValue();
 
         if (selected == null || selected.equals("ALL")) {
-            // Если "ALL" - показываем NEW и IN_PROGRESS
             loadTasksByStatuses(TaskStatus.NEW, TaskStatus.IN_PROGRESS);
             return;
         }
 
         try {
-            // Для остальных - загружаем выбранный статус
             TaskStatus status = TaskStatus.valueOf(selected);
             List<Task> filtered = taskService.getTasksByStatus(status);
             tasksList.clear();
@@ -504,6 +589,9 @@ public class MainController {
         }
     }
 
+    /**
+     * Загрузить задачи нескольких статусов
+     */
     private void loadTasksByStatuses(TaskStatus... statuses) {
         try {
             List<Task> allTasks = new java.util.ArrayList<>();

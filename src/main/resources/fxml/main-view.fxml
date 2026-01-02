@@ -43,9 +43,12 @@
                     <Label text="Приоритет (0-10):" />
                     <Spinner fx:id="prioritySpinner" prefWidth="Infinity" />
 
-                    <!-- Дата выполнения -->
+                    <!-- Дата выполнения со временем -->
                     <Label text="Дата выполнения:" />
-                    <DatePicker fx:id="dueDatePicker" prefWidth="Infinity" />
+                    <HBox spacing="5.0">
+                        <TextField fx:id="dueDateTimeInput" promptText="dd.MM.yyyy HH:mm" prefWidth="180.0" />
+                        <Button fx:id="dueDatePickerBtn" text="📅" prefWidth="40.0" onAction="#handleDatePickerClick" />
+                    </HBox>
 
                     <!-- Тип повтора -->
                     <Label text="Тип повтора:" />
@@ -61,7 +64,7 @@
                 </VBox>
             </ScrollPane>
 
-            <!-- Кнопка Создать задачу (вместо удалить) -->
+            <!-- Кнопка Создать задачу -->
             <Separator />
             <Button fx:id="createTaskButtonLeft" text="✓ Создать задачу" onAction="#handleCreateTask"
                     prefWidth="Infinity" style="-fx-font-size: 12; -fx-padding: 8; -fx-font-weight: bold; -fx-min-height: 40;" />
