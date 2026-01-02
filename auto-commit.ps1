@@ -16,16 +16,38 @@ while ($true) {
         $commitMessage = "Auto-commit: $timestamp"
 
         git commit -m $commitMessage
-        git push origin main
-
-        $commitCount++
-        Write-Host "Commit #$commitCount pushed to GitHub"
-        Write-Host "Next commit time: $(Get-Date -Format 'HH:mm:ss')"
-        Write-Host ""
+        $commitExitCode = $LASTEXITCODE
+        
+        if ($commitExitCode -eq 0) {
+            git push origin main
+            $pushExitCode = $LASTEXITCODE
+            
+            if ($pushExitCode -eq 0) {
+                $commitCount++
+                Write-Host "✓ Commit #$commitCount pushed to GitHub at $(Get-Date -Format 'HH:mm:ss')"
+            } else {
+                Write-Host "✗ Push failed with exit code: $pushExitCode"
+            }
+        } else {
+            Write-Host "⚠ No changes to commit (exit code: $commitExitCode)"
+        }
     }
     catch {
-        Write-Host "No changes to commit or error: $_"
+        Write-Host "✗ Error: $_"
     }
 
-    Start-Sleep -Seconds $interval
+    Write-Host "Sleeping for $interval seconds (until $(Get-Date -AddSeconds $interval -Format 'HH:mm:ss'))..."
+    
+    # Спим с промежуточными проверками
+    for ($i = 0; $i -lt $interval; $i++) {
+        Start-Sleep -Seconds 1
+        
+        # Выводим прогресс каждую минуту
+        if ($i -gt 0 -and $i % 60 -eq 0) {
+            $remaining = $interval - $i
+            Write-Host "Still sleeping... ($i / $interval seconds passed, $remaining seconds remaining)"
+        }
+    }
+    
+    Write-Host ""
 }
