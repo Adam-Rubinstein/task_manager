@@ -24,19 +24,19 @@ while ($true) {
             
             if ($pushExitCode -eq 0) {
                 $commitCount++
-                Write-Host "✓ Commit #$commitCount pushed to GitHub at $(Get-Date -Format 'HH:mm:ss')"
+                Write-Host "Commit #$commitCount pushed to GitHub at $(Get-Date -Format 'HH:mm:ss')"
             } else {
-                Write-Host "✗ Push failed with exit code: $pushExitCode"
+                Write-Host "Push failed with exit code: $pushExitCode"
             }
         } else {
-            Write-Host "⚠ No changes to commit (exit code: $commitExitCode)"
+            Write-Host "No changes to commit (exit code: $commitExitCode)"
         }
     }
     catch {
-        Write-Host "✗ Error: $_"
+        Write-Host "Error: $_"
     }
 
-    Write-Host "Sleeping for $interval seconds (until $(Get-Date -AddSeconds $interval -Format 'HH:mm:ss'))..."
+    Write-Host "Sleeping for $interval seconds..."
     
     # Спим с промежуточными проверками
     for ($i = 0; $i -lt $interval; $i++) {
