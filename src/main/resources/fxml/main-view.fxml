@@ -32,11 +32,11 @@
 
                     <!-- НАЗВАНИЕ ЗАДАЧИ (ОПЦИОНАЛЬНО) -->
                     <Label text="Название:" style="-fx-font-weight: bold;" />
-                    <TextField fx:id="taskNameInput" promptText="Название задачи" prefHeight="30.0" />
+                    <TextField fx:id="taskNameInput" promptText="(автозаполнится из описания)" prefHeight="30.0" />
 
                     <!-- Описание задачи (ОБЯЗАТЕЛЬНО) -->
                     <Label text="Описание:" style="-fx-text-fill: #ff0000; -fx-font-weight: bold;" />
-                    <TextArea fx:id="taskDescriptionInput" promptText="Описание задачи" wrapText="true"
+                    <TextArea fx:id="taskDescriptionInput" promptText="Введите описание (первая строка станет названием)..." wrapText="true"
                               prefHeight="50.0" />
 
                     <!-- Приоритет -->
@@ -52,27 +52,29 @@
                     <ComboBox fx:id="recurrenceCombo" prefWidth="Infinity"
                               onAction="#handleRecurrenceChange" />
 
-                    <!-- Интервал повтора -->
-                    <Label text="Интервал повтора (дней):" />
-                    <Spinner fx:id="intervalSpinner" prefWidth="Infinity" />
+                    <!-- Интервал повтора - СКРЫВАЕТСЯ если выбран "Без повтора" -->
+                    <VBox fx:id="intervalContainer" spacing="8.0">
+                        <Label text="Интервал повтора (дней):" />
+                        <Spinner fx:id="intervalSpinner" prefWidth="Infinity" />
+                    </VBox>
 
                 </VBox>
             </ScrollPane>
 
-            <!-- Кнопка Удалить под полем "интервал повтора" -->
+            <!-- Кнопка Создать задачу (вместо удалить) -->
             <Separator />
-            <Button fx:id="deleteTaskButton" text="✕ Удалить задачу" onAction="#handleDeleteTask"
-                    prefWidth="Infinity" style="-fx-font-size: 12; -fx-padding: 8; -fx-font-weight: bold; -fx-text-fill: #ffffff; -fx-background-color: #ff5555;" />
+            <Button fx:id="createTaskButtonLeft" text="✓ Создать задачу" onAction="#handleCreateTask"
+                    prefWidth="Infinity" style="-fx-font-size: 12; -fx-padding: 8; -fx-font-weight: bold; -fx-min-height: 40;" />
 
         </VBox>
 
         <!-- Правая панель - Список и фильтры -->
         <VBox HBox.hgrow="ALWAYS" spacing="10.0" style="-fx-padding: 10;">
 
-            <!-- Верхняя панель с кнопкой Создать - ПОМЕНЯЛИСЬ МЕСТАМИ -->
+            <!-- Верхняя панель с кнопками -->
             <HBox spacing="10.0" style="-fx-alignment: center_left;">
-                <Button fx:id="createTaskButton" text="✓ Создать задачу" onAction="#handleCreateTask"
-                        style="-fx-font-size: 12; -fx-padding: 8 16; -fx-font-weight: bold; -fx-min-width: 130;" />
+                <Button fx:id="deleteTaskButtonRight" text="✕ Удалить задачу" onAction="#handleDeleteTask"
+                        style="-fx-font-size: 12; -fx-padding: 8 16; -fx-font-weight: bold; -fx-min-width: 130; -fx-text-fill: #ffffff; -fx-background-color: #ff5555;" />
                 <Label text="Фильтр по статусу:" />
                 <ComboBox fx:id="statusFilter" prefWidth="200.0"
                           onAction="#handleFilterByStatus" />

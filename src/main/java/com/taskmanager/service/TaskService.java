@@ -40,7 +40,6 @@ public class TaskService {
     }
 
     /**
-     * ✅ ИСПРАВЛЕНО: теперь принимает TITLE и DESCRIPTION отдельно
      * Создать новую задачу
      */
     public Task createTask(String title, String description, Integer priority, LocalDateTime dueDate, RecurrenceType recurrenceType) {
@@ -60,7 +59,7 @@ public class TaskService {
     }
 
     /**
-     * Обновить задачу
+     * Обновить задачу (по ID и отдельным параметрам)
      */
     public Task updateTask(Long id, String description, Integer priority, LocalDateTime dueDate, TaskStatus status, RecurrenceType recurrenceType) {
         Task task = getTaskById(id);
@@ -70,6 +69,17 @@ public class TaskService {
             task.setDueDate(dueDate);
             task.setStatus(status);
             task.setRecurrenceType(recurrenceType);
+            task.setUpdatedAt(LocalDateTime.now());
+            return taskRepository.save(task);
+        }
+        return null;
+    }
+
+    /**
+     * Обновить задачу (принимает объект Task целиком)
+     */
+    public Task updateTask(Task task) {
+        if (task != null && task.getId() != null) {
             task.setUpdatedAt(LocalDateTime.now());
             return taskRepository.save(task);
         }

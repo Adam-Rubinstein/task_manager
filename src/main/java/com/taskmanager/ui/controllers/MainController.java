@@ -12,6 +12,7 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.VBox;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class MainController {
@@ -58,6 +60,9 @@ public class MainController {
     private Spinner<Integer> intervalSpinner;
 
     @FXML
+    private VBox intervalContainer;
+
+    @FXML
     private TableView<Task> tasksTable;
 
     @FXML
@@ -73,10 +78,10 @@ public class MainController {
     private TableColumn<Task, String> dueDateColumn;
 
     @FXML
-    private Button createTaskButton;
+    private Button createTaskButtonLeft;
 
     @FXML
-    private Button deleteTaskButton;
+    private Button deleteTaskButtonRight;
 
     @FXML
     private ComboBox<TaskStatus> statusFilter;
@@ -127,7 +132,6 @@ public class MainController {
                 new javafx.beans.property.SimpleObjectProperty<>(cellData.getValue().getPriority())
         );
 
-        // ✅ НОВЫЙ ФОРМАТЕР ДАТЫ
         dueDateColumn.setCellValueFactory(cellData -> {
             Task task = cellData.getValue();
             if (task.getDueDate() != null) {
@@ -136,6 +140,8 @@ public class MainController {
             }
             return new javafx.beans.property.SimpleStringProperty("-");
         });
+
+        intervalContainer.setVisible(false);
 
         // Загрузить все задачи при запуске
         loadAllTasks();
@@ -159,7 +165,6 @@ public class MainController {
 
     /**
      * Создать новую задачу
-     * ✅ АВТОЗАПОЛНЕНИЕ: если название пусто, берём первую строку описания
      */
     @FXML
     private void handleCreateTask() {
@@ -173,13 +178,11 @@ public class MainController {
                 ? recurrenceCombo.getValue()
                 : RecurrenceType.NONE;
 
-        // ✅ НОВАЯ ЛОГИКА: если название пусто, берём первую строку из описания
         if (title.isEmpty()) {
             if (description.isEmpty()) {
                 showAlert("Ошибка", "Введите описание задачи! Название будет автозаполнено из первой строки.");
                 return;
             }
-            // Берём первую строку описания как название
             String[] lines = description.split("\n");
             title = lines[0].trim();
             if (title.isEmpty()) {
@@ -188,7 +191,6 @@ public class MainController {
             }
         }
 
-        // Если описание пусто, используем название
         if (description.isEmpty()) {
             description = title;
         }
@@ -204,7 +206,6 @@ public class MainController {
 
             tasksList.add(newTask);
 
-            // Очистить форму после успешного создания
             taskNameInput.clear();
             taskDescriptionInput.clear();
             prioritySpinner.getValueFactory().setValue(5);
@@ -219,9 +220,6 @@ public class MainController {
         }
     }
 
-    /**
-     * Удалить выбранную задачу
-     */
     @FXML
     private void handleDeleteTask() {
         Task selected = tasksTable.getSelectionModel().getSelectedItem();
@@ -230,21 +228,198 @@ public class MainController {
             return;
         }
 
+        // Показываем диалог подтверждения
+        javafx.scene.control.Alert confirmAlert = new javafx.scene.control.Alert(
+                javafx.scene.control.Alert.AlertType.CONFIRMATION
+        );
+        confirmAlert.setTitle("Подтверждение удаления");
+        confirmAlert.setHeaderText(null);
+        confirmAlert.setContentText("Вы уверены, что хотите удалить задачу:\n\"" + selected.getTitle() + "\"?");
+
+        Optional<ButtonType> result = confirmAlert.showAndWait();
+
+        // Если пользователь нажал ОК (подтвердил)
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            try {
+                taskService.deleteTask(selected.getId());
+                tasksList.remove(selected);
+                showAlert("Успех", "Задача удалена!");
+            } catch (Exception e) {
+                showAlert("Ошибка", "Не удалось удалить задачу: " + e.getMessage());
+            }
+        }
+        // Если нажал Отмена - ничего не делаем
+    }
+
+    /**
+     * Открыть окно с деталями задачи (редактируемое, большего размера, без кнопки закрыть)
+     */
+    private void openTaskDetailWindow(Task task) {
         try {
-            taskService.deleteTask(selected.getId());
-            tasksList.remove(selected);
-            showAlert("Успех", "Задача удалена!");
+            javafx.stage.Stage detailStage = new javafx.stage.Stage();
+            detailStage.setTitle("Задача: " + task.getTitle());
+            detailStage.setWidth(700);
+            detailStage.setHeight(715);
+
+            javafx.scene.layout.VBox mainVBox = new javafx.scene.layout.VBox(10);
+            mainVBox.setStyle("-fx-padding: 15; -fx-font-size: 12;");
+
+            // === ЗАГОЛОВОК (редактируемое) ===
+            Label titleLabel = new Label("Название (первая строка описания):");
+            titleLabel.setStyle("-fx-font-weight: bold;");
+            TextField titleField = new TextField(task.getTitle());
+            titleField.setStyle("-fx-font-size: 14; -fx-padding: 5;");
+
+            // === ОПИСАНИЕ (БЕЗ ДУБЛИРОВАНИЯ НАЗВАНИЯ) ===
+            Label descLabel = new Label("Остальное описание:");
+            descLabel.setStyle("-fx-font-weight: bold;");
+
+            // Берём описание без первой строки (название)
+            String fullDescription = task.getDescription();
+            String descriptionWithoutTitle = fullDescription;
+
+            int newlineIndex = fullDescription.indexOf('\n');
+            if (newlineIndex != -1) {
+                descriptionWithoutTitle = fullDescription.substring(newlineIndex + 1);
+            } else {
+                descriptionWithoutTitle = "";
+            }
+
+            TextArea descArea = new TextArea(descriptionWithoutTitle);
+            descArea.setWrapText(true);
+            descArea.setPrefHeight(120);
+            descArea.setStyle("-fx-font-size: 12; -fx-padding: 5;");
+
+            // === СТАТУС ===
+            Label statusLabel = new Label("Статус:");
+            statusLabel.setStyle("-fx-font-weight: bold;");
+            ComboBox<TaskStatus> statusCombo = new ComboBox<>(
+                    FXCollections.observableArrayList(TaskStatus.values())
+            );
+            statusCombo.setValue(task.getStatus());
+            statusCombo.setStyle("-fx-padding: 5;");
+
+            // === ПРИОРИТЕТ ===
+            Label priorityLabel = new Label("Приоритет (0-10):");
+            priorityLabel.setStyle("-fx-font-weight: bold;");
+            Spinner<Integer> prioritySpinner2 = new Spinner<>(0, 10, task.getPriority());
+            prioritySpinner2.setStyle("-fx-padding: 5;");
+
+            // === ДАТА ВЫПОЛНЕНИЯ ===
+            Label dueDateLabel = new Label("Срок выполнения:");
+            dueDateLabel.setStyle("-fx-font-weight: bold;");
+            DatePicker dueDatePicker2 = new DatePicker(
+                    task.getDueDate() != null ? task.getDueDate().toLocalDate() : null
+            );
+            dueDatePicker2.setStyle("-fx-padding: 5;");
+
+            // === ТИП ПОВТОРА ===
+            Label recurrenceLabel = new Label("Тип повтора:");
+            recurrenceLabel.setStyle("-fx-font-weight: bold;");
+            ComboBox<RecurrenceType> recurrenceCombo2 = new ComboBox<>(
+                    FXCollections.observableArrayList(RecurrenceType.values())
+            );
+            recurrenceCombo2.setValue(task.getRecurrenceType());
+            recurrenceCombo2.setStyle("-fx-padding: 5;");
+
+            // === ИНТЕРВАЛ ПОВТОРА ===
+            Label intervalLabel = new Label("Интервал повтора (дней):");
+            intervalLabel.setStyle("-fx-font-weight: bold;");
+            Spinner<Integer> intervalSpinner2 = new Spinner<>(1, 365, task.getRecurrenceInterval());
+            intervalSpinner2.setStyle("-fx-padding: 5;");
+
+            // === КНОПКИ (только Сохранить) ===
+            javafx.scene.layout.HBox buttonsBox = new javafx.scene.layout.HBox(10);
+            buttonsBox.setStyle("-fx-alignment: center;");
+
+            Button saveButton = new Button("💾 Сохранить изменения");
+            saveButton.setStyle("-fx-font-size: 12; -fx-padding: 8 16; -fx-font-weight: bold;");
+            saveButton.setOnAction(e -> {
+                try {
+                    // Собираем описание из названия и остального текста
+                    String newTitle = titleField.getText().trim();
+                    String newDescRest = descArea.getText().trim();
+
+                    if (newTitle.isEmpty()) {
+                        showAlert("Ошибка", "Название не может быть пустым!");
+                        return;
+                    }
+
+                    // Собираем полное описание: название + новая строка + остальное
+                    String newFullDescription = newTitle;
+                    if (!newDescRest.isEmpty()) {
+                        newFullDescription = newTitle + "\n" + newDescRest;
+                    }
+
+                    // Обновляем задачу
+                    task.setDescription(newFullDescription);
+                    task.setStatus(statusCombo.getValue());
+                    task.setPriority(prioritySpinner2.getValue());
+                    if (dueDatePicker2.getValue() != null) {
+                        task.setDueDate(dueDatePicker2.getValue().atStartOfDay());
+                    }
+                    task.setRecurrenceType(recurrenceCombo2.getValue());
+                    task.setRecurrenceInterval(intervalSpinner2.getValue());
+                    task.setUpdatedAt(LocalDateTime.now());
+
+                    // Сохраняем в БД
+                    taskService.updateTask(task);
+
+                    // Обновляем таблицу
+                    tasksTable.refresh();
+
+                    showAlert("Успех", "Задача обновлена!");
+                    detailStage.close();
+                } catch (Exception ex) {
+                    showAlert("Ошибка", "Не удалось сохранить: " + ex.getMessage());
+                }
+            });
+
+            buttonsBox.getChildren().add(saveButton);
+
+            // === СОБИРАЕМ ВСЁ В VBox ===
+            javafx.scene.control.ScrollPane scrollPane = new javafx.scene.control.ScrollPane();
+            javafx.scene.layout.VBox contentVBox = new javafx.scene.layout.VBox(10);
+            contentVBox.setStyle("-fx-padding: 10;");
+
+            contentVBox.getChildren().addAll(
+                    titleLabel,
+                    titleField,
+                    new Separator(),
+                    descLabel,
+                    descArea,
+                    new Separator(),
+                    statusLabel,
+                    statusCombo,
+                    priorityLabel,
+                    prioritySpinner2,
+                    dueDateLabel,
+                    dueDatePicker2,
+                    recurrenceLabel,
+                    recurrenceCombo2,
+                    intervalLabel,
+                    intervalSpinner2,
+                    new Separator(),
+                    buttonsBox
+            );
+
+            scrollPane.setContent(contentVBox);
+            scrollPane.setFitToWidth(true);
+
+            javafx.scene.Scene scene = new javafx.scene.Scene(scrollPane);
+            detailStage.setScene(scene);
+            detailStage.show();
+
         } catch (Exception e) {
-            showAlert("Ошибка", "Не удалось удалить задачу: " + e.getMessage());
+            showAlert("Ошибка", "Не удалось открыть задачу: " + e.getMessage());
         }
     }
 
     /**
-     * ✅ НОВЫЙ МЕТОД: Открыть задачу в отдельном окне по клику
+     * Открыть задачу в отдельном окне по двойному клику
      */
     @FXML
     private void handleTaskClick(MouseEvent event) {
-        // Двойной клик (clickCount = 2)
         if (event.getClickCount() == 2) {
             Task selected = tasksTable.getSelectionModel().getSelectedItem();
             if (selected != null) {
@@ -254,101 +429,18 @@ public class MainController {
     }
 
     /**
-     * ✅ НОВЫЙ МЕТОД: Открыть окно с деталями задачи
-     */
-    private void openTaskDetailWindow(Task task) {
-        try {
-            // Создаём новое окно
-            javafx.stage.Stage detailStage = new javafx.stage.Stage();
-            detailStage.setTitle("Задача: " + task.getTitle());
-            detailStage.setWidth(500);
-            detailStage.setHeight(400);
-
-            // Создаём VBox с информацией о задаче
-            javafx.scene.layout.VBox vbox = new javafx.scene.layout.VBox(10);
-            vbox.setStyle("-fx-padding: 15; -fx-font-size: 12;");
-
-            // Заголовок
-            Label titleLabel = new Label("Название: " + task.getTitle());
-            titleLabel.setStyle("-fx-font-size: 16; -fx-font-weight: bold;");
-
-            // Описание
-            Label descLabel = new Label("Описание:");
-            TextArea descArea = new TextArea(task.getDescription());
-            descArea.setWrapText(true);
-            descArea.setPrefHeight(100);
-            descArea.setEditable(false);
-
-            // Статус
-            Label statusLabel = new Label("Статус: " + task.getStatus());
-
-            // Приоритет
-            Label priorityLabel = new Label("Приоритет: " + task.getPriority() + "/10");
-
-            // Дата выполнения
-            String dueDateStr = task.getDueDate() != null
-                    ? task.getDueDate().format(dateFormatter)
-                    : "Не установлена";
-            Label dueDateLabel = new Label("Срок выполнения: " + dueDateStr);
-
-            // Тип повтора
-            Label recurrenceLabel = new Label("Тип повтора: " + task.getRecurrenceType());
-
-            // Интервал повтора
-            Label intervalLabel = new Label("Интервал повтора: " + task.getRecurrenceInterval() + " дней");
-
-            // Кнопка закрытия
-            Button closeButton = new Button("Закрыть");
-            closeButton.setStyle("-fx-padding: 8; -fx-font-size: 12;");
-            closeButton.setOnAction(e -> detailStage.close());
-
-            // Добавляем всё в VBox
-            vbox.getChildren().addAll(
-                    titleLabel,
-                    new Separator(),
-                    descLabel,
-                    descArea,
-                    new Separator(),
-                    statusLabel,
-                    priorityLabel,
-                    dueDateLabel,
-                    recurrenceLabel,
-                    intervalLabel,
-                    new Separator(),
-                    closeButton
-            );
-
-            // Создаём ScrollPane для прокрутки
-            javafx.scene.control.ScrollPane scrollPane = new javafx.scene.control.ScrollPane(vbox);
-            scrollPane.setFitToWidth(true);
-
-            // Создаём сцену
-            javafx.scene.Scene scene = new javafx.scene.Scene(scrollPane);
-            detailStage.setScene(scene);
-
-            // Показываем окно
-            detailStage.show();
-
-        } catch (Exception e) {
-            showAlert("Ошибка", "Не удалось открыть задачу: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Обновить задачу (двойной клик по строке)
+     * Обработка изменения типа повтора
      */
     @FXML
-    private void handleTaskDoubleClick() {
-        Task selected = tasksTable.getSelectionModel().getSelectedItem();
-        if (selected != null) {
-            taskNameInput.setText(selected.getTitle());
-            taskDescriptionInput.setText(selected.getDescription());
-            prioritySpinner.getValueFactory().setValue(selected.getPriority());
-            if (selected.getDueDate() != null) {
-                dueDatePicker.setValue(selected.getDueDate().toLocalDate());
-            }
-            recurrenceCombo.setValue(selected.getRecurrenceType());
-            intervalSpinner.getValueFactory().setValue(selected.getRecurrenceInterval());
+    private void handleRecurrenceChange() {
+        RecurrenceType selected = recurrenceCombo.getValue();
+
+        if (selected == RecurrenceType.CUSTOM) {
+            intervalContainer.setVisible(true);
+            intervalSpinner.setDisable(false);
+        } else {
+            intervalContainer.setVisible(false);
+            intervalSpinner.setDisable(true);
         }
     }
 
@@ -369,19 +461,6 @@ public class MainController {
             tasksList.addAll(filtered);
         } catch (Exception e) {
             showAlert("Ошибка", "Не удалось отфильтровать задачи: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Обработка изменения типа повтора
-     */
-    @FXML
-    private void handleRecurrenceChange() {
-        RecurrenceType selected = recurrenceCombo.getValue();
-        if (selected == null || selected == RecurrenceType.NONE) {
-            intervalSpinner.setDisable(true);
-        } else {
-            intervalSpinner.setDisable(false);
         }
     }
 
