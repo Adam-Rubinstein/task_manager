@@ -93,18 +93,17 @@ public class Task {
      * Проверить, является ли задача просроченной
      */
     public boolean isOverdue() {
-        if (dueDate == null || status == TaskStatus.COMPLETED) {
+        if (dueDate == null) {
             return false;
         }
-
-        return LocalDateTime.now().isAfter(dueDate);
+        return LocalDateTime.now().isAfter(dueDate) && status != TaskStatus.COMPLETED;
     }
 
     /**
      * Проверить, является ли задача на сегодня или завтра
      */
     public boolean isTodayOrTomorrow() {
-        if (dueDate == null || status == TaskStatus.COMPLETED) {
+        if (dueDate == null) {  // Только проверяем дату, БЕЗ проверки статуса!
             return false;
         }
 
@@ -113,14 +112,14 @@ public class Task {
         LocalDateTime tomorrow = today.plusDays(1);
         LocalDateTime taskDay = dueDate.withHour(0).withMinute(0).withSecond(0);
 
-        return (taskDay.equals(today) || taskDay.equals(tomorrow));
+        return (taskDay.equals(today) || taskDay.equals(tomorrow)) && status != TaskStatus.COMPLETED;
     }
 
     /**
      * Проверить, является ли задача на неделю
      */
     public boolean isThisWeek() {
-        if (dueDate == null || status == TaskStatus.COMPLETED) {
+        if (dueDate == null) {  // Только проверяем дату, БЕЗ проверки статуса!
             return false;
         }
 
@@ -131,7 +130,7 @@ public class Task {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime weekLater = now.plusDays(7);
 
-        return !dueDate.isAfter(weekLater);
+        return !dueDate.isAfter(weekLater) && status != TaskStatus.COMPLETED;
     }
 
     /**

@@ -84,7 +84,7 @@ public class MainController {
     private Button deleteTaskButtonRight;
 
     @FXML
-    private ComboBox<TaskStatus> statusFilter;
+    private ComboBox<String> statusFilter;
 
     @FXML
     private Label alertsCountLabel;
@@ -112,11 +112,16 @@ public class MainController {
         recurrenceCombo.setItems(FXCollections.observableArrayList(RecurrenceType.values()));
         recurrenceCombo.setValue(RecurrenceType.NONE);
 
-        // ✅ ПУНКТ 1: Фильтр статуса только с NEW и IN_PROGRESS (без CANCELLED и COMPLETED)
+        // Фильтр со всеми статусами
         statusFilter.setItems(FXCollections.observableArrayList(
-                TaskStatus.NEW,
-                TaskStatus.IN_PROGRESS
+                "ALL",
+                "NEW",
+                "IN_PROGRESS",
+                "COMPLETED",
+                "CANCELLED"
         ));
+        statusFilter.setValue("ALL");  // По умолчанию ALL
+        statusFilter.setOnAction(e -> handleFilterByStatus());
 
         // Инициализация таблицы задач
         tasksList = FXCollections.observableArrayList();
@@ -144,7 +149,7 @@ public class MainController {
             return new javafx.beans.property.SimpleStringProperty("-");
         });
 
-        // ✅ ПУНКТ 2: Применить стиль подсвечивания задач на основе категории
+        // ✅ Применить стиль подсвечивания задач на основе категории
         tasksTable.setRowFactory(tableView -> new TableRow<Task>() {
             @Override
             protected void updateItem(Task task, boolean empty) {
@@ -157,13 +162,13 @@ public class MainController {
 
                 // Определяем цвет подсвечивания
                 if (task.isOverdue()) {
-                    // Просроченные - красное полупрозрачное выделение
+                    // 🔴 Просроченные - красное полупрозрачное выделение
                     setStyle("-fx-background-color: rgba(255, 100, 100, 0.15);");
                 } else if (task.isTodayOrTomorrow()) {
-                    // Сегодня-завтра - жёлтое полупрозрачное выделение
+                    // 🟡 Сегодня-завтра - жёлтое полупрозрачное выделение
                     setStyle("-fx-background-color: rgba(255, 200, 100, 0.15);");
                 } else if (task.isThisWeek()) {
-                    // Неделя - голубое полупрозрачное выделение
+                    // 🟦 Неделя - голубое полупрозрачное выделение
                     setStyle("-fx-background-color: rgba(100, 150, 255, 0.15);");
                 } else {
                     // Нет выделения для остальных
@@ -174,8 +179,8 @@ public class MainController {
 
         intervalContainer.setVisible(false);
 
-        // Загрузить все задачи при запуске
-        loadAllTasks();
+        // ✅ ИСПРАВЛЕНО: Загрузить задачи при запуске (NEW + IN_PROGRESS по умолчанию)
+        loadTasksByStatuses(TaskStatus.NEW, TaskStatus.IN_PROGRESS);
         updateAlertsCount();
 
         // Обновлять оповещения каждые 10 секунд
@@ -480,18 +485,35 @@ public class MainController {
      */
     @FXML
     private void handleFilterByStatus() {
-        TaskStatus selected = (TaskStatus) statusFilter.getValue();
-        if (selected == null) {
-            loadAllTasks();
+        String selected = statusFilter.getValue();
+
+        if (selected == null || selected.equals("ALL")) {
+            // Если "ALL" - показываем NEW и IN_PROGRESS
+            loadTasksByStatuses(TaskStatus.NEW, TaskStatus.IN_PROGRESS);
             return;
         }
 
         try {
-            List<Task> filtered = taskService.getTasksByStatus(selected);
+            // Для остальных - загружаем выбранный статус
+            TaskStatus status = TaskStatus.valueOf(selected);
+            List<Task> filtered = taskService.getTasksByStatus(status);
             tasksList.clear();
             tasksList.addAll(filtered);
         } catch (Exception e) {
             showAlert("Ошибка", "Не удалось отфильтровать задачи: " + e.getMessage());
+        }
+    }
+
+    private void loadTasksByStatuses(TaskStatus... statuses) {
+        try {
+            List<Task> allTasks = new java.util.ArrayList<>();
+            for (TaskStatus status : statuses) {
+                allTasks.addAll(taskService.getTasksByStatus(status));
+            }
+            tasksList.clear();
+            tasksList.addAll(allTasks);
+        } catch (Exception e) {
+            showAlert("Ошибка", "Не удалось загрузить задачи: " + e.getMessage());
         }
     }
 
