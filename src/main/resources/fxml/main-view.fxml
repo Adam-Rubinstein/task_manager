@@ -21,70 +21,72 @@
     <!-- Основной контент -->
     <HBox VBox.vgrow="ALWAYS" spacing="10.0" style="-fx-padding: 10;">
 
-        <!-- Левая панель - Создание/редактирование задач (ПРОКРУЧИВАЕМАЯ) -->
-        <ScrollPane prefWidth="350.0" fitToWidth="true" style="-fx-padding: 0;">
-            <VBox spacing="8.0" style="-fx-border-color: #cccccc; -fx-padding: 10; -fx-font-size: 12;">
+        <!-- Левая панель - Создание/редактирование задач -->
+        <VBox prefWidth="350.0" spacing="10.0" style="-fx-border-color: #cccccc; -fx-padding: 10; -fx-font-size: 12;">
 
-                <Label text="СОЗДАНИЕ ЗАДАЧИ" style="-fx-font-size: 14; -fx-font-weight: bold;" />
+            <Label text="СОЗДАНИЕ ЗАДАЧИ" style="-fx-font-size: 14; -fx-font-weight: bold;" />
 
-                <!-- НАЗВАНИЕ ЗАДАЧИ (ОБЯЗАТЕЛЬНОЕ) -->
-                <Label text="Название:" style="-fx-text-fill: #ff0000; -fx-font-weight: bold;" />
-                <TextField fx:id="taskNameInput" promptText="Введите название задачи..." prefHeight="30.0" />
+            <!-- Прокручиваемая часть для полей ввода -->
+            <ScrollPane fitToWidth="true" style="-fx-padding: 0;" VBox.vgrow="ALWAYS">
+                <VBox spacing="8.0" style="-fx-padding: 0;">
 
-                <!-- Описание задачи (УМЕНЬШЕНО) -->
-                <Label text="Описание:" />
-                <TextArea fx:id="taskDescriptionInput" promptText="Введите описание..." wrapText="true"
-                          prefHeight="50.0" />
+                    <!-- НАЗВАНИЕ ЗАДАЧИ (ОПЦИОНАЛЬНО) -->
+                    <Label text="Название:" style="-fx-font-weight: bold;" />
+                    <TextField fx:id="taskNameInput" promptText="(автозаполнится из описания)" prefHeight="30.0" />
 
-                <!-- Приоритет -->
-                <Label text="Приоритет (0-10):" />
-                <Spinner fx:id="prioritySpinner" prefWidth="Infinity" />
+                    <!-- Описание задачи (ОБЯЗАТЕЛЬНО) -->
+                    <Label text="Описание:" style="-fx-text-fill: #ff0000; -fx-font-weight: bold;" />
+                    <TextArea fx:id="taskDescriptionInput" promptText="Введите описание (первая строка станет названием)..." wrapText="true"
+                              prefHeight="50.0" />
 
-                <!-- Дата выполнения -->
-                <Label text="Дата выполнения:" />
-                <DatePicker fx:id="dueDatePicker" prefWidth="Infinity" />
+                    <!-- Приоритет -->
+                    <Label text="Приоритет (0-10):" />
+                    <Spinner fx:id="prioritySpinner" prefWidth="Infinity" />
 
-                <!-- Тип повтора -->
-                <Label text="Тип повтора:" />
-                <ComboBox fx:id="recurrenceCombo" prefWidth="Infinity"
-                          onAction="#handleRecurrenceChange" />
+                    <!-- Дата выполнения -->
+                    <Label text="Дата выполнения:" />
+                    <DatePicker fx:id="dueDatePicker" prefWidth="Infinity" />
 
-                <!-- Интервал повтора -->
-                <Label text="Интервал повтора (дней):" />
-                <Spinner fx:id="intervalSpinner" prefWidth="Infinity" />
+                    <!-- Тип повтора -->
+                    <Label text="Тип повтора:" />
+                    <ComboBox fx:id="recurrenceCombo" prefWidth="Infinity"
+                              onAction="#handleRecurrenceChange" />
 
-                <!-- ПУСТОЕ МЕСТО - ОТСТУП -->
-                <Region VBox.vgrow="ALWAYS" />
+                    <!-- Интервал повтора -->
+                    <Label text="Интервал повтора (дней):" />
+                    <Spinner fx:id="intervalSpinner" prefWidth="Infinity" />
 
-                <!-- Кнопки - ВСЕГДА ВИДНЫ -->
-                <Separator />
-                <HBox spacing="5.0">
-                    <Button fx:id="createTaskButton" text="Создать" onAction="#handleCreateTask"
-                            prefWidth="Infinity" style="-fx-font-size: 12; -fx-padding: 8; -fx-font-weight: bold;" />
-                    <Button fx:id="deleteTaskButton" text="Удалить" onAction="#handleDeleteTask"
-                            prefWidth="Infinity" style="-fx-font-size: 12; -fx-padding: 8; -fx-font-weight: bold;" />
-                </HBox>
-            </VBox>
-        </ScrollPane>
+                </VBox>
+            </ScrollPane>
+
+            <!-- Кнопка Удалить под полем "интервал повтора" -->
+            <Separator />
+            <Button fx:id="deleteTaskButton" text="✕ Удалить задачу" onAction="#handleDeleteTask"
+                    prefWidth="Infinity" style="-fx-font-size: 12; -fx-padding: 8; -fx-font-weight: bold; -fx-text-fill: #ffffff; -fx-background-color: #ff5555;" />
+
+        </VBox>
 
         <!-- Правая панель - Список и фильтры -->
         <VBox HBox.hgrow="ALWAYS" spacing="10.0" style="-fx-padding: 10;">
 
-            <!-- Фильтрация -->
-            <HBox spacing="10.0">
+            <!-- Верхняя панель с кнопкой Создать - ПОМЕНЯЛИСЬ МЕСТАМИ -->
+            <HBox spacing="10.0" style="-fx-alignment: center_left;">
+                <Button fx:id="createTaskButton" text="✓ Создать задачу" onAction="#handleCreateTask"
+                        style="-fx-font-size: 12; -fx-padding: 8 16; -fx-font-weight: bold; -fx-min-width: 130;" />
                 <Label text="Фильтр по статусу:" />
                 <ComboBox fx:id="statusFilter" prefWidth="200.0"
                           onAction="#handleFilterByStatus" />
+                <Region HBox.hgrow="ALWAYS" />
             </HBox>
 
             <!-- Таблица задач -->
             <Label text="СПИСОК ЗАДАЧ" style="-fx-font-size: 14; -fx-font-weight: bold;" />
-            <TableView fx:id="tasksTable" prefHeight="250.0" VBox.vgrow="ALWAYS">
+            <TableView fx:id="tasksTable" prefHeight="250.0" VBox.vgrow="ALWAYS" onMouseClicked="#handleTaskClick">
                 <columns>
                     <TableColumn fx:id="titleColumn" text="Название" prefWidth="150.0" />
                     <TableColumn fx:id="statusColumn" text="Статус" prefWidth="80.0" />
                     <TableColumn fx:id="priorityColumn" text="Приоритет" prefWidth="80.0" />
-                    <TableColumn fx:id="dueDateColumn" text="Срок" prefWidth="120.0" />
+                    <TableColumn fx:id="dueDateColumn" text="Срок" prefWidth="200.0" />
                 </columns>
             </TableView>
 
@@ -96,6 +98,9 @@
                 <Button text="Прочитано" onAction="#handleMarkAlertAsRead" />
             </HBox>
             <ListView fx:id="alertsListView" prefHeight="80.0" VBox.vgrow="SOMETIMES" />
+
         </VBox>
+
     </HBox>
+
 </VBox>
