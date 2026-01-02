@@ -32,11 +32,11 @@
 
                     <!-- НАЗВАНИЕ ЗАДАЧИ (ОПЦИОНАЛЬНО) -->
                     <Label text="Название:" style="-fx-font-weight: bold;" />
-                    <TextField fx:id="taskNameInput" promptText="(автозаполнится из описания)" prefHeight="30.0" />
+                    <TextField fx:id="taskNameInput" promptText="Название задачи" prefHeight="30.0" />
 
                     <!-- Описание задачи (ОБЯЗАТЕЛЬНО) -->
                     <Label text="Описание:" style="-fx-text-fill: #ff0000; -fx-font-weight: bold;" />
-                    <TextArea fx:id="taskDescriptionInput" promptText="Введите описание (первая строка станет названием)..." wrapText="true"
+                    <TextArea fx:id="taskDescriptionInput" promptText="Описание задачи" wrapText="true"
                               prefHeight="50.0" />
 
                     <!-- Приоритет -->
