@@ -14,6 +14,7 @@ import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
+import java.time.LocalTime;
 
 @Component
 public class MainController {
@@ -53,10 +55,7 @@ public class MainController {
     private Spinner<Integer> prioritySpinner;
 
     @FXML
-    private DatePicker dueDatePicker;
-
-    @FXML
-    private TextField dueTimeInput;
+    private TextField dueDateTimeInput;
 
     @FXML
     private ComboBox<RecurrenceType> recurrenceCombo;
@@ -117,16 +116,9 @@ public class MainController {
         recurrenceCombo.setItems(FXCollections.observableArrayList(RecurrenceType.values()));
         recurrenceCombo.setValue(RecurrenceType.NONE);
 
-        // Инициализация DatePicker
-        dueDatePicker.setValue(LocalDate.now().plusDays(1));
-
-        // Инициализация TextField для времени
-        dueTimeInput.setText("09:00");
-        dueTimeInput.textProperty().addListener((obs, oldVal, newVal) -> {
-            if (!newVal.matches("[0-9:]*")) {
-                dueTimeInput.setText(newVal.replaceAll("[^0-9:]", ""));
-            }
-        });
+        // Инициализация TextField с маской и встроенной кнопкой календаря
+        dueDateTimeInput.setText("");
+        setupDateTimeInputMask();
 
         // Фильтр со всеми вариантами
         statusFilter.setItems(FXCollections.observableArrayList(
@@ -165,7 +157,7 @@ public class MainController {
             return new javafx.beans.property.SimpleStringProperty("-");
         });
 
-        // Применить стиль подсвечивания задач на основе категории
+        // ✅ Применить стиль подсвечивания задач на основе категории
         tasksTable.setRowFactory(tableView -> new TableRow<Task>() {
             @Override
             protected void updateItem(Task task, boolean empty) {
@@ -197,7 +189,7 @@ public class MainController {
 
         intervalContainer.setVisible(false);
 
-        // Загрузить задачи при запуске (NEW + IN_PROGRESS по умолчанию)
+        // ✅ Загрузить задачи при запуске (NEW + IN_PROGRESS по умолчанию)
         loadTasksByStatuses(TaskStatus.NEW, TaskStatus.IN_PROGRESS);
         updateAlertsCount();
 
@@ -229,32 +221,19 @@ public class MainController {
                 ? recurrenceCombo.getValue()
                 : RecurrenceType.NONE;
 
-        // Собираем дату + время
+        // ✅ Парсим дату и время из маскированного поля
         LocalDateTime dueDate;
-        if (dueDatePicker.getValue() != null) {
-            int hour = 9, minute = 0;
+        String dateTimeStr = dueDateTimeInput.getText().trim();
 
-            String timeStr = dueTimeInput.getText().trim();
-            if (!timeStr.isEmpty()) {
-                try {
-                    String[] parts = timeStr.split(":");
-                    if (parts.length == 2) {
-                        hour = Integer.parseInt(parts[0]);
-                        minute = Integer.parseInt(parts[1]);
-
-                        if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
-                            showAlert("Ошибка", "Неправильное время! Часы: 0-23, минуты: 0-59");
-                            return;
-                        }
-                    }
-                } catch (NumberFormatException e) {
-                    showAlert("Ошибка", "Неправильный формат времени! Используйте: HH:mm");
-                    return;
-                }
+        if (!dateTimeStr.isEmpty() && dateTimeStr.length() == 16) {
+            try {
+                dueDate = LocalDateTime.parse(dateTimeStr, DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
+            } catch (java.time.format.DateTimeParseException e) {
+                showAlert("Ошибка", "Неправильный формат даты! Используйте: dd.MM.yyyy HH:mm\nПример: 03.01.2026 14:30");
+                return;
             }
-            dueDate = dueDatePicker.getValue().atTime(hour, minute);
         } else {
-            dueDate = LocalDateTime.now().plusDays(1).withHour(9).withMinute(0);
+            dueDate = null;
         }
 
         if (title.isEmpty()) {
@@ -288,8 +267,7 @@ public class MainController {
             taskNameInput.clear();
             taskDescriptionInput.clear();
             prioritySpinner.getValueFactory().setValue(5);
-            dueDatePicker.setValue(LocalDate.now().plusDays(1));
-            dueTimeInput.setText("09:00");
+            dueDateTimeInput.setText("");
             recurrenceCombo.setValue(RecurrenceType.NONE);
             intervalSpinner.getValueFactory().setValue(7);
 
@@ -387,34 +365,93 @@ public class MainController {
             Spinner<Integer> prioritySpinner2 = new Spinner<>(0, 10, task.getPriority());
             prioritySpinner2.setStyle("-fx-padding: 5;");
 
-            // === ДАТА ВЫПОЛНЕНИЯ ===
-            Label dueDateLabel = new Label("Дата выполнения:");
+            // === ДАТА ВЫПОЛНЕНИЯ СО ВРЕМЕНЕМ (маскированное поле) ===
+            Label dueDateLabel = new Label("Срок выполнения (dd.MM.yyyy HH:mm):");
             dueDateLabel.setStyle("-fx-font-weight: bold;");
-            DatePicker dueDatePicker2 = new DatePicker(
-                    task.getDueDate() != null ? task.getDueDate().toLocalDate() : LocalDate.now()
-            );
-            dueDatePicker2.setStyle("-fx-padding: 5;");
 
-            // === ВРЕМЯ ВЫПОЛНЕНИЯ ===
-            Label timeLabel = new Label("Время (HH:mm):");
-            timeLabel.setStyle("-fx-font-weight: bold;");
-            TextField dueTimeField = new TextField();
+            TextField dueDateTimeField = new TextField();
             if (task.getDueDate() != null) {
-                dueTimeField.setText(String.format("%02d:%02d", task.getDueDate().getHour(), task.getDueDate().getMinute()));
+                dueDateTimeField.setText(task.getDueDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")));
             } else {
-                dueTimeField.setText("09:00");
+                dueDateTimeField.setText("");
             }
-            dueTimeField.setStyle("-fx-padding: 5;");
-            dueTimeField.setPrefWidth(80);
+            dueDateTimeField.setStyle("-fx-padding: 5;");
 
-            dueTimeField.textProperty().addListener((obs, oldVal, newVal) -> {
-                if (!newVal.matches("[0-9:]*")) {
-                    dueTimeField.setText(newVal.replaceAll("[^0-9:]", ""));
+            // МАСКИРОВАНИЕ ПРИ ВВОДЕ
+            dueDateTimeField.textProperty().addListener((obs, oldValue, newValue) -> {
+                if (newValue == null || newValue.isEmpty()) {
+                    return;
+                }
+
+                String digitsOnly = newValue.replaceAll("[^0-9]", "");
+
+                if (digitsOnly.isEmpty()) {
+                    return;
+                }
+
+                if (digitsOnly.length() > 12) {
+                    digitsOnly = digitsOnly.substring(0, 12);
+                }
+
+                String formatted = formatDateTime(digitsOnly);
+
+                if (!formatted.equals(newValue)) {
+                    dueDateTimeField.setText(formatted);
                 }
             });
 
-            HBox timeBox = new HBox(8);
-            timeBox.getChildren().addAll(dueDatePicker2, timeLabel, dueTimeField);
+            // АВТОЗАПОЛНЕНИЕ НА ПОТЕРЮ ФОКУСА
+            dueDateTimeField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+                if (wasFocused && !isFocused) {
+                    autoFillDateTimeField(dueDateTimeField);
+                }
+            });
+
+            // АВТОЗАПОЛНЕНИЕ НА ENTER
+            dueDateTimeField.setOnKeyPressed(event -> {
+                if (event.getCode() == javafx.scene.input.KeyCode.ENTER) {
+                    autoFillDateTimeField(dueDateTimeField);
+                }
+            });
+
+
+            // Применяем маску
+            dueDateTimeField.textProperty().addListener((obs, oldVal, newVal) -> {
+                int caretPosition = dueDateTimeField.getCaretPosition();
+                int[] protectedPositions = {2, 5, 10, 13};
+
+                if (newVal.length() < oldVal.length()) {
+                    if (caretPosition > 0 && caretPosition <= newVal.length()) {
+                        for (int i = 0; i < protectedPositions.length; i++) {
+                            if (caretPosition - 1 == protectedPositions[i]) {
+                                if (caretPosition - 2 >= 0) {
+                                    String before = newVal.substring(0, caretPosition - 2);
+                                    String after = newVal.substring(caretPosition - 1);
+                                    char protectedChar = oldVal.charAt(caretPosition - 1);
+                                    dueDateTimeField.setText(before + protectedChar + after);
+                                    dueDateTimeField.positionCaret(caretPosition - 1);
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (newVal.length() > 16) {
+                    dueDateTimeField.setText(oldVal);
+                    dueDateTimeField.positionCaret(caretPosition - 1);
+                    return;
+                }
+
+                if (!newVal.matches("[0-9. :]*")) {
+                    dueDateTimeField.setText(oldVal);
+                    dueDateTimeField.positionCaret(caretPosition - 1);
+                    return;
+                }
+            });
+
+            HBox dateTimeBox = new HBox(8);
+            dateTimeBox.getChildren().addAll(dueDateTimeField);
 
             // === ТИП ПОВТОРА ===
             Label recurrenceLabel = new Label("Тип повтора:");
@@ -430,6 +467,24 @@ public class MainController {
             intervalLabel.setStyle("-fx-font-weight: bold;");
             Spinner<Integer> intervalSpinner2 = new Spinner<>(1, 365, task.getRecurrenceInterval());
             intervalSpinner2.setStyle("-fx-padding: 5;");
+
+            // СЛУШАТЕЛЬ ДЛЯ СКРЫТИЯ/ПОКАЗА ИНТЕРВАЛА
+            recurrenceCombo2.setOnAction(e -> {
+                RecurrenceType selected = recurrenceCombo2.getValue();
+                if (selected != null && selected == RecurrenceType.CUSTOM) {
+                    intervalLabel.setVisible(true);
+                    intervalSpinner2.setVisible(true);
+                } else {
+                    intervalLabel.setVisible(false);
+                    intervalSpinner2.setVisible(false);
+                }
+            });
+
+            // НАЧАЛЬНОЕ СОСТОЯНИЕ
+            if (task.getRecurrenceType() != RecurrenceType.CUSTOM) {
+                intervalLabel.setVisible(false);
+                intervalSpinner2.setVisible(false);
+            }
 
             // === КНОПКА СОХРАНИТЬ ===
             HBox buttonsBox = new HBox(10);
@@ -452,30 +507,16 @@ public class MainController {
                         newFullDescription = newTitle + "\n" + newDescRest;
                     }
 
-                    // Собираем дату + время
+                    // ✅ Парсим дату и время
                     LocalDateTime newDueDate = null;
-                    if (dueDatePicker2.getValue() != null) {
-                        int hour = 9, minute = 0;
-
-                        String timeStr = dueTimeField.getText().trim();
-                        if (!timeStr.isEmpty()) {
-                            try {
-                                String[] parts = timeStr.split(":");
-                                if (parts.length == 2) {
-                                    hour = Integer.parseInt(parts[0]);
-                                    minute = Integer.parseInt(parts[1]);
-
-                                    if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
-                                        showAlert("Ошибка", "Неправильное время! Часы: 0-23, минуты: 0-59");
-                                        return;
-                                    }
-                                }
-                            } catch (NumberFormatException ex) {
-                                showAlert("Ошибка", "Неправильный формат времени! Используйте: HH:mm");
-                                return;
-                            }
+                    String dateTimeStr = dueDateTimeField.getText().trim();
+                    if (!dateTimeStr.isEmpty() && dateTimeStr.length() == 16) {
+                        try {
+                            newDueDate = LocalDateTime.parse(dateTimeStr, DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
+                        } catch (java.time.format.DateTimeParseException ex) {
+                            showAlert("Ошибка", "Неправильный формат! Используйте: dd.MM.yyyy HH:mm");
+                            return;
                         }
-                        newDueDate = dueDatePicker2.getValue().atTime(hour, minute);
                     }
 
                     task.setDescription(newFullDescription);
@@ -517,7 +558,7 @@ public class MainController {
                     priorityLabel,
                     prioritySpinner2,
                     dueDateLabel,
-                    timeBox,
+                    dateTimeBox,
                     recurrenceLabel,
                     recurrenceCombo2,
                     intervalLabel,
@@ -627,6 +668,299 @@ public class MainController {
     @FXML
     private void handleExit() {
         System.exit(0);
+    }
+
+    /**
+     * Форматирование даты с автозаполнением при потере фокуса или Enter
+     */
+    private void setupDateTimeInputMask() {
+        // Слушатель для форматирования при вводе (только точки и двоеточие)
+        dueDateTimeInput.textProperty().addListener((obs, oldValue, newValue) -> {
+            String digitsOnly = newValue.replaceAll("[^0-9]", "");
+
+            if (digitsOnly.length() > 12) {
+                digitsOnly = digitsOnly.substring(0, 12);
+            }
+
+            String formatted = formatDateTime(digitsOnly);
+
+            if (!formatted.equals(newValue)) {
+                dueDateTimeInput.setText(formatted);
+            }
+        });
+
+        // Обработчик на потерю фокуса (когда переходишь на другое поле)
+        dueDateTimeInput.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+            if (wasFocused && !isFocused) {  // Потеряли фокус
+                autoFillDateTime();
+            }
+        });
+
+        // Обработчик на нажатие Enter
+        dueDateTimeInput.setOnKeyPressed(event -> {
+            if (event.getCode() == javafx.scene.input.KeyCode.ENTER) {
+                autoFillDateTime();
+            }
+        });
+    }
+
+    /**
+     * Автозаполнение года и времени
+     */
+    private void autoFillDateTime() {
+        String digitsOnly = dueDateTimeInput.getText().replaceAll("[^0-9]", "");
+
+        if (digitsOnly.isEmpty()) {
+            return;
+        }
+
+        LocalDate now = LocalDate.now();
+        int currentYear = now.getYear();
+        int currentMonth = now.getMonthValue();
+        int currentDay = now.getDayOfMonth();
+
+        int day = currentDay;
+        int month = currentMonth;
+        int year = currentYear;
+        int hour = 0;
+        int minute = 0;
+
+        // Парсим ДЕНЬ (позиции 0-1, макс 31)
+        if (digitsOnly.length() >= 2) {
+            int d = Integer.parseInt(digitsOnly.substring(0, 2));
+            if (d >= 1 && d <= 31) {
+                day = d;
+            }
+        } else if (digitsOnly.length() == 1) {
+            day = currentDay;
+        }
+
+        // Парсим МЕСЯЦ (позиции 2-3, макс 12)
+        if (digitsOnly.length() >= 4) {
+            int m = Integer.parseInt(digitsOnly.substring(2, 4));
+            if (m >= 1 && m <= 12) {
+                month = m;
+            }
+        } else if (digitsOnly.length() >= 3) {
+            month = currentMonth;
+        }
+
+        // Парсим ГОД (позиции 4-7, должно быть 4 цифры!)
+        if (digitsOnly.length() >= 8) {
+            int y = Integer.parseInt(digitsOnly.substring(4, 8));
+            if (y >= 1900 && y <= 9999) {
+                year = y;
+            }
+        } else if (digitsOnly.length() >= 5) {
+            year = currentYear;
+        }
+
+        // Парсим ЧАСЫ (позиции 8-9, макс 23)
+        if (digitsOnly.length() >= 10) {
+            int h = Integer.parseInt(digitsOnly.substring(8, 10));
+            if (h >= 0 && h <= 23) {
+                hour = h;
+            }
+        }
+
+        // Парсим МИНУТЫ (позиции 10-11, макс 59)
+        if (digitsOnly.length() >= 12) {
+            int min = Integer.parseInt(digitsOnly.substring(10, 12));
+            if (min >= 0 && min <= 59) {
+                minute = min;
+            }
+        }
+
+        // ПРОВЕРКА ВАЛИДНОСТИ ДАТЫ (существует ли такой день в таком месяце?)
+        try {
+            LocalDate.of(year, month, day);
+            // Если не выбросил исключение, дата валидна
+        } catch (java.time.DateTimeException e) {
+            // Дата невалидна (например 31 февраля) → берем текущую дату
+            day = currentDay;
+            month = currentMonth;
+            year = currentYear;
+        }
+
+        // Форматируем результат
+        String formatted = String.format("%02d.%02d.%04d %02d:%02d",
+                day, month, year, hour, minute);
+
+        dueDateTimeInput.setText(formatted);
+    }
+
+    /**
+     * Форматирование 12 цифр в dd.MM.yyyy HH:mm
+     */
+    private String formatDateTime(String digits) {
+        StringBuilder sb = new StringBuilder();
+
+        // День (позиции 0-1)
+        if (digits.length() >= 1) sb.append(digits.charAt(0));
+        if (digits.length() >= 2) sb.append(digits.charAt(1));
+
+        // Первая точка
+        if (digits.length() >= 3) {
+            sb.append(".");
+            sb.append(digits.charAt(2));
+        }
+        if (digits.length() >= 4) sb.append(digits.charAt(3));
+
+        // Вторая точка
+        if (digits.length() >= 5) {
+            sb.append(".");
+            sb.append(digits.charAt(4));
+        }
+        if (digits.length() >= 6) sb.append(digits.charAt(5));
+        if (digits.length() >= 7) sb.append(digits.charAt(6));
+        if (digits.length() >= 8) sb.append(digits.charAt(7));
+
+        // Пробел
+        if (digits.length() >= 9) {
+            sb.append(" ");
+            sb.append(digits.charAt(8));
+        }
+        if (digits.length() >= 10) sb.append(digits.charAt(9));
+
+        // Двоеточие
+        if (digits.length() >= 11) {
+            sb.append(":");
+            sb.append(digits.charAt(10));
+        }
+        if (digits.length() >= 12) sb.append(digits.charAt(11));
+
+        return sb.toString();
+    }
+
+    /**
+     * Показать popup с календарём под полем
+     */
+    private void showDatePickerPopup() {
+        // Создаём Stage для popup
+        javafx.stage.Stage popupStage = new javafx.stage.Stage();
+        popupStage.initStyle(javafx.stage.StageStyle.UNDECORATED);
+        popupStage.setAlwaysOnTop(true);
+
+        // Создаём DatePicker
+        DatePicker picker = new DatePicker();
+
+        // Пытаемся распарсить текущую дату
+        try {
+            String currentText = dueDateTimeInput.getText().trim();
+            if (currentText.length() >= 10) {
+                String dateStr = currentText.substring(0, 10);
+                LocalDate date = LocalDate.parse(dateStr, DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+                picker.setValue(date);
+            } else {
+                picker.setValue(LocalDate.now());
+            }
+        } catch (Exception e) {
+            picker.setValue(LocalDate.now());
+        }
+
+        // Обработчик выбора даты
+        picker.setOnAction(e -> {
+            LocalDate selectedDate = picker.getValue();
+            if (selectedDate != null) {
+                String formattedDate = selectedDate.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+                dueDateTimeInput.setText(formattedDate + " 00:00");
+                popupStage.close();
+            }
+        });
+
+        // Создаём сцену и показываем popup
+        javafx.scene.Scene scene = new javafx.scene.Scene(picker, 350, 320);
+        popupStage.setScene(scene);
+
+        // Вычисляем позицию popup (под полем)
+        javafx.geometry.Bounds bounds = dueDateTimeInput.localToScreen(dueDateTimeInput.getBoundsInLocal());
+        popupStage.setX(bounds.getCenterX() - 175);
+        popupStage.setY(bounds.getMaxY() + 5);
+
+        // Закрываем popup при клике вне его
+        scene.setOnMouseExited(e -> {
+            if (!picker.isShowing()) {
+                popupStage.close();
+            }
+        });
+
+        popupStage.show();
+    }
+
+    /**
+     * Автозаполнение для поля в окне редактирования задачи
+     */
+    private void autoFillDateTimeField(TextField field) {
+        String digitsOnly = field.getText().replaceAll("[^0-9]", "");
+
+        if (digitsOnly.isEmpty()) {
+            return;
+        }
+
+        LocalDate now = LocalDate.now();
+        int currentYear = now.getYear();
+        int currentMonth = now.getMonthValue();
+        int currentDay = now.getDayOfMonth();
+
+        int day = currentDay;
+        int month = currentMonth;
+        int year = currentYear;
+        int hour = 0;
+        int minute = 0;
+
+        if (digitsOnly.length() >= 2) {
+            int d = Integer.parseInt(digitsOnly.substring(0, 2));
+            if (d >= 1 && d <= 31) {
+                day = d;
+            }
+        } else if (digitsOnly.length() == 1) {
+            day = currentDay;
+        }
+
+        if (digitsOnly.length() >= 4) {
+            int m = Integer.parseInt(digitsOnly.substring(2, 4));
+            if (m >= 1 && m <= 12) {
+                month = m;
+            }
+        } else if (digitsOnly.length() >= 3) {
+            month = currentMonth;
+        }
+
+        if (digitsOnly.length() >= 8) {
+            int y = Integer.parseInt(digitsOnly.substring(4, 8));
+            if (y >= 1900 && y <= 9999) {
+                year = y;
+            }
+        } else if (digitsOnly.length() >= 5) {
+            year = currentYear;
+        }
+
+        if (digitsOnly.length() >= 10) {
+            int h = Integer.parseInt(digitsOnly.substring(8, 10));
+            if (h >= 0 && h <= 23) {
+                hour = h;
+            }
+        }
+
+        if (digitsOnly.length() >= 12) {
+            int min = Integer.parseInt(digitsOnly.substring(10, 12));
+            if (min >= 0 && min <= 59) {
+                minute = min;
+            }
+        }
+
+        try {
+            LocalDate.of(year, month, day);
+        } catch (java.time.DateTimeException e) {
+            day = currentDay;
+            month = currentMonth;
+            year = currentYear;
+        }
+
+        String formatted = String.format("%02d.%02d.%04d %02d:%02d",
+                day, month, year, hour, minute);
+
+        field.setText(formatted);
     }
 
     // ==================== ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ ====================

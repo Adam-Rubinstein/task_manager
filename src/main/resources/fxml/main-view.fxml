@@ -32,23 +32,20 @@
 
                     <!-- НАЗВАНИЕ ЗАДАЧИ (ОПЦИОНАЛЬНО) -->
                     <Label text="Название:" style="-fx-font-weight: bold;" />
-                    <TextField fx:id="taskNameInput" promptText="(автозаполнится из описания)" prefHeight="30.0" />
+                    <TextField fx:id="taskNameInput" promptText="Название задачи" prefHeight="30.0" />
 
                     <!-- Описание задачи (ОБЯЗАТЕЛЬНО) -->
                     <Label text="Описание:" style="-fx-text-fill: #ff0000; -fx-font-weight: bold;" />
-                    <TextArea fx:id="taskDescriptionInput" promptText="Введите описание (первая строка станет названием)..." wrapText="true"
+                    <TextArea fx:id="taskDescriptionInput" promptText="Описание задачи" wrapText="true"
                               prefHeight="50.0" />
 
                     <!-- Приоритет -->
                     <Label text="Приоритет (0-10):" />
                     <Spinner fx:id="prioritySpinner" prefWidth="Infinity" />
 
-                    <!-- Дата выполнения со временем -->
+                    <!-- Дата выполнения -->
                     <Label text="Дата выполнения:" />
-                    <HBox spacing="5.0">
-                        <TextField fx:id="dueDateTimeInput" promptText="dd.MM.yyyy HH:mm" prefWidth="180.0" />
-                        <Button fx:id="dueDatePickerBtn" text="📅" prefWidth="40.0" onAction="#handleDatePickerClick" />
-                    </HBox>
+                    <TextField fx:id="dueDateTimeInput" promptText="dd.MM.yyyy HH:mm" prefWidth="Infinity" />
 
                     <!-- Тип повтора -->
                     <Label text="Тип повтора:" />
@@ -66,7 +63,7 @@
 
             <!-- Кнопка Создать задачу -->
             <Separator />
-            <Button fx:id="createTaskButtonLeft" text="✓ Создать задачу" onAction="#handleCreateTask"
+            <Button fx:id="createTaskButtonLeft" text="Создать задачу" onAction="#handleCreateTask"
                     prefWidth="Infinity" style="-fx-font-size: 12; -fx-padding: 8; -fx-font-weight: bold; -fx-min-height: 40;" />
 
         </VBox>
@@ -76,7 +73,7 @@
 
             <!-- Верхняя панель с кнопками -->
             <HBox spacing="10.0" style="-fx-alignment: center_left;">
-                <Button fx:id="deleteTaskButtonRight" text="✕ Удалить задачу" onAction="#handleDeleteTask"
+                <Button fx:id="deleteTaskButtonRight" text="Удалить задачу" onAction="#handleDeleteTask"
                         style="-fx-font-size: 12; -fx-padding: 8 16; -fx-font-weight: bold; -fx-min-width: 130; -fx-text-fill: #ffffff; -fx-background-color: #ff5555;" />
                 <Label text="Фильтр по статусу:" />
                 <ComboBox fx:id="statusFilter" prefWidth="200.0"
