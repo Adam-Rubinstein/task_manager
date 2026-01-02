@@ -112,8 +112,11 @@ public class MainController {
         recurrenceCombo.setItems(FXCollections.observableArrayList(RecurrenceType.values()));
         recurrenceCombo.setValue(RecurrenceType.NONE);
 
-        // Инициализация ComboBox для фильтра статуса
-        statusFilter.setItems(FXCollections.observableArrayList(TaskStatus.values()));
+        // ✅ ПУНКТ 1: Фильтр статуса только с NEW и IN_PROGRESS (без CANCELLED и COMPLETED)
+        statusFilter.setItems(FXCollections.observableArrayList(
+                TaskStatus.NEW,
+                TaskStatus.IN_PROGRESS
+        ));
 
         // Инициализация таблицы задач
         tasksList = FXCollections.observableArrayList();
@@ -139,6 +142,34 @@ public class MainController {
                 return new javafx.beans.property.SimpleStringProperty(formattedDate);
             }
             return new javafx.beans.property.SimpleStringProperty("-");
+        });
+
+        // ✅ ПУНКТ 2: Применить стиль подсвечивания задач на основе категории
+        tasksTable.setRowFactory(tableView -> new TableRow<Task>() {
+            @Override
+            protected void updateItem(Task task, boolean empty) {
+                super.updateItem(task, empty);
+
+                if (empty || task == null) {
+                    setStyle("");
+                    return;
+                }
+
+                // Определяем цвет подсвечивания
+                if (task.isOverdue()) {
+                    // Просроченные - красное полупрозрачное выделение
+                    setStyle("-fx-background-color: rgba(255, 100, 100, 0.15);");
+                } else if (task.isTodayOrTomorrow()) {
+                    // Сегодня-завтра - жёлтое полупрозрачное выделение
+                    setStyle("-fx-background-color: rgba(255, 200, 100, 0.15);");
+                } else if (task.isThisWeek()) {
+                    // Неделя - голубое полупрозрачное выделение
+                    setStyle("-fx-background-color: rgba(100, 150, 255, 0.15);");
+                } else {
+                    // Нет выделения для остальных
+                    setStyle("");
+                }
+            }
         });
 
         intervalContainer.setVisible(false);
