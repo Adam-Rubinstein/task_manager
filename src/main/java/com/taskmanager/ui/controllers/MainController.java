@@ -312,7 +312,6 @@ public class MainController {
                 return;
             }
 
-            // ✅ ИСПРАВЛЕНО: Явное использование javafx.scene.control.Alert
             javafx.scene.control.Alert confirmAlert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
             confirmAlert.setTitle("Подтверждение");
             confirmAlert.setHeaderText(null);
@@ -536,7 +535,7 @@ public class MainController {
                 }
                 tasksTable.setStyle("-fx-background-color: #2b2b2b; -fx-text-fill: #ffffff;");
                 if (themeToggleButton != null) {
-                    themeToggleButton.setText("☀️");
+                    themeToggleButton.setText("☀");
                     themeToggleButton.setStyle("-fx-text-fill: #ffff00;");
                 }
             } else {
