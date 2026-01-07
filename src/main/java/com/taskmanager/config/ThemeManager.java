@@ -58,7 +58,7 @@ public class ThemeManager {
             appProperties.load(new FileReader(propertiesPath));
         } catch (IOException e) {
             // Файл не найден или недоступен, используем значения по умолчанию
-            System.out.println("⚠️  Не удалось загрузить application.properties: " + e.getMessage());
+            System.out.println("⚠ Не удалось загрузить application.properties: " + e.getMessage());
         }
     }
 
@@ -85,7 +85,7 @@ public class ThemeManager {
                 System.out.println("✅ Загружена сохранённая тема: " + currentTheme);
                 return;
             } catch (IllegalArgumentException e) {
-                System.out.println("⚠️  Неизвестная тема в конфиге: " + savedTheme);
+                System.out.println("⚠ Неизвестная тема в конфиге: " + savedTheme);
             }
         }
 
@@ -140,7 +140,7 @@ public class ThemeManager {
                 } else if (line.contains("0x1")) {
                     // 0x1 = светлая тема
                     currentTheme = Theme.LIGHT;
-                    System.out.println("☀️ Windows: обнаружена светлая тема");
+                    System.out.println("☀ Windows: обнаружена светлая тема");
                     return;
                 }
             }
@@ -150,7 +150,7 @@ public class ThemeManager {
         } catch (Exception e) {
             // Если произойдёт ошибка, используем светлую тему
             currentTheme = Theme.LIGHT;
-            System.out.println("⚠️  Не удалось детектировать тему Windows, используется светлая");
+            System.out.println("⚠ Не удалось детектировать тему Windows, используется светлая");
         }
     }
 
@@ -174,12 +174,12 @@ public class ThemeManager {
                 System.out.println("🌙 macOS: обнаружена тёмная тема");
             } else {
                 currentTheme = Theme.LIGHT;
-                System.out.println("☀️ macOS: обнаружена светлая тема");
+                System.out.println("☀ macOS: обнаружена светлая тема");
             }
         } catch (Exception e) {
             // Если не удалось прочитать, используем светлую
             currentTheme = Theme.LIGHT;
-            System.out.println("⚠️ Не удалось детектировать тему macOS, используется светлая");
+            System.out.println("⚠ Не удалось детектировать тему macOS, используется светлая");
         }
     }
 
@@ -203,7 +203,7 @@ public class ThemeManager {
      */
     public void applyTheme() {
         if (currentScene == null) {
-            System.out.println("⚠️ Сцена не установлена!");
+            System.out.println("⚠ Сцена не установлена!");
             return;
         }
 

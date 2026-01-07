@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 
 /**
  * SpeechRecognitionService - Сервис распознавания речи
- *
  * Текущая реализация: базовая заглушка
  * Может быть интегрирована с:
  * - Google Cloud Speech API

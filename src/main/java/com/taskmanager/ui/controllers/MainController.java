@@ -354,6 +354,11 @@ public class MainController {
             VBox mainVBox = new VBox(10);
             mainVBox.setStyle("-fx-padding: 15;");
 
+            // ДОБАВЛЯЕМ СТИЛЬ В ЗАВИСИМОСТИ ОТ ТЕКУЩЕЙ ТЕМЫ
+            if (isDarkTheme) {
+                mainVBox.setStyle("-fx-padding: 15; -fx-background-color: #1e1e1e; -fx-text-fill: #ffffff;");
+            }
+
             // Название
             Label titleLabel = new Label("Название:");
             titleLabel.setStyle("-fx-font-weight: bold;");
