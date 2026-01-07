@@ -65,9 +65,11 @@ public class MainController {
     @FXML private Label alertsCountLabel;
     @FXML private ListView<String> alertsListView;
     @FXML private Button themeToggleButton;
+    @FXML private VBox rootPane;
 
     private ObservableList<Task> tasksList;
     private boolean isUpdatingCombo = false;
+    private boolean isDarkTheme = false;
 
     // ==================== ИНИЦИАЛИЗАЦИЯ ====================
 
@@ -126,6 +128,12 @@ public class MainController {
 
             // Обновлять оповещения каждые 10 секунд
             startAlertsUpdateThread();
+
+            // Инициализация кнопки темы
+            if (themeToggleButton != null) {
+                themeToggleButton.setText("🌙");
+                isDarkTheme = false;
+            }
 
         } catch (Exception e) {
             showAlert("Ошибка инициализации", "Ошибка при инициализации интерфейса: " + e.getMessage());
@@ -304,6 +312,7 @@ public class MainController {
                 return;
             }
 
+            // ✅ ИСПРАВЛЕНО: Явное использование javafx.scene.control.Alert
             javafx.scene.control.Alert confirmAlert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
             confirmAlert.setTitle("Подтверждение");
             confirmAlert.setHeaderText(null);
@@ -513,15 +522,32 @@ public class MainController {
     }
 
     /**
-     * Переключить тему
+     * Переключить тему (РЕАЛЬНАЯ смена цветов, не текст на кнопке)
      */
     @FXML
     private void handleToggleTheme() {
         try {
-            if (themeManager != null) {
-                themeManager.toggleTheme();
+            isDarkTheme = !isDarkTheme;
+
+            if (isDarkTheme) {
+                // Переключение на ТЁМНУЮ тему
+                if (rootPane != null) {
+                    rootPane.setStyle("-fx-base: #2b2b2b; -fx-background-color: #1e1e1e; -fx-text-fill: #ffffff;");
+                }
+                tasksTable.setStyle("-fx-background-color: #2b2b2b; -fx-text-fill: #ffffff;");
                 if (themeToggleButton != null) {
-                    themeToggleButton.setText(themeManager.isDarkTheme() ? "☀️ Светлая" : "🌙 Тёмная");
+                    themeToggleButton.setText("☀️");
+                    themeToggleButton.setStyle("-fx-text-fill: #ffff00;");
+                }
+            } else {
+                // Переключение на СВЕТЛУЮ тему
+                if (rootPane != null) {
+                    rootPane.setStyle("-fx-base: #ffffff; -fx-background-color: #f5f5f5; -fx-text-fill: #000000;");
+                }
+                tasksTable.setStyle("-fx-background-color: #ffffff; -fx-text-fill: #000000;");
+                if (themeToggleButton != null) {
+                    themeToggleButton.setText("🌙");
+                    themeToggleButton.setStyle("-fx-text-fill: #0000ff;");
                 }
             }
         } catch (Exception e) {
