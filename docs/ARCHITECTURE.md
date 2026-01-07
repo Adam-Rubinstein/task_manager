@@ -1,563 +1,657 @@
-# 🏗️ Архитектура Voice Task Manager v2.0.0 (с Telegram Bot)
+🏗️ Архитектура Task Manager v1.5.0
+Техническое описание архитектуры JavaFX приложения с Spring Boot и PostgreSQL.
 
-## Обзор
+Обзор проекта
+Task Manager — настольное приложение для управления задачами, построенное на Java 21 с использованием JavaFX для UI и Spring Boot для бизнес-логики.
 
-**Voice Task Manager** — настольное приложение для управления задачами на Java 21 + Spring Boot + JavaFX.
+Ключевые возможности
+✅ CRUD операции с задачами (создание, чтение, обновление, удаление)
+✅ Система приоритетов (0-10)
+✅ Статусы задач (NEW, IN_PROGRESS, COMPLETED, CANCELLED)
+✅ Автозаполнение даты/времени при вводе
+✅ Система оповещений с счётчиком непрочитанных
+✅ Светлая/тёмная тема интерфейса
+✅ Цветовая подсветка задач (просроченные, сегодня, на неделю)
+✅ Фильтрация и сортировка задач
+✅ Редактирование задач через всплывающее окно
 
-### ФАЗА 1 ✅
-- Создание, редактирование, удаление задач
-- Хранение в PostgreSQL
-- JavaFX UI + CRUD операции
-- Система оповещений
-- Фильтрация по статусу и приоритету
+Слоистая архитектура
+Приложение построено на основе трёхслойной архитектуры:
 
-### ФАЗА 2 ✅ (НОВАЯ - VOICE INPUT)
-- REST API для голосового ввода (7 endpoints)
-- Telegram Bot интеграция (@voice_task_manager_bot)
-- Автоматический парсинг текста (Natty + Regex)
-- Парсинг дат на русском: "завтра в 15:00" → LocalDateTime
-- Парсинг приоритета: "приоритет 8" → priority: 8
+1. Presentation Layer (UI)
+   JavaFX UI - графический интерфейс
 
----
+main-view.fxml - разметка интерфейса
 
-## Слоистая архитектура (ФАЗА 1 + ФАЗА 2)
+MainController.java - логика взаимодействия с UI
 
-```text
-┌──────────────────────────────────────────┐
-│ Presentation Layer                       │
-│ ├─ JavaFX UI (ФАЗА 1)                   │
-│ │  ├─ main-view.fxml                    │
-│ │  └─ MainController                    │
-│ └─ Telegram Bot (ФАЗА 2)                │
-│    └─ @voice_task_manager_bot           │
-└──────────────────┬───────────────────────┘
-                   │
-┌──────────────────▼───────────────────────┐
-│ API Layer (НОВОЕ ФАЗА 2)                │
-│ └─ VoiceTaskController                  │
-│    ├─ POST /api/voice/create-task       │
-│    ├─ GET  /api/voice/stats             │
-│    ├─ GET  /api/voice/today             │
-│    ├─ GET  /api/voice/overdue           │
-│    ├─ GET  /api/voice/list              │
-│    ├─ GET  /api/voice/search            │
-│    └─ GET  /api/voice/active            │
-└──────────────────┬───────────────────────┘
-                   │
-┌──────────────────▼───────────────────────┐
-│ Service Layer (Business Logic)          │
-│ ├─ TaskService                          │
-│ │  ├─ createTask() [ФАЗА 1]            │
-│ │  ├─ createTaskFromVoice() [ФАЗА 2]   │
-│ │  ├─ getTasksByStatus()                │
-│ │  └─ getAllTasks()                     │
-│ ├─ VoiceParsingService [НОВОЕ ФАЗА 2]  │
-│ │  ├─ parseVoiceText()                 │
-│ │  ├─ parseDateWithNatty()             │
-│ │  └─ parsePriority()                   │
-│ ├─ AlertService                         │
-│ └─ AudioFileService                     │
-└──────────────────┬───────────────────────┘
-                   │
-┌──────────────────▼───────────────────────┐
-│ Data Access Layer (DAO/Repository)      │
-│ ├─ TaskRepository                       │
-│ ├─ AlertRepository                      │
-│ └─ AudioFileRepository                  │
-└──────────────────┬───────────────────────┘
-                   │
-┌──────────────────▼───────────────────────┐
-│ Persistence Layer                       │
-│ └─ PostgreSQL + Hibernate/JPA           │
-│    ├─ tasks table                       │
-│    ├─ alerts table                      │
-│    └─ audio_files table                 │
-└──────────────────────────────────────────┘
-```
+Темы оформления - CSS стили для светлой/тёмной темы
 
----
+2. Service Layer (Business Logic)
+   TaskService - управление задачами
 
-## Модульная структура (ФАЗА 1 + ФАЗА 2)
+createTask() - создание новой задачи
 
-```text
+updateTask() - изменение существующей задачи
+
+deleteTask() - удаление задачи
+
+getTasksByStatus() - поиск по статусу
+
+getAllTasks() - получить все задачи
+
+AlertService - управление оповещениями
+
+createAlert() - создание оповещения
+
+getUnreadAlerts() - получить непрочитанные
+
+markAsRead() - отметить как прочитанное
+
+AudioFileService - работа с аудиофайлами
+
+saveAudioFile() - сохранить аудиозапись
+
+getAudioFile() - получить аудио по задаче
+
+deleteExpiredAudio() - удалить старые аудио
+
+3. Data Access Layer (DAO/Repository)
+   TaskRepository - Spring Data JPA для работы с задачами
+
+AlertRepository - Spring Data JPA для оповещений
+
+AudioFileRepository - Spring Data JPA для аудиофайлов
+
+4. Persistence Layer
+   PostgreSQL - реляционная база данных
+
+Hibernate/JPA - маппинг объектов на таблицы
+
+Таблица tasks - все задачи
+
+Таблица alerts - все оповещения
+
+Таблица audio_files - все аудиофайлы
+
+Модульная структура проекта
+Проект организован по функциональным пакетам:
+
+text
 com.taskmanager/
-│
-├── TaskManagerApp.java                    # Entry point (@SpringBootApplication)
+├── TaskManagerApp.java
+│   Точка входа приложения (@SpringBootApplication)
+│   Инициализирует Spring контекст и JavaFX окно
 │
 ├── config/
-│   └── DatabaseConfig.java                # БД конфигурация
-│
-├── dao/ (Data Access)
-│   ├── TaskRepository.java
-│   ├── AlertRepository.java
-│   └── AudioFileRepository.java
-│
-├── model/ (Entity классы)
-│   ├── Task.java
-│   ├── Alert.java
-│   ├── AudioFile.java
-│   ├── TaskStatus.java (enum)
-│   ├── AlertType.java (enum)
-│   └── RecurrenceType.java (enum)
-│
-├── service/ (Business Logic)
-│   ├── TaskService.java                   # ОБНОВЛЕНА для ФАЗЫ 2
-│   │  └─ методы для createTaskFromVoice()
+│   ├── DatabaseConfig.java
+│   │   Конфигурация подключения к PostgreSQL
 │   │
-│   ├── VoiceParsingService.java           # НОВАЯ для ФАЗЫ 2
-│   │  ├─ parseVoiceText()
-│   │  ├─ parseDateWithNatty()
-│   │  └─ parsePriority()
+│   └── ThemeManager.java
+│       Управление темами (если используется)
+│
+├── dao/
+│   ├── TaskRepository.java
+│   │   Spring Data JPA репозиторий для Task
+│   │   Наследует JpaRepository<Task, Long>
+│   │
+│   ├── AlertRepository.java
+│   │   Spring Data JPA репозиторий для Alert
+│   │
+│   └── AudioFileRepository.java
+│       Spring Data JPA репозиторий для AudioFile
+│
+├── model/
+│   ├── Task.java
+│   │   @Entity - сущность задачи
+│   │   Поля: id, title, description, dueDate, status, priority
+│   │
+│   ├── Alert.java
+│   │   @Entity - сущность оповещения
+│   │   Поля: id, taskId, alertTime, type, message, isRead
+│   │
+│   ├── AudioFile.java
+│   │   @Entity - сущность аудиофайла
+│   │   Поля: id, taskId, audioData, durationSeconds, fileName
+│   │
+│   ├── TaskStatus.java
+│   │   Enum: NEW, IN_PROGRESS, COMPLETED, CANCELLED
+│   │
+│   ├── AlertType.java
+│   │   Enum: NOTIFICATION, REMINDER, DEADLINE
+│   │
+│   └── RecurrenceType.java
+│       Enum: NONE, DAILY, WEEKLY, MONTHLY, CUSTOM
+│
+├── service/
+│   ├── TaskService.java
+│   │   Бизнес-логика работы с задачами
+│   │   Использует TaskRepository для сохранения
 │   │
 │   ├── AlertService.java
-│   └── AudioFileService.java
-│
-├── controller/
-│   ├── MainController.java                # JavaFX контроллер (ФАЗА 1)
+│   │   Бизнес-логика работы с оповещениями
+│   │   Использует AlertRepository для сохранения
 │   │
-│   └── VoiceTaskController.java           # REST API контроллер (ФАЗА 2)
-│      ├─ @PostMapping /api/voice/create-task
-│      ├─ @GetMapping  /api/voice/stats
-│      └─ ... остальные endpoints
+│   └── AudioFileService.java
+│       Бизнес-логика работы с аудиофайлами
+│       Использует AudioFileRepository для сохранения
 │
-├── dto/ (Data Transfer Objects - НОВАЯ для ФАЗЫ 2)
-│   ├── VoiceTaskRequest.java              # Запрос от Telegram бота
-│   ├── VoiceTaskParsed.java               # Распарсенные данные
-│   ├── VoiceTaskResponse.java             # Ответ Telegram боту
-│   └── TaskStatisticsDTO.java             # DTO для статистики
-│
-└── bot/ (опционально для Java бота)
-    ├── TelegramBotService.java
-    └── TelegramBotConfig.java
-```
+└── ui/
+└── controllers/
+└── MainController.java
+JavaFX контроллер (@Component)
+Связывает UI с сервисным слоем
+Обрабатывает все действия пользователя
+Поток данных
+Сценарий 1: Создание новой задачи
+Этап 1 - Ввод данных
 
----
+Пользователь заполняет форму на левой панели:
 
-## Поток данных ФАЗЫ 2 (Voice Input via Telegram)
+Название (опционально)
 
-```text
-┌──────────────────────────┐
-│  Telegram User           │
-│  "Купить молоко завтра   │
-│   в 15:00, приоритет 8"  │
-└────────────┬─────────────┘
-             │
-    ┌────────▼────────┐
-    │  Telegram Bot   │
-    │  (@voice_task_) │
-    │  manager_bot    │
-    └────────┬────────┘
-             │ HTTP POST
-┌────────────▼──────────────────────────┐
-│  VoiceTaskController                 │
-│  /api/voice/create-task              │
-│  {                                    │
-│    "text": "Купить молоко...",       │
-│    "telegramUserId": 123456          │
-│  }                                    │
-└────────────┬──────────────────────────┘
-             │ вызывает
-┌────────────▼──────────────────────────┐
-│  VoiceParsingService                 │
-│                                       │
-│  1. parseDateWithNatty()             │
-│     INPUT:  "завтра в 15:00"         │
-│     OUTPUT: LocalDateTime(02.01 15:00)│
-│                                       │
-│  2. parsePriority()                  │
-│     INPUT:  "приоритет 8"            │
-│     OUTPUT: 8                        │
-│                                       │
-│  3. cleanText()                      │
-│     INPUT:  "Купить молоко завтра... │
-│     OUTPUT: "Купить молоко"          │
-│                                       │
-│  RETURN: VoiceTaskParsed             │
-└────────────┬──────────────────────────┘
-             │
-┌────────────▼──────────────────────────┐
-│  TaskService                         │
-│  createTaskFromVoice(VoiceTaskParsed)│
-│                                       │
-│  Task task = new Task()              │
-│  task.setTitle("Купить молоко")     │
-│  task.setDueDate(02.01.2026 15:00)  │
-│  task.setPriority(8)                │
-│  task.setStatus(NEW)                │
-│  task.setCreatedAt(NOW)             │
-└────────────┬──────────────────────────┘
-             │
-┌────────────▼──────────────────────────┐
-│  TaskRepository.save(task)           │
-└────────────┬──────────────────────────┘
-             │ SQL INSERT
-┌────────────▼──────────────────────────┐
-│  PostgreSQL - tasks table            │
-│  INSERT INTO tasks                   │
-│    (title, description, due_date,    │
-│     priority, status, created_at)    │
-│  VALUES (...)                        │
-└────────────┬──────────────────────────┘
-             │
-┌────────────▼──────────────────────────┐
-│  VoiceTaskResponse                   │
-│  {                                    │
-│    "success": true,                  │
-│    "message": "✅ Задача создана!",  │
-│    "task": { id, title, dueDate... } │
-│  }                                    │
-└────────────┬──────────────────────────┘
-             │ HTTP 200 + JSON
-┌────────────▼──────────────────────────┐
-│  Telegram Bot                        │
-│  sendMessage(chatId,                 │
-│    "✅ Задача 'Купить молоко'       │
-│     создана на 02.01.2026 15:00")   │
-└────────────┬──────────────────────────┘
-             │
-┌────────────▼──────────────────────────┐
-│  Telegram User видит:                │
-│  ✅ Задача создана!                  │
-│  📅 02.01.2026 15:00                 │
-│  🔴 Приоритет: 8                     │
-└──────────────────────────────────────┘
-```
+Описание (обязательно)
 
----
+Приоритет (0-10)
 
-## Модель данных (Entity классы)
+Дата выполнения (автозаполнение: 0812 → 08.12.2026 00:00)
 
-### Task
+Тип повтора
 
-```text
+Нажимает кнопку "Создать задачу"
+
+Этап 2 - Обработка в контроллере
+
+Вызывается метод MainController.handleCreateTask()
+
+Валидация полей ввода
+
+Парсинг даты через autoFillDateTime()
+
+Вызов TaskService.createTask()
+
+Этап 3 - Сервис
+
+Сервис TaskService создаёт объект Task
+
+Устанавливает статус = NEW
+
+Устанавливает время создания
+
+Вызывает TaskRepository.save()
+
+Этап 4 - Сохранение в БД
+
+Repository выполняет SQL INSERT в таблицу tasks
+
+PostgreSQL вставляет строку в базу
+
+Возвращает созданный объект с присвоенным ID
+
+Этап 5 - Обновление UI
+
+Контроллер добавляет задачу в ObservableList
+
+TableView автоматически обновляется
+
+Пользователь видит новую задачу в таблице
+
+Показывается Alert "Задача успешно создана"
+
+Сценарий 2: Редактирование задачи (двойной клик)
+Этап 1 - Выбор задачи
+
+Пользователь делает двойной клик на строке задачи в таблице
+
+Срабатывает обработчик handleDoubleClickTask()
+
+Этап 2 - Открытие окна редактирования
+
+Создаётся новое окно Stage
+
+Заполняются поля редактирования с текущими значениями:
+
+TextField для названия
+
+TextArea для описания
+
+Spinner для приоритета
+
+TextField для даты (с автозаполнением)
+
+ComboBox для статуса
+
+Кнопки "Сохранить" и "Отмена"
+
+Этап 3 - Редактирование
+
+Пользователь изменяет нужные поля
+
+Автозаполнение даты работает и в этом окне
+
+Тема окна применяется автоматически (светлая или тёмная)
+
+Этап 4 - Сохранение
+
+Пользователь нажимает "Сохранить"
+
+Обновляются поля объекта Task
+
+Вызывается TaskService.updateTask()
+
+Сервис устанавливает updatedAt = NOW()
+
+Repository сохраняет через save()
+
+Этап 5 - Обновление БД
+
+Выполняется SQL UPDATE в таблицу tasks
+
+WHERE условие по id задачи
+
+Строка в БД обновляется
+
+Этап 6 - Обновление UI
+
+Окно редактирования закрывается
+
+Строка в таблице обновляется автоматически
+
+Пользователь видит изменения
+
+Alert "Задача обновлена"
+
+Модель данных (Entity классы)
 Task (таблица: tasks)
-├── id             : Long                  # Primary Key
-├── title          : String                # Название задачи
-├── description    : String                # Описание (TEXT)
-├── dueDate        : LocalDateTime         # Срок выполнения
-├── createdAt      : LocalDateTime         # Дата создания
-├── updatedAt      : LocalDateTime         # Дата обновления
-├── status         : TaskStatus            # NEW, IN_PROGRESS, COMPLETED, CANCELLED
-├── priority       : Integer (0-10)        # Приоритет
-├── recurrence_*   : (зарезервировано)    # Для ФАЗЫ 3
-└── version        : Integer               # Для синхронизации
-```
+Главная сущность приложения - представляет одну задачу в системе.
 
-### Alert
+Поля:
 
-```text
+id (BIGINT) - уникальный идентификатор (Primary Key)
+
+title (VARCHAR 255) - название/заголовок задачи
+
+description (TEXT) - подробное описание задачи
+
+due_date (TIMESTAMP) - срок выполнения
+
+created_at (TIMESTAMP) - когда задача была создана
+
+updated_at (TIMESTAMP) - когда задача была последний раз изменена
+
+status (VARCHAR 50) - текущий статус (NEW, IN_PROGRESS, COMPLETED, CANCELLED)
+
+priority (INTEGER, 0-10) - приоритет (0 = низкий, 10 = высокий)
+
+recurrence_type (VARCHAR 50) - тип повтора (для будущих версий)
+
+recurrence_interval (INTEGER) - интервал повтора в днях
+
+version (INTEGER) - для оптимистичной блокировки
+
+Методы для UI:
+
+isOverdue() - просрочена ли задача
+
+isTodayOrTomorrow() - задача на сегодня или завтра
+
+isThisWeek() - задача на текущую неделю
+
 Alert (таблица: alerts)
-├── id          : Long                     # Primary Key
-├── taskId      : Long                     # FK → tasks.id
-├── alertTime   : LocalDateTime            # Когда сработать
-├── type        : AlertType                # NOTIFICATION, REMINDER, DEADLINE
-├── message     : String                   # Текст сообщения
-├── isRead      : Boolean                  # Прочитано ли
-└── createdAt   : LocalDateTime            # Дата создания
-```
+Оповещения и напоминания, связанные с задачами.
 
-### AudioFile
+Поля:
 
-```text
+id (BIGINT) - уникальный идентификатор
+
+task_id (BIGINT) - Foreign Key на задачу (связь Many-to-One)
+
+alert_time (TIMESTAMP) - когда должно сработать оповещение
+
+type (VARCHAR 50) - тип: NOTIFICATION, REMINDER, DEADLINE
+
+message (TEXT) - текст сообщения оповещения
+
+is_read (BOOLEAN) - прочитано ли оповещение
+
+created_at (TIMESTAMP) - когда было создано оповещение
+
+Связь:
+
+Один Alert связан с одной Task
+
+Одна Task может иметь много Alert
+
 AudioFile (таблица: audio_files)
-├── id              : Long                 # Primary Key
-├── taskId          : Long                 # FK → tasks.id (UNIQUE)
-├── audioData       : byte[]               # BYTEA (бинарные данные)
-├── durationSeconds : Integer              # Длительность
-├── fileName        : String               # Имя файла
-├── createdAt       : LocalDateTime        # Дата загрузки
-└── expiresAt       : LocalDateTime        # Дата удаления (30 дней)
-```
+Хранилище аудиозаписей, связанных с задачами.
 
----
+Поля:
 
-## Сервисный слой (ФАЗА 1 + ФАЗА 2)
+id (BIGINT) - уникальный идентификатор
 
-### TaskService
+task_id (BIGINT) - Foreign Key на задачу (UNIQUE - один аудио на задачу)
 
-**Методы ФАЗЫ 1:**
-- `createTask(title, description, dueDate, priority)` — создание обычной задачи
-- `getTask(id)` — получить по ID
-- `getAllTasks()` — все задачи
-- `getTasksByStatus(status)` — фильтр по статусу
-- `updateTaskStatus(id, status)` — обновить статус
-- `deleteTask(id)` — удалить
-- `getImportantTasks()` — приоритет > 5
-- `getActiveTasks()` — не завершённые
+audio_data (BYTEA) - бинарные данные аудиофайла
 
-**Методы ФАЗЫ 2 (НОВЫЕ):**
-- `createTaskFromVoice(VoiceTaskParsed)` — создать из распарсенного текста
-- `getTasksByDateRange(start, end)` — задачи в диапазоне дат
-- `getTasksForToday()` — задачи на сегодня
+duration_seconds (INTEGER) - длительность записи в секундах
 
-### VoiceParsingService (НОВАЯ ФАЗА 2)
+file_name (VARCHAR 255) - имя файла
 
-**Основной метод:**
-```java
-public VoiceTaskParsed parseVoiceText(String text)
-```
+created_at (TIMESTAMP) - когда был загружен файл
 
-**Вспомогательные методы:**
-- `parseDateWithNatty(String dateText)` — парсинг дат (Natty + русский)
-- `parsePriority(String text)` — парсинг приоритета (Regex)
-- `cleanText(String text)` — удаление служебных слов
-- `isUrgent(String text)` — проверка срочности
+expires_at (TIMESTAMP) - когда файл будет удалён (по умолчанию +30 дней)
 
-**Парсинг дат:**
-```
-Input:  "завтра в 15:00"
-Logic:  "завтра в 15:00" → "tomorrow at 15:00" → Natty → LocalDateTime
-Output: 02.01.2026 15:00
-```
+Связь:
 
-**Парсинг приоритета:**
-```
-Input:  "приоритет 8" или "срочно!"
-Logic:  Regex ищет числа 0-10, или если "срочно" → 8
-Output: 8
-```
+One-to-One с Task (один аудиофайл на одну задачу максимум)
 
-### AlertService
+Сервисный слой
+TaskService
+Основной сервис для работы с задачами.
 
-- `createAlert(taskId, time, type, message)` — создание оповещения
-- `getUnreadAlerts()` — непрочитанные
-- `markAsRead(alertId)` — пометить как прочитанное
+Основные методы:
 
-### AudioFileService
+Метод	Параметры	Возвращает	Описание
+createTask()	title, description, priority, dueDate, recurrenceType	Task	Создаёт новую задачу
+getTask()	id	Task	Получает задачу по ID
+getAllTasks()	—	List<Task>	Возвращает все задачи
+getTasksByStatus()	status	List<Task>	Фильтр по статусу
+updateTask()	task	Task	Сохраняет изменения задачи
+updateTaskStatus()	id, status	void	Меняет статус задачи
+deleteTask()	id	void	Удаляет задачу по ID
+getImportantTasks()	—	List<Task>	Задачи с приоритетом > 5
+getActiveTasks()	—	List<Task>	Не завершённые задачи
+Используемые компоненты:
 
-- `saveAudioFile(taskId, audioBytes, fileName)` — сохранение аудио
-- `getAudioFile(taskId)` — получить аудио по задаче
-- `deleteExpiredAudio()` — удаление старых (>30 дней)
+@Autowired TaskRepository - для доступа к БД
 
----
+@Service - аннотация Spring для компонента сервиса
 
-## REST API ФАЗЫ 2 (7 endpoints)
+AlertService
+Сервис для работы с оповещениями.
 
-```
-POST /api/voice/create-task
-  Body: { "text": "string", "telegramUserId": number }
-  Response: { "success": boolean, "message": string, "task": Task }
+Основные методы:
 
-GET /api/voice/stats
-  Response: { "totalTasks": int, "newTasks": int, "activeTasks": int, ... }
+Метод	Параметры	Возвращает	Описание
+createAlert()	task, alertTime, type, message	Alert	Создаёт оповещение
+getUnreadAlerts()	—	List<Alert>	Непрочитанные оповещения
+markAsRead()	alertId	void	Отмечает как прочитанное
+deleteOldAlerts()	before	void	Удаляет старые оповещения
+AudioFileService
+Сервис для работы с аудиофайлами.
 
-GET /api/voice/today
-  Response: [ Task, ... ]  # Задачи на сегодня
+Основные методы:
 
-GET /api/voice/overdue
-  Response: [ Task, ... ]  # Просроченные
+Метод	Параметры	Возвращает	Описание
+saveAudioFile()	task, audioData, fileName, duration	AudioFile	Сохраняет аудиофайл
+getAudioFile()	task	AudioFile	Получает аудио по задаче
+deleteExpiredAudio()	—	void	Удаляет истёкшие аудио
+UI-слой (JavaFX)
+Компоненты main-view.fxml
+Левая панель (форма создания):
 
-GET /api/voice/list?limit=5
-  Response: [ Task, ... ]  # Последние N
+Заголовок "СОЗДАНИЕ ЗАДАЧИ"
 
-GET /api/voice/search?q=молоко
-  Response: [ Task, ... ]  # По ключевому слову
+TextField для названия задачи
 
-GET /api/voice/active
-  Response: [ Task, ... ]  # Не завершённые
-```
+TextArea для описания (обязательное поле - красная метка)
 
----
+Spinner для приоритета (значения 0-10)
 
-## DTO классы ФАЗЫ 2 (Новые)
+TextField для даты выполнения (с автозаполнением)
 
-### VoiceTaskRequest
+ComboBox для типа повтора
 
-```java
-{
-  text: String              # Текст от пользователя
-  telegramUserId: Long      # ID пользователя Telegram
-}
-```
+VBox для интервала повтора (скрыт по умолчанию)
 
-### VoiceTaskParsed
+Кнопка "Создать задачу"
 
-```java
-{
-  title: String             # Очищенное название
-  description: String       # Описание
-  dueDate: LocalDateTime    # Распарсенная дата
-  priority: Integer         # Распарсенный приоритет (0-10)
-  isUrgent: Boolean         # Срочно ли
-}
-```
+Правая панель (таблица и оповещения):
 
-### VoiceTaskResponse
+Кнопка "Удалить задачу"
 
-```java
-{
-  success: Boolean          # Успех ли
-  message: String           # Сообщение для пользователя
-  task: Task                # Созданная задача
-  error: String (опционально)  # Ошибка если есть
-}
-```
+ComboBox "Фильтр по статусу" (ALL, NEW, IN_PROGRESS, COMPLETED, CANCELLED)
 
-### TaskStatisticsDTO
+Кнопка смены темы (🌙/☀)
 
-```java
-{
-  totalTasks: Integer
-  newTasks: Integer
-  inProgressTasks: Integer
-  completedTasks: Integer
-  cancelledTasks: Integer
-  activeTasks: Integer
-  overdueCount: Integer
-}
-```
+TableView с колонками: Название, Статус, Приоритет, Срок
 
----
+Заголовок "ОПОВЕЩЕНИЯ"
 
-## UI-слой
+Label с количеством непрочитанных оповещений
 
-### JavaFX (ФАЗА 1)
+ListView для отображения оповещений
 
-**main-view.fxml:**
-- Таблица задач (колонки: название, статус, приоритет, дата)
-- Форма создания задачи
-- Фильтр по статусу (ComboBox)
-- Счётчик оповещений
-- Кнопки: Создать, Удалить, Очистить фильтр
+MainController.java - ключевые методы
+Инициализация:
 
-**MainController:**
-- `@FXML TableView<Task> taskTable`
-- `@FXML TextField titleField, descriptionField`
-- `@FXML ComboBox<TaskStatus> statusFilter`
-- `@FXML Label alertCountLabel`
-- `handleCreateTask()` — слушатель кнопки создания
-- `handleDeleteTask()` — удаление выбранной задачи
-- `handleFilterByStatus()` — фильтрация
-- `updateAlertCount()` — фоновое обновление оповещений (каждые 10 сек)
+initialize() - вызывается автоматически при загрузке FXML
 
-### Telegram (ФАЗА 2)
+Настраивает колонки таблицы
 
-**Команды бота:**
-- `/start` → Приветствие
-- `/today` → GET /api/voice/today
-- `/list` → GET /api/voice/list
-- `/stats` → GET /api/voice/stats
-- `/search текст` → GET /api/voice/search?q=текст
-- Просто текст → POST /api/voice/create-task
+Устанавливает row factory для цветовой подсветки
 
-**Ответы форматируются с emoji:**
-```
-✅ Задача создана!
-🔴 Высокий приоритет (8)
-📅 Дата: 02.01.2026 15:00
-⏳ Статус: NEW
-```
+Инициализирует автозаполнение дат
 
----
+Загружает задачи из БД
 
-## IntegrationSpring Boot + JavaFX + Telegram
+Запускает фоновый поток обновления оповещений
 
-```text
-┌─ TaskManagerApp.java (@SpringBootApplication)
-│  └─ Запускает Spring контекст
-│     ├─ Загружает сервисы (TaskService, VoiceParsingService)
-│     ├─ Создаёт репозитории (TaskRepository и т.д.)
-│     ├─ Инициализирует JavaFX (FXMLLoader с controllerFactory)
-│     │  └─ MainController как Spring bean
-│     └─ Запускает REST сервер (port 8080)
-│        └─ VoiceTaskController обрабатывает /api/voice/* запросы
-│           ├─ Вызывает VoiceParsingService для парсинга
-│           ├─ Вызывает TaskService для сохранения
-│           └─ Возвращает JSON ответ
-│
-├─ Telegram Bot (Python или Java)
-│  └─ Слушает сообщения от пользователей
-│     └─ Отправляет HTTP POST на /api/voice/create-task
-│        └─ Получает JSON ответ и отправляет в чат
-│
-└─ JavaFX UI
-   └─ Показывает таблицу задач (из БД)
-      └─ Каждые 10 сек обновляет оповещения
-         └─ Вызывает AlertService.getUnreadAlerts()
-```
+Автозаполнение даты:
 
----
+setupDateTimeInputMask() - устанавливает listeners для поля даты
 
-## База данных (PostgreSQL)
+autoFillDateTime() - парсит текст типа "0812" → "08.12.2026 00:00"
 
-### Таблица tasks
+Работает на потере фокуса
 
-```sql
+Работает при нажатии Enter
+
+Валидирует дату (31 февраля → текущая дата)
+
+Цветовая подсветка задач:
+
+setupTableRowFactory() - создаёт custom row factory
+
+Красный фон - просроченные задачи
+
+Жёлтый фон - задачи на сегодня/завтра
+
+Синий фон - задачи на текущую неделю
+
+Без цвета - остальные задачи
+
+Смена темы:
+
+handleToggleTheme() - переключает между светлой и тёмной темой
+
+Применяется ко всем компонентам
+
+Применяется к всплывающим окнам редактирования
+
+Кнопка меняется 🌙 ↔ ☀
+
+Редактирование задачи:
+
+handleDoubleClickTask() - слушатель двойного клика
+
+openTaskDetailWindow() - открывает окно редактирования
+
+Создаёт новый Stage
+
+Заполняет поля текущими значениями
+
+Применяет текущую тему
+
+Включает автозаполнение даты
+
+На кнопке "Сохранить" вызывает update
+
+Интеграция компонентов
+Spring Boot инициализирует:
+
+Загружает application.properties с конфигом БД
+
+Создаёт Spring контекст
+
+Инициализирует сервисы (TaskService, AlertService, AudioFileService)
+
+Создаёт репозитории через Spring Data JPA
+
+Инициализирует JavaFX приложение
+
+Передаёт Spring бины в FXMLLoader через controllerFactory
+
+Создаёт MainController как Spring bean
+
+MainController получает:
+
+@Autowired TaskService - для работы с задачами
+
+@Autowired AlertService - для работы с оповещениями
+
+Вызывает методы сервисов для CRUD операций
+
+База данных (PostgreSQL)
+Таблица tasks
+sql
 CREATE TABLE tasks (
-    id BIGSERIAL PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    description TEXT,
-    due_date TIMESTAMP NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW(),
-    status VARCHAR(50) NOT NULL DEFAULT 'NEW',
-    priority INTEGER DEFAULT 5,
-    recurrence_type VARCHAR(50),  -- для ФАЗЫ 3
-    version INTEGER DEFAULT 0,
-    INDEX(due_date),
-    INDEX(status),
-    INDEX(priority)
+id BIGSERIAL PRIMARY KEY,
+title VARCHAR(255) NOT NULL,
+description TEXT,
+due_date TIMESTAMP,
+created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+updated_at TIMESTAMP DEFAULT NOW(),
+status VARCHAR(50) NOT NULL DEFAULT 'NEW',
+priority INTEGER DEFAULT 5 CHECK (priority BETWEEN 0 AND 10),
+recurrence_type VARCHAR(50),
+recurrence_interval INTEGER,
+version INTEGER DEFAULT 0
 );
-```
 
-### Таблица alerts
+CREATE INDEX idx_tasks_due_date ON tasks(due_date);
+CREATE INDEX idx_tasks_status ON tasks(status);
+CREATE INDEX idx_tasks_priority ON tasks(priority);
+Индексы для оптимизации:
 
-```sql
+idx_tasks_status - ускоряет фильтрацию по статусу
+
+idx_tasks_due_date - ускоряет сортировку по дате
+
+idx_tasks_priority - ускоряет поиск важных задач
+
+Таблица alerts
+sql
 CREATE TABLE alerts (
-    id BIGSERIAL PRIMARY KEY,
-    task_id BIGINT NOT NULL REFERENCES tasks(id),
-    alert_time TIMESTAMP NOT NULL,
-    type VARCHAR(50) NOT NULL,
-    message TEXT,
-    is_read BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT NOW(),
-    INDEX(is_read),
-    INDEX(alert_time)
+id BIGSERIAL PRIMARY KEY,
+task_id BIGINT NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
+alert_time TIMESTAMP NOT NULL,
+type VARCHAR(50) NOT NULL,
+message TEXT,
+is_read BOOLEAN DEFAULT FALSE,
+created_at TIMESTAMP DEFAULT NOW()
 );
-```
 
-### Таблица audio_files
+CREATE INDEX idx_alerts_is_read ON alerts(is_read);
+CREATE INDEX idx_alerts_time ON alerts(alert_time);
+Индексы:
 
-```sql
+idx_alerts_is_read - быстрый поиск непрочитанных оповещений
+
+idx_alerts_time - сортировка по времени
+
+Таблица audio_files
+sql
 CREATE TABLE audio_files (
-    id BIGSERIAL PRIMARY KEY,
-    task_id BIGINT UNIQUE NOT NULL REFERENCES tasks(id),
-    audio_data BYTEA NOT NULL,
-    duration_seconds INTEGER,
-    file_name VARCHAR(255),
-    created_at TIMESTAMP DEFAULT NOW(),
-    expires_at TIMESTAMP
+id BIGSERIAL PRIMARY KEY,
+task_id BIGINT UNIQUE NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
+audio_data BYTEA NOT NULL,
+duration_seconds INTEGER,
+file_name VARCHAR(255),
+created_at TIMESTAMP DEFAULT NOW(),
+expires_at TIMESTAMP
 );
-```
+UNIQUE constraint:
 
----
+На task_id - гарантирует один аудиофайл на задачу
 
-## Ключевые технические решения
+ON DELETE CASCADE - при удалении задачи удаляется и её аудиофайл
 
-1. **Spring Data JPA** — репозитории с автоматическим CRUD
-2. **Hibernate + ddl-auto=update** — схема создаётся автоматически
-3. **FXMLLoader + Spring beans** — JavaFX контроллеры как компоненты Spring
-4. **REST контроллер (@RestController)** — простое выполнение HTTP запросов
-5. **Natty + Regex** — мощная комбинация для парсинга дат и приоритетов
-6. **DTO для API** — чистое разделение между слоями
-7. **Async обновления UI** — Platform.runLater() для потокобезопасности
-8. **PostgreSQL с индексами** — оптимизация запросов
+Ключевые технические решения
+Spring Data JPA - автоматический CRUD без писания SQL
 
----
+Hibernate - автоматическое маппирование объектов на таблицы
 
-## Планы развития (ФАЗА 3)
+@Service/@Component - управление зависимостями через Spring
 
-- **Повторяющиеся задачи** — ежедневные, еженедельные, ежемесячные
-- **Категории и теги** — группировка задач
-- **ML контекст** — автоматическое определение категории из текста
-- **Web dashboard** — React интерфейс
-- **Mobile app** — синхронизация с мобильными устройствами
-- **Webhook вместо polling** — более эффективная работа Telegram бота
-- **Кэширование** — для производительности при большом количестве задач
-- **Уведомления** — системные и звуковые напоминания
+@Autowired - внедрение зависимостей
 
----
+FXMLLoader - разделение UI разметки и логики
 
-**Версия документа:** 2.0.0  
-**Обновлено:** 01.01.2026  
-**Статус:** ✅ ГОТОВО
+ObservableList - автоматическое обновление таблицы при изменении данных
+
+Platform.runLater() - потокобезопасное обновление UI
+
+CSS стили - динамическая смена темы
+
+LocalDateTime - работа с датами и временем
+
+Enum для статусов - типобезопасность вместо строк
+
+Оптимизация и производительность
+Индексы в PostgreSQL
+Индексы ускоряют выполнение запросов:
+
+sql
+-- Ускоряют WHERE status = 'NEW'
+CREATE INDEX idx_tasks_status ON tasks(status);
+
+-- Ускоряют ORDER BY due_date
+CREATE INDEX idx_tasks_due_date ON tasks(due_date);
+
+-- Ускоряют WHERE priority > 5
+CREATE INDEX idx_tasks_priority ON tasks(priority);
+Кэширование (будущее улучшение)
+java
+@Cacheable("tasks")
+public List<Task> getAllTasks() {
+return taskRepository.findAll();
+}
+Batch операции
+java
+// Вместо 100 запросов делаем 1
+taskRepository.saveAll(tasks);
+Безопасность
+SQL Injection
+✅ Защита: Spring Data JPA использует PreparedStatements автоматически
+
+Оптимистичная блокировка
+java
+@Version
+private Integer version;  // Hibernate проверяет версию при UPDATE
+Предотвращает конфликты при одновременном редактировании.
+
+Планы развития (будущие версии)
+Версия 2.0.0
+Повторяющиеся задачи (DAILY, WEEKLY, MONTHLY)
+
+Категории и теги для группировки
+
+Экспорт/импорт задач (JSON, CSV, XML)
+
+Системные уведомления (Windows/macOS/Linux)
+
+Горячие клавиши (Ctrl+N для новой задачи)
+
+Версия 3.0.0
+REST API для мобильного приложения
+
+Web-интерфейс (React)
+
+Синхронизация между устройствами
+
+Облачное хранилище
+
+Версия документа: 1.5.0
+Последнее обновление: 08.01.2026
+Статус: ✅ ГОТОВО

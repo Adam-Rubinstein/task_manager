@@ -1,484 +1,459 @@
-# 🚀 Установка и Запуск Voice Task Manager v2.0.0 (с Telegram Bot)
+🚀 Руководство по установке Task Manager v1.5.0
+Пошаговая инструкция по развёртыванию JavaFX приложения с PostgreSQL базой данных.
 
-Подробное пошаговое руководство по развёртыванию проекта с поддержкой ФАЗЫ 2 (Voice Input via Telegram).
+1. Предварительные требования
+   Обязательное ПО
+   Java 21+ — https://www.oracle.com/java/technologies/downloads/#java21
 
----
+Maven 3.8+ — https://maven.apache.org/download.cgi
 
-## 1. Предварительные требования
+PostgreSQL 12+ — https://www.postgresql.org/download/ (рекомендуется 14+)
 
-### Обязательное ПО
-- **Java 21+** — https://www.oracle.com/java/technologies/downloads/#java21
-- **Maven 3.8+** — https://maven.apache.org/download.cgi
-- **PostgreSQL 12+** — https://www.postgresql.org/download/ (рекомендуется 14+)
-- **Git** — https://git-scm.com/
+Git — https://git-scm.com/
 
-### Для Telegram Bot (ФАЗА 2)
-- **Python 3.8+** (если используешь Python бот) — https://www.python.org/downloads/
-  ИЛИ используй Java бот (встроен в Spring Boot)
-- **Telegram аккаунт** и **Telegram Bot** (см. шаг 6)
+Проверка установки
+bash
+java -version     # Должна быть 21+
+mvn -version      # Должна быть 3.8+
+psql --version    # Должна быть 12+
+git --version     # Любая версия
+Пример вывода:
 
-### Проверка установки
+bash
+$ java -version
+openjdk version "21.0.1" 2023-10-17
+OpenJDK Runtime Environment (build 21.0.1+12-29)
+OpenJDK 64-Bit Server VM (build 21.0.1+12-29, mixed mode, sharing)
 
-```bash
-java -version
-mvn -version
-psql --version
-python --version  # если используешь Python бот
-git --version
-```
+$ mvn -version
+Apache Maven 3.9.6
 
----
+$ psql --version
+psql (PostgreSQL) 15.3
+2. Установка и запуск PostgreSQL
+   Windows
+   Скачай инсталлятор: https://www.postgresql.org/download/windows/
 
-## 2. Установка и запуск PostgreSQL
+Запусти инсталлятор
 
-### Windows
+Важно: Запомни пароль пользователя postgres
 
-1. Скачай инсталлятор: https://www.postgresql.org/download/windows/
-2. Запусти инсталлятор, запомни пароль пользователя `postgres`
-3. Убедись, что сервис PostgreSQL запущен (Services → PostgreSQL)
+Убедись, что сервис PostgreSQL запущен:
 
-### macOS (Homebrew)
+Открой Services (Win+R → services.msc)
 
-```bash
+Найди PostgreSQL
+
+Статус должен быть Running
+
+macOS (Homebrew)
+bash
+# Установка
 brew install postgresql@15
+
+# Запуск сервиса
 brew services start postgresql@15
-psql postgres  # проверка подключения
-```
 
-### Linux (Ubuntu/Debian)
-
-```bash
+# Проверка подключения
+psql postgres
+Linux (Ubuntu/Debian)
+bash
+# Установка
 sudo apt-get update
 sudo apt-get install postgresql postgresql-contrib
+
+# Запуск сервиса
 sudo service postgresql start
-sudo -u postgres psql  # проверка подключения
-```
 
----
+# Проверка подключения
+sudo -u postgres psql
+3. Создание базы данных
+   Шаг 1: Подключись к PostgreSQL
+   bash
+   psql -U postgres
+   При запросе пароля введи тот, что указал при установке.
 
-## 3. Создание базы данных
-
-Подключись к PostgreSQL:
-
-```bash
-psql -U postgres
-```
-
-Создай БД:
-
-```sql
+Шаг 2: Создай базу данных
+sql
 CREATE DATABASE taskmanager;
+Шаг 3: Проверь создание
+sql
+\l
+Должна появиться строка:
+
+text
+taskmanager | postgres | UTF8     | ...
+Шаг 4: Выйди из psql
+sql
 \q
-```
+Проверка из командной строки
+bash
+psql -U postgres -l | grep taskmanager
+Должна быть видна БД taskmanager.
 
-Проверка:
+4. Клонирование репозитория
+   bash
+   git clone https://github.com/Adam-Rubinstein/task_manager.git
+   cd task_manager
+5. Конфигурация приложения
+   Открой файл src/main/resources/application.properties и отредактируй:
 
-```bash
-psql -U postgres -l  # должна быть видна taskmanager
-```
-
----
-
-## 4. Клонирование репозитория
-
-```bash
-git clone https://github.com/Adam-Rubinstein/task_manager.git
-cd task_manager
-```
-
----
-
-## 5. Конфигурация приложения (ФАЗА 1 + ФАЗА 2)
-
-Открой `src/main/resources/application.properties` и отредактируй:
-
-### ФАЗА 1: PostgreSQL Connection
-
-```properties
+Обязательные настройки PostgreSQL
+text
 # PostgreSQL подключение
 spring.datasource.url=jdbc:postgresql://localhost:5432/taskmanager
 spring.datasource.username=postgres
-spring.datasource.password=ВАШ_ПАРОЛЬ_POSTGRES
+spring.datasource.password=ВАШ_ПАРОЛЬ_POSTGRES_ЗДЕСЬ
 
 spring.datasource.driver-class-name=org.postgresql.Driver
+⚠️ ВАЖНО: Замени ВАШ_ПАРОЛЬ_POSTGRES_ЗДЕСЬ на реальный пароль!
 
+Настройки JPA/Hibernate
+text
 # JPA / Hibernate
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=false
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
 spring.jpa.properties.hibernate.format_sql=true
+Пояснение:
 
+ddl-auto=update — автоматическое создание/обновление таблиц
+
+show-sql=false — не выводить SQL запросы (для production)
+
+Для отладки можно поставить show-sql=true
+
+Настройки логирования
+text
 # Логирование
 logging.level.root=INFO
 logging.level.com.taskmanager=DEBUG
 logging.level.org.hibernate=WARN
-```
+Для отладки можно увеличить уровень:
 
-### ФАЗА 2: Telegram Bot (НОВОЕ)
+text
+logging.level.com.taskmanager=TRACE
+logging.level.org.hibernate.SQL=DEBUG
+6. Инициализация схемы БД (опционально)
+   SQL-скрипт src/main/resources/db/schema.sql содержит полную схему с индексами и триггерами.
 
-Добавь после PostgreSQL конфига:
-
-```properties
-# Telegram Bot Settings (ФАЗА 2)
-telegram.bot.enabled=true
-telegram.bot.token=YOUR_BOT_TOKEN_HERE
-telegram.bot.username=voice_task_manager_bot
-
-# Voice Parsing Settings
-voice.parsing.language=ru
-voice.parsing.date-format=dd.MM.yyyy HH:mm
-```
-
-**⚠️ ВАЖНО:** Не коммитьте реальные токены в Git!
-
-Используй вместо этого переменные окружения:
-
-```bash
-# Для Linux/macOS
-export TELEGRAM_BOT_TOKEN="123456789:ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefgh"
-
-# Для Windows PowerShell
-$env:TELEGRAM_BOT_TOKEN="123456789:ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefgh"
-
-# В application.properties используй:
-telegram.bot.token=${TELEGRAM_BOT_TOKEN}
-```
-
----
-
-## 6. Создание Telegram Bot (ФАЗА 2)
-
-### Шаг 1: BotFather
-
-1. Открой Telegram
-2. Найди пользователя **@BotFather**
-3. Отправь команду: `/newbot`
-4. Выбери имя для бота (например: "Voice Task Manager Bot")
-5. Выбери username (например: `voice_task_manager_bot`)
-6. **BotFather выдаст токен** — скопируй его!
-
-Пример токена:
-```
-123456789:ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefgh
-```
-
-### Шаг 2: Вставь токен в application.properties
-
-```properties
-telegram.bot.token=123456789:ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefgh
-telegram.bot.username=voice_task_manager_bot
-```
-
-### Шаг 3: Протестируй
-
-После запуска приложения найди своего бота в Telegram и отправь `/start`.
-Если бот ответит — всё настроено правильно!
-
----
-
-## 7. Инициализация схемы БД (опционально)
-
-SQL-скрипт `src/main/resources/db/schema.sql` содержит полную схему с индексами и триггерами.
-
-Запусти (опционально):
-
-```bash
+Запуск вручную (рекомендуется для production)
+bash
 psql -U postgres -d taskmanager -f src/main/resources/db/schema.sql
-```
+Автоматическое создание (для разработки)
+Если не запускать schema.sql, Hibernate с ddl-auto=update создаст таблицы автоматически при первом запуске, но без дополнительных индексов и триггеров.
 
-**Примечание:** Если не выполнять этот скрипт, Hibernate с `ddl-auto=update` создаст таблицы автоматически, но без дополнительных индексов и триггеров.
+Что будет создано автоматически:
 
----
+Таблицы: tasks, alerts, audio_files
 
-## 8. Добавление зависимостей Maven
+Колонки и типы данных
 
-Убедись, что в `pom.xml` добавлены зависимости для ФАЗЫ 2:
+Foreign Keys
 
-```xml
-<!-- Natty для парсинга дат -->
-<dependency>
-    <groupId>com.joestelmach</groupId>
-    <artifactId>natty</artifactId>
-    <version>0.13</version>
-</dependency>
+Что НЕ будет создано автоматически:
 
-<!-- Telegram Bot API (если используешь Java бот) -->
-<dependency>
-    <groupId>org.telegram</groupId>
-    <artifactId>telegrambots</artifactId>
-    <version>7.0.1</version>
-</dependency>
-```
+Индексы для оптимизации (кроме первичных ключей)
 
-Выполни:
+Триггеры для updated_at
 
-```bash
-mvn clean install
-```
+Check constraints
 
----
+Рекомендация: Для production используй schema.sql вручную.
 
-## 9. Сборка проекта
+7. Сборка проекта
+   Полная сборка с тестами
+   bash
+   mvn clean install
+   Сборка без тестов (быстрее)
+   bash
+   mvn clean install -DskipTests
+   Только компиляция (без упаковки JAR)
+   bash
+   mvn clean compile
+   Ожидаемый результат:
 
-```bash
-mvn clean install
-```
+text
+[INFO] BUILD SUCCESS
+[INFO] Total time:  15.234 s
+[INFO] Finished at: 2026-01-08T02:30:00+03:00
+8. Запуск приложения
+   Вариант 1: Maven JavaFX Plugin (рекомендуется для разработки)
+   bash
+   mvn javafx:run
+   Плюсы:
 
-Или без тестов (быстрее):
+Автоматическая настройка JavaFX модулей
 
-```bash
-mvn clean install -DskipTests
-```
+Не нужно указывать VM options вручную
 
-Проверка компиляции:
+Минусы:
 
-```bash
-mvn clean compile
-```
+Немного медленнее, чем прямой запуск
 
----
+Вариант 2: IntelliJ IDEA
+Шаг 1: Импорт проекта
+File → Open
 
-## 10. Запуск приложения
+Выбери папку task_manager
 
-### Вариант 1: Maven JavaFX (для ФАЗЫ 1, рекомендуется для разработки)
+IntelliJ автоматически распознает Maven проект
 
-```bash
-mvn javafx:run
-```
+Шаг 2: Настройка SDK
+File → Project Structure (Ctrl+Alt+Shift+S)
 
-Откроется окно JavaFX с таблицей задач.
+Project → SDK → выбери 21 (или скачай, если нет)
 
-### Вариант 2: Spring Boot (для ФАЗЫ 2 REST API)
+Project → Language Level → выбери 21 - Sealed types, always-strict floating-point semantics
 
-```bash
-mvn spring-boot:run
-```
+Шаг 3: Создание конфигурации запуска
+Run → Edit Configurations
 
-Приложение будет работать в фоновом режиме, REST API доступен на `http://localhost:8080`.
+Нажми + → Application
 
-### Вариант 3: Запуск обоих одновременно (рекомендуется для полной функциональности)
+Заполни поля:
 
-**Окно 1 (JavaFX UI ФАЗА 1):**
+Name: TaskManager
 
-```bash
-mvn javafx:run
-```
+Main class: com.taskmanager.TaskManagerApp
 
-**Окно 2 (REST API для ФАЗЫ 2, в новом терминале):**
+VM options: --add-modules javafx.controls,javafx.fxml,javafx.graphics
 
-```bash
-mvn spring-boot:run
-```
+Working directory: $ProjectFileDir$
 
-**Окно 3 (Telegram Bot, в новом терминале, если Python):**
+Use classpath of module: TaskManager
 
-```bash
-python telegram_bot.py
-```
+Нажми OK
 
-(Если используешь Java бот, он запустится вместе с Spring Boot)
+Шаг 4: Запуск
+Нажми Run (Shift+F10)
 
-### Вариант 4: IntelliJ IDEA
+Или нажми зелёную кнопку ▶️ рядом с конфигурацией
 
-1. Импортируй проект как Maven
-2. Убедись, что выбран JDK 21 (Project Settings → Project → SDK)
-3. Создай конфигурацию запуска:
-   - **Type:** Application
-   - **Main class:** `com.taskmanager.TaskManagerApp`
-   - **Program arguments:** пусто
-   - **VM options:** `--add-modules javafx.controls,javafx.fxml,javafx.graphics,javafx.media`
-4. Нажми **Run** или **Shift+F10**
+Вариант 3: Командная строка с JAR файлом
+Шаг 1: Создай исполняемый JAR
+bash
+mvn clean package
+Шаг 2: Запусти JAR
+bash
+java --add-modules javafx.controls,javafx.fxml,javafx.graphics \
+-jar target/TaskManager-1.5.0.jar
+Для Windows:
 
----
+powershell
+java --add-modules javafx.controls,javafx.fxml,javafx.graphics -jar target/TaskManager-1.5.0.jar
+9. Успешный запуск
+   При успешном запуске ты увидишь:
+   ✅ Окно приложения откроется с интерфейсом:
 
-## 11. Успешный запуск
+Левая панель: форма создания задачи
 
-### ФАЗА 1 (JavaFX)
-- Откроется окно приложения
-- Таблица будет пустой (или с задачами, если они уже в БД)
-- Вверху форма для создания задач
-- Внизу счётчик оповещений
+Правая панель: таблица задач + оповещения
 
-### ФАЗА 2 (Telegram Bot)
-- В терминале увидишь логи: "Bot started polling"
-- Найди бота в Telegram по username
-- Отправь сообщение: "Купить молоко завтра в 15:00"
-- Бот отвечает: "✅ Задача 'Купить молоко' создана!"
+✅ В консоли логи:
 
-### REST API доступен
-- Проверка: `curl http://localhost:8080/api/voice/stats`
-- Должен вернуть JSON со статистикой
+text
+2026-01-08 02:30:00 INFO  TaskManagerApp - Starting TaskManager...
+2026-01-08 02:30:01 INFO  DatabaseConfig - Connected to PostgreSQL
+2026-01-08 02:30:02 INFO  TaskService - TaskService initialized
+2026-01-08 02:30:03 INFO  MainController - UI loaded successfully
+✅ Таблица задач:
 
----
+Если БД пустая — таблица пустая
 
-## 12. Типовые проблемы и решения
+Если есть задачи — они отображаются
 
-### ❌ «Cannot connect to database»
+✅ Счётчик оповещений внизу справа
 
-**Причины:**
-- PostgreSQL не запущен
-- Неверные учётные данные в `application.properties`
-- БД не существует
+10. Проверка работоспособности
+    Тест 1: Создание задачи
+    В поле "Описание" введи: Тестовая задача
 
-**Решение:**
+В поле "Дата выполнения" введи: 0901 (нажми Enter)
 
-```bash
-# Проверка PostgreSQL
+Должно автозаполниться до 09.01.2026 00:00
+
+Нажми "Создать задачу"
+
+Должно появиться окно: "Задача создана: Тестовая задача"
+
+Задача появится в таблице
+
+Тест 2: Редактирование задачи
+Двойной клик на созданной задаче
+
+Откроется окно редактирования
+
+Измени статус на IN_PROGRESS
+
+Нажми "Сохранить"
+
+Статус в таблице обновится
+
+Тест 3: Смена темы
+Нажми кнопку 🌙 в правом верхнем углу
+
+Интерфейс должен стать тёмным
+
+Кнопка изменится на ☀
+
+Нажми ещё раз → вернётся светлая тема
+
+Тест 4: Проверка БД
+bash
+psql -U postgres -d taskmanager
+
+SELECT * FROM tasks;
+Должна появиться строка с твоей тестовой задачей:
+
+text
+id |      title       |   description    |     due_date      | status | priority
+----+------------------+------------------+-------------------+--------+----------
+1 | Тестовая задача  | Тестовая задача  | 2026-01-09 00:00  | NEW    | 5
+Выход из psql:
+
+sql
+\q
+11. Типовые проблемы и решения
+    ❌ «Cannot connect to database»
+    Причины:
+
+PostgreSQL не запущен
+
+Неверные учётные данные в application.properties
+
+БД taskmanager не существует
+
+Решение:
+
+bash
+# Проверка запущен ли PostgreSQL
+
 # Windows
 tasklist | findstr postgres
 
 # macOS/Linux
 ps aux | grep postgres
 
+# Если не запущен, запусти:
+# Windows: Services → PostgreSQL → Start
+# macOS: brew services start postgresql@15
+# Linux: sudo service postgresql start
+
 # Проверка существования БД
-psql -U postgres -l
+psql -U postgres -l | grep taskmanager
 
-# Перезапуск PostgreSQL
-# Windows: Services → PostgreSQL → Restart
-# macOS: brew services restart postgresql@15
-# Linux: sudo service postgresql restart
-```
+# Если нет БД — создай:
+psql -U postgres -c "CREATE DATABASE taskmanager;"
+❌ «relation "tasks" does not exist»
+Причина: Таблицы не созданы в БД
 
----
+Решение 1 (автоматически):
 
-### ❌ «relation "tasks" does not exist»
+Убедись, что в application.properties:
 
-**Причина:** Таблицы не созданы
+text
+spring.jpa.hibernate.ddl-auto=update
+Запусти приложение один раз → Hibernate создаст таблицы
 
-**Решение:**
-1. Запусти приложение один раз с `ddl-auto=update` — Hibernate создаст таблицы
-2. Или вручную запусти: `psql -U postgres -d taskmanager -f src/main/resources/db/schema.sql`
+Решение 2 (вручную):
 
----
+bash
+psql -U postgres -d taskmanager -f src/main/resources/db/schema.sql
+❌ «JavaFX runtime components are missing»
+Причины:
 
-### ❌ «JavaFX runtime components are missing»
+Используешь JRE вместо JDK
 
-**Причины:**
-- Используешь JRE вместо JDK
-- Неправильная версия Java (не 21)
-- Отсутствуют JavaFX модули
+Неправильная версия Java (не 21)
 
-**Решение:**
+Отсутствуют JavaFX модули
 
-```bash
+Решение:
+
+bash
 # Проверка версии Java
 java -version
 
-# Убедись, что JDK 21, а не JRE
-# Переустанови JDK если нужно
+# Должна быть "openjdk version 21..." или "java version 21..."
+# Если показывает JRE, переустанови JDK 21
 
 # Для Maven используй:
 mvn javafx:run  # плагин автоматически настраивает модули
 
 # Для IDE укажи VM options:
---add-modules javafx.controls,javafx.fxml,javafx.graphics,javafx.media
-```
+--add-modules javafx.controls,javafx.fxml,javafx.graphics
+Скачать JDK 21:
 
----
+Oracle: https://www.oracle.com/java/technologies/downloads/#java21
 
-### ❌ «No visible @SpringBootConfiguration class»
+OpenJDK: https://jdk.java.net/21/
 
-**Причина:** Spring не находит `@SpringBootApplication`
+❌ «No visible @SpringBootApplication class»
+Причина: Spring не находит класс TaskManagerApp
 
-**Решение:**
+Решение:
 
-```bash
+bash
+# Перекомпилируй проект
 mvn clean compile
-# или перезагрузи IDE (Ctrl+Shift+S)
-```
 
----
+# Или в IntelliJ:
+# File → Invalidate Caches / Restart
+❌ Автозаполнение даты не работает
+Симптомы:
 
-### ❌ Telegram Bot не отвечает
+Ввожу 0812, ничего не происходит
 
-**Проверки:**
+Причина: Используешь старую версию MainController.java
 
-1. Правильный ли токен в `application.properties`?
-   ```bash
-   echo $TELEGRAM_BOT_TOKEN  # (macOS/Linux)
-   echo %TELEGRAM_BOT_TOKEN% # (Windows)
-   ```
+Решение:
 
-2. Запущено ли приложение?
-   ```bash
-   curl http://localhost:8080/api/voice/stats
-   ```
+Убедись, что в MainController.java есть метод autoFillDateTime()
 
-3. Telegram Bot имеет ли доступ в интернет?
+Убедись, что в setupDateTimeInputMask() есть listeners:
 
-4. Логи показывают ошибки?
-   ```bash
-   # Увеличь логирование в application.properties
-   logging.level.com.taskmanager=DEBUG
-   ```
+java
+dueDateTimeInput.focusedProperty().addListener(...)
+dueDateTimeInput.setOnKeyPressed(...)
+Пересобери проект: mvn clean install
 
----
+Перезапусти приложение
 
-### ❌ Natty не парсит русские даты
+❌ Тёмная тема не работает во всплывающем окне
+Симптом: При двойном клике на задаче окно остаётся светлым, хотя основное окно тёмное
 
-**Причина:** Natty по умолчанию на английском
+Причина: Используешь старую версию MainController.java
 
-**Решение:** Используется кастомная реализация в `VoiceParsingService`:
-- Сначала заменяем русские даты на английские: "завтра" → "tomorrow"
-- Потом передаём Natty
-- Результат используем
+Решение:
 
-Если не работает — проверь логи:
+Обновлён в версии 1.5.0. Убедись, что в методе openTaskDetailWindow() есть:
 
-```
-logging.level.com.taskmanager=DEBUG
-```
+java
+if (isDarkTheme) {
+mainVBox.setStyle("...");
+scrollPane.setStyle("...");
+scene.setFill(Color.web("#1e1e1e"));
+}
+❌ «Port 8080 already in use»
+Причина: Другое приложение занимает порт 8080
 
----
+Решение 1: Измени порт в application.properties
 
-## 13. Разработка
+text
+server.port=8081
+Решение 2: Останови процесс на порту 8080
 
-### Запуск тестов
+bash
+# Windows
+netstat -ano | findstr :8080
+taskkill /PID <PID> /F
 
-```bash
-mvn test
-```
-
-### Создание feature-ветки
-
-```bash
-git checkout -b feature/my-feature
-# ... изменения ...
-git add .
-git commit -m "feat: описание фичи"
-git push origin feature/my-feature
-```
-
-### Горячее перезагрузка (DevTools)
-
-Добавь в `pom.xml`:
-
-```xml
-<dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-devtools</artifactId>
-    <scope>runtime</scope>
-    <optional>true</optional>
-</dependency>
-```
-
----
-
-## 14. Дополнительные ресурсы
-
-- **JavaFX:** https://openjfx.io/
-- **Spring Boot:** https://spring.io/projects/spring-boot
-- **Hibernate:** https://hibernate.org/
-- **PostgreSQL:** https://www.postgresql.org/docs/
-- **Maven:** https://maven.apache.org/guides/
-- **Telegram Bot API:** https://core.telegram.org/bots/api
-- **Natty:** https://natty.joestelmach.com/
-
----
-
-## 15. Полезные команды
-
-```bash
+# macOS/Linux
+lsof -ti:8080 | xargs kill -9
+12. Полезные команды
+    Maven
+    bash
 # Сборка и запуск всё сразу
 mvn clean javafx:run
 
@@ -499,16 +474,84 @@ mvn clean
 
 # Проверка зависимостей
 mvn dependency:tree
+PostgreSQL
+bash
+# Подключение к БД
+psql -U postgres -d taskmanager
 
-# PostgreSQL команды
-psql -U postgres -d taskmanager  # подключение
-\dt                               # список таблиц
-SELECT * FROM task;              # вывод задач
-\q                                # выход
-```
+# Список таблиц
+\dt
 
----
+# Описание таблицы
+\d tasks
 
-**Версия документа:** 2.0.0  
-**Обновлено:** 01.01.2026  
-**Статус:** ✅ ГОТОВО К ИСПОЛЬЗОВАНИЮ
+# Вывод всех задач
+SELECT * FROM tasks;
+
+# Вывод задач с приоритетом > 5
+SELECT * FROM tasks WHERE priority > 5;
+
+# Удалить все задачи (осторожно!)
+TRUNCATE TABLE tasks CASCADE;
+
+# Выход
+\q
+Git
+bash
+# Проверка статуса
+git status
+
+# Добавить изменения
+git add .
+
+# Создать коммит
+git commit -m "feat: описание изменений"
+
+# Отправить в репозиторий
+git push origin main
+
+# Создать новую ветку
+git checkout -b feature/my-feature
+
+# Переключиться на ветку
+git checkout main
+
+# Обновить локальную копию
+git pull origin main
+13. Разработка
+    Горячая перезагрузка (Spring Boot DevTools)
+    Добавь в pom.xml:
+
+xml
+<dependency>
+<groupId>org.springframework.boot</groupId>
+<artifactId>spring-boot-devtools</artifactId>
+<scope>runtime</scope>
+<optional>true</optional>
+</dependency>
+После сборки (Ctrl+F9 в IntelliJ) приложение автоматически перезагрузится.
+
+Тестирование
+bash
+# Запуск всех тестов
+mvn test
+
+# Запуск конкретного теста
+mvn test -Dtest=TaskServiceTest
+
+# Тесты с отчётом покрытия
+mvn test jacoco:report
+14. Дополнительные ресурсы
+    JavaFX: https://openjfx.io/
+
+Spring Boot: https://spring.io/projects/spring-boot
+
+Hibernate: https://hibernate.org/
+
+PostgreSQL: https://www.postgresql.org/docs/
+
+Maven: https://maven.apache.org/guides/
+
+Версия документа: 1.5.0
+Обновлено: 08.01.2026
+Статус: ✅ ГОТОВО К ИСПОЛЬЗОВАНИЮ
