@@ -1,96 +1,104 @@
-# 📖 README - Voice Task Manager (v2.0.0 с Telegram Bot)
+📋 Task Manager - Менеджер Задач v1.5.0
+Настольное приложение для управления задачами с JavaFX интерфейсом и PostgreSQL базой данных.
 
-## 🎯 Основные функции
+🎯 Основные возможности
+✅ Управление задачами
+Создание задач с названием и описанием
 
-### ✅ ФАЗА 1 (Активна)
-- ✅ Ввод задач через JavaFX форму
-- ✅ Создание, редактирование, удаление задач
-- ✅ Система приоритетов (0–10)
-- ✅ Статусы задач (NEW, IN_PROGRESS, COMPLETED, CANCELLED)
-- ✅ Напоминания и уведомления
-- ✅ Фильтрация и сортировка по статусу и приоритету
-- ✅ История аудиозаписей (до 30 дней в БД)
-- ✅ PostgreSQL персистентность
+Редактирование задач (двойной клик на задаче)
 
-### ✅ ФАЗА 2 (НОВАЯ - Telegram Voice Input)
-- ✅ **REST API для Voice Input** (7 endpoints)
-- ✅ **Telegram Bot интеграция** (@voice_task_manager_bot)
-- ✅ **Автоматический парсинг текста:**
-  - Парсинг дат на русском (Natty): "завтра" → 02.01.2026
-  - Парсинг приоритета: "приоритет 8" → priority: 8
-  - Парсинг срочности: "срочно!" → priority: 8 автоматически
-  - Очистка текста от служебных слов
-- ✅ **Команды Telegram:**
-  - `/start` - приветствие
-  - `/today` - задачи на сегодня
-  - `/list` - все задачи
-  - `/stats` - статистика
-  - `/search` - поиск
-  - Просто напиши текст → создаст задачу!
+Удаление задач с подтверждением
 
-### 🔄 В ПЛАНАХ (ФАЗА 3)
-- Повторяющиеся задачи (ежедневно, еженедельно, ежемесячно)
-- Категории и теги
-- Улучшенный ML для контекста
-- Web dashboard (React)
-- Mobile app интеграция
+Система приоритетов (0-10, настраивается Spinner)
 
----
+Статусы задач: NEW, IN_PROGRESS, COMPLETED, CANCELLED
 
-## 🛠️ Технологический стек
+Фильтрация по статусу (ComboBox)
 
-### Frontend/UI
-- **JavaFX 21** — Desktop приложение (ФАЗА 1)
-- **Telegram Bot API** — Voice Input через Telegram (ФАЗА 2)
-- **REST API** — Communication между компонентами
+Сортировка по любой колонке таблицы
 
-### Backend
-- **Java 21** — основной язык
-- **Spring Boot 3.2** — фреймворк, DI, конфигурация
-- **Spring Data JPA** — ORM для работы с БД
-- **Maven 3.8+** — управление зависимостями
+⏰ Даты и время
+Автозаполнение даты - введи 0812 → автоматически заполнится 08.12.2026 00:00
 
-### Voice Parsing (ФАЗА 2)
-- **Natty 0.13** — парсинг дат на естественном языке
-- **Java Regex** — парсинг приоритета и служебных слов
-- **Custom String Processing** — очистка и нормализация текста
+Работает на потере фокуса (переход на другое поле)
 
-### Telegram Integration (ФАЗА 2)
-- **PyTelegramBotAPI 4.x** (Python бот) ИЛИ
-- **TelegramBots 7.0.1** (Java бот)
+Работает по нажатию Enter
 
-### База данных
-- **PostgreSQL 12+** — реляционная БД
-- **Hibernate 6** — ORM (Object-Relational Mapping)
-- **HikariCP** — пул соединений
+Валидация дат (31 февраля → текущая дата)
 
-### DevTools
-- **Git** — контроль версий
-- **IntelliJ IDEA** / **VS Code** — IDE
-- **Maven** — сборка
+Формат ввода: dd.MM.yyyy HH:mm
 
----
+🎨 Интерфейс
+Светлая/тёмная тема (кнопка 🌙/☀ в правом верхнем углу)
 
-## 📋 Структура проекта
+Цветовая подсветка задач:
 
-```text
-task_manager/
-├── pom.xml                             # Maven конфигурация + Natty, Telegram зависимости
+🔴 Красный фон - просроченные задачи
+
+🟡 Жёлтый фон - задачи на сегодня/завтра
+
+🔵 Синий фон - задачи на эту неделю
+
+Responsive дизайн - автоматическое масштабирование
+
+🔔 Система оповещений
+Счётчик непрочитанных оповещений
+
+Список уведомлений (двойной клик → отметить как прочитанное)
+
+Автообновление каждые 10 секунд
+
+Типы оповещений: NOTIFICATION, REMINDER, DEADLINE
+
+🔁 Повторяющиеся задачи (заготовка)
+Типы повтора: NONE, DAILY, WEEKLY, MONTHLY, CUSTOM
+
+Интервал повтора (для CUSTOM) - скрывается, если выбран "Без повтора"
+
+🛠️ Технологический стек
+Frontend/UI
+JavaFX 21 - Desktop приложение
+
+FXML - разметка интерфейса
+
+CSS - стилизация (темная/светлая тема)
+
+Backend
+Java 21 - основной язык
+
+Spring Boot 3.2 - фреймворк, Dependency Injection
+
+Spring Data JPA - ORM для работы с БД
+
+Hibernate 6 - JPA провайдер
+
+Maven 3.8+ - управление зависимостями
+
+База данных
+PostgreSQL 12+ - реляционная БД
+
+HikariCP - пул соединений
+
+DevTools
+Git - контроль версий
+
+IntelliJ IDEA - рекомендуемая IDE
+
+📋 Структура проекта
+text
+TaskManager/
+├── pom.xml                             # Maven конфигурация
 ├── README.md                           # Этот файл
-├── LICENSE
-├── .gitignore
-│
-├── docs/
-│   ├── SETUP.md                        # Подробное руководство по установке
-│   ├── ARCHITECTURE.md                 # Описание архитектуры
-│   └── TELEGRAM_SETUP.md               # Telegram Bot инструкция (НОВАЯ)
+├── SETUP.md                            # Подробная инструкция по установке
+├── ARCHITECTURE.md                     # Описание архитектуры
 │
 ├── src/main/
 │   ├── java/com/taskmanager/
-│   │   ├── TaskManagerApp.java         # Точка входа приложения
+│   │   ├── TaskManagerApp.java         # Точка входа
 │   │   │
 │   │   ├── config/
-│   │   │   └── DatabaseConfig.java
+│   │   │   ├── DatabaseConfig.java     # Конфигурация БД
+│   │   │   └── ThemeManager.java       # Управление темами
 │   │   │
 │   │   ├── dao/
 │   │   │   ├── TaskRepository.java
@@ -98,301 +106,323 @@ task_manager/
 │   │   │   └── AudioFileRepository.java
 │   │   │
 │   │   ├── model/
-│   │   │   ├── Task.java
-│   │   │   ├── Alert.java
-│   │   │   ├── AudioFile.java
-│   │   │   └── *Status / *Type enums
+│   │   │   ├── Task.java               # Сущность задачи
+│   │   │   ├── Alert.java              # Оповещения
+│   │   │   ├── AudioFile.java          # Аудиофайлы (резерв)
+│   │   │   ├── TaskStatus.java         # Enum статусов
+│   │   │   ├── AlertType.java          # Enum типов оповещений
+│   │   │   └── RecurrenceType.java     # Enum типов повторов
 │   │   │
 │   │   ├── service/
-│   │   │   ├── TaskService.java         # ОБНОВЛЕНА: методы для Voice Input
-│   │   │   ├── AlertService.java
-│   │   │   ├── AudioFileService.java
-│   │   │   └── VoiceParsingService.java # НОВАЯ: парсинг текста
+│   │   │   ├── TaskService.java        # Бизнес-логика задач
+│   │   │   ├── AlertService.java       # Бизнес-логика оповещений
+│   │   │   └── AudioFileService.java   # Работа с аудио
 │   │   │
-│   │   ├── controller/
-│   │   │   ├── MainController.java      # JavaFX UI контроллер
-│   │   │   └── VoiceTaskController.java # НОВАЯ: REST API (7 endpoints)
-│   │   │
-│   │   ├── dto/                         # НОВАЯ папка
-│   │   │   ├── VoiceTaskRequest.java
-│   │   │   ├── VoiceTaskParsed.java
-│   │   │   ├── VoiceTaskResponse.java
-│   │   │   └── TaskStatisticsDTO.java
-│   │   │
-│   │   └── bot/ (опционально для Java бота)
-│   │       ├── TelegramBotService.java
-│   │       └── TelegramBotConfig.java
+│   │   └── ui/controllers/
+│   │       └── MainController.java     # JavaFX контроллер
 │   │
 │   └── resources/
-│       ├── application.properties      # Конфиг (+ Telegram settings)
+│       ├── application.properties      # Конфигурация приложения
 │       ├── fxml/
-│       │   └── main-view.fxml
+│       │   └── main-view.fxml          # Разметка интерфейса
 │       ├── css/
-│       │   └── style.css
+│       │   └── style.css               # Стили
 │       └── db/
-│           └── schema.sql
+│           └── schema.sql              # SQL схема БД
 │
-├── target/                             # Скомпилированные артефакты
-└── test/                               # Unit тесты
-```
+└── target/                             # Скомпилированные файлы
+🚀 Быстрый старт
+Предварительные требования
+Java 21+ - https://www.oracle.com/java/technologies/downloads/
 
----
+PostgreSQL 12+ - https://www.postgresql.org/download/
 
-## 🚀 Быстрый старт (ФАЗА 1 + ФАЗА 2)
+Maven 3.8+ - https://maven.apache.org/download.cgi
 
-### Системные требования
+Git - https://git-scm.com/
 
-- **Java 21+** — https://www.oracle.com/java/technologies/downloads/
-- **PostgreSQL 12+** — https://www.postgresql.org/download/
-- **Maven 3.8+** — https://maven.apache.org/download.cgi
-- **Git** — https://git-scm.com/
-
-### Шаг 1: Клонирование и Setup
-
-```bash
+Проверка установки
+bash
+java -version      # Должна быть 21+
+mvn -version       # Должна быть 3.8+
+psql --version     # Должна быть 12+
+Шаг 1: Клонирование репозитория
+bash
 git clone https://github.com/Adam-Rubinstein/task_manager.git
 cd task_manager
+Шаг 2: Создание базы данных
+bash
+# Подключиться к PostgreSQL
+psql -U postgres
 
 # Создать БД
-psql -U postgres
 CREATE DATABASE taskmanager;
 \q
 
-# Инициализировать схему
+# Проверка
+psql -U postgres -l  # должна быть видна taskmanager
+Опционально: Запустить SQL схему вручную:
+
+bash
 psql -U postgres -d taskmanager -f src/main/resources/db/schema.sql
-```
+⚠️ Примечание: Если не запускать schema.sql, Hibernate создаст таблицы автоматически при первом запуске (с ddl-auto=update), но без дополнительных индексов и триггеров.
 
-### Шаг 2: Конфигурация
+Шаг 3: Конфигурация
+Отредактируй src/main/resources/application.properties:
 
-Отредактируй `src/main/resources/application.properties`:
-
-```properties
-# PostgreSQL
+text
+# PostgreSQL подключение
 spring.datasource.url=jdbc:postgresql://localhost:5432/taskmanager
 spring.datasource.username=postgres
-spring.datasource.password=ВАШ_ПАРОЛЬ
+spring.datasource.password=ВАШ_ПАРОЛЬ_ЗДЕСЬ
 
-# JPA/Hibernate
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+# JPA / Hibernate
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=false
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
-
-# ФАЗА 2: Telegram Bot
-telegram.bot.enabled=true
-telegram.bot.token=YOUR_BOT_TOKEN_HERE
-telegram.bot.username=voice_task_manager_bot
-voice.parsing.language=ru
-voice.parsing.date-format=dd.MM.yyyy HH:mm
+spring.jpa.properties.hibernate.format_sql=true
 
 # Логирование
 logging.level.root=INFO
 logging.level.com.taskmanager=DEBUG
-```
-
-### Шаг 3: Сборка и Запуск
-
-```bash
-# Сборка
+logging.level.org.hibernate=WARN
+Шаг 4: Сборка проекта
+bash
 mvn clean install
+Или без тестов (быстрее):
 
-# Запуск (JavaFX ФАЗА 1)
+bash
+mvn clean install -DskipTests
+Шаг 5: Запуск приложения
+Вариант 1: Maven JavaFX (рекомендуется)
+bash
 mvn javafx:run
+Вариант 2: IntelliJ IDEA
+Импортируй проект как Maven
 
-# В отдельном терминале: Telegram Bot (ФАЗА 2)
-python telegram_bot.py
-```
+Убедись, что выбран JDK 21 (Project Settings → Project → SDK)
 
-**При успешном старте:**
-- Откроется JavaFX окно с таблицей задач
-- Telegram бот будет готов к приемке сообщений
-- REST API доступен на `http://localhost:8080/api/voice/*`
+Создай конфигурацию запуска:
 
----
+Type: Application
 
-## 📚 REST API ENDPOINTS (ФАЗА 2)
+Main class: com.taskmanager.TaskManagerApp
 
-```bash
-# Создать задачу из текста
-POST /api/voice/create-task
-{
-  "text": "Купить молоко завтра в 15:00, приоритет 8",
-  "telegramUserId": 123456789
-}
-Response:
-{
-  "success": true,
-  "message": "✅ Задача 'Купить молоко' создана на 02.01.2026 15:00",
-  "task": { id, title, dueDate, priority, status, ... }
-}
+VM options: --add-modules javafx.controls,javafx.fxml,javafx.graphics
 
-# Получить статистику
-GET /api/voice/stats
-Response:
-{
-  "totalTasks": 5,
-  "newTasks": 2,
-  "completedTasks": 2,
-  "activeTasks": 3
-}
+Нажми Run (Shift+F10)
 
-# Задачи на сегодня
-GET /api/voice/today
-Response: [ { id, title, dueDate, ... }, ... ]
+Вариант 3: JAR файл
+bash
+mvn clean package
+java --add-modules javafx.controls,javafx.fxml,javafx.graphics -jar target/TaskManager-1.5.0.jar
+При успешном запуске:
+✅ Откроется окно приложения
+✅ Таблица будет пустой (или с задачами, если они уже в БД)
+✅ Вверху форма для создания задач
+✅ Справа вверху кнопка смены темы 🌙
+✅ Внизу счётчик оповещений
 
-# Просроченные задачи
-GET /api/voice/overdue
-Response: [ { id, title, dueDate, ... }, ... ]
+📖 Как пользоваться
+Создание задачи
+Название (опционально) - если не заполнить, возьмётся первая строка описания
 
-# Последние N задач
-GET /api/voice/list?limit=5
-Response: [ { id, title, ... }, ... ]
+Описание (обязательно, красная метка) - основной текст задачи
 
-# Поиск по ключевому слову
-GET /api/voice/search?q=молоко
-Response: [ { id, title, ... }, ... ]
+Приоритет (0-10) - чем выше, тем важнее (по умолчанию 5)
 
-# Активные задачи (не завершены)
-GET /api/voice/active
-Response: [ { id, title, ... }, ... ]
-```
+Дата выполнения - формат dd.MM.yyyy HH:mm
 
----
+Введи 0812 → автоматически станет 08.12.2026 00:00
 
-## 🎤 Telegram Примеры
+Работает при потере фокуса или по Enter
 
-```
-Ты в Telegram:
-  "Купить молоко завтра в 15:00, приоритет 8"
-  
-Бот отвечает:
-  "✅ Задача 'Купить молоко' создана!
-   📅 Дата: 02.01.2026 15:00
-   🔴 Приоритет: 8"
+Тип повтора - NONE (без повтора), DAILY, WEEKLY, MONTHLY, CUSTOM
 
-Ты:
-  "/stats"
-  
-Бот:
-  "📊 СТАТИСТИКА
-   📈 Всего задач: 5
-   🆕 Новых: 2
-   ✅ Завершённых: 2
-   ⏳ Активных: 3"
-```
+Нажми "Создать задачу"
 
----
+Редактирование задачи
+Двойной клик на строке задачи в таблице
 
-## 🔧 Архитектура (ФАЗА 2)
+Откроется окно редактирования
 
-### Поток данных
+Измени поля (название, описание, приоритет, статус, дата)
 
-```
-Telegram User
-    ↓ (пишет текст)
-Telegram Bot (@voice_task_manager_bot)
-    ↓ (HTTP POST /api/voice/create-task)
-VoiceTaskController (REST)
-    ↓
-VoiceParsingService
-    ├─ Natty парсит дату: "завтра в 15:00" → LocalDateTime
-    ├─ Regex парсит приоритет: "приоритет 8" → 8
-    └─ Возвращает VoiceTaskParsed (DTO)
-    ↓
-TaskService.createTaskFromVoice(VoiceTaskParsed)
-    ↓ (save)
-TaskRepository
-    ↓ (insert)
-PostgreSQL (таблица tasks)
-    ↓
-VoiceTaskResponse (success, message, task)
-    ↓ (HTTP 200 + JSON)
-Telegram Bot
-    ↓ (отправляет в чат)
-Telegram User видит: ✅ Задача создана!
-```
+Нажми "Сохранить" или "Отмена"
 
-### Слои архитектуры
+Удаление задачи
+Выдели задачу в таблице
 
-```
-┌─────────────────────────────────────┐
-│ Telegram / REST API                 │ ← User Input
-├─────────────────────────────────────┤
-│ VoiceTaskController (REST)          │ ← API Layer
-├─────────────────────────────────────┤
-│ VoiceParsingService + TaskService   │ ← Business Logic
-├─────────────────────────────────────┤
-│ TaskRepository (Spring Data JPA)    │ ← Data Access
-├─────────────────────────────────────┤
-│ PostgreSQL (задачи)                 │ ← Persistence
-└─────────────────────────────────────┘
-```
+Нажми "Удалить задачу"
 
----
+Подтверди удаление в диалоге
 
-## 🧪 Тестирование
+Фильтрация задач
+Используй ComboBox "Фильтр по статусу" справа вверху
 
-### Запуск юнит-тестов
+Выбери: ALL, NEW, IN_PROGRESS, COMPLETED, CANCELLED
 
-```bash
+Смена темы
+Нажми кнопку 🌙 в правом верхнем углу
+
+Интерфейс переключится на тёмную тему (кнопка станет ☀)
+
+Нажми ещё раз для возврата к светлой теме
+
+Оповещения
+Счётчик непрочитанных оповещений отображается внизу
+
+Двойной клик на оповещении → отметить как прочитанное
+
+Обновление автоматическое каждые 10 секунд
+
+🔧 Разработка
+Запуск тестов
+bash
 mvn test
-```
+Создание feature-ветки
+bash
+git checkout -b feature/my-feature
+# ... изменения ...
+git add .
+git commit -m "feat: описание фичи"
+git push origin feature/my-feature
+Горячая перезагрузка (DevTools)
+Добавь в pom.xml:
 
-### Тест REST API через curl
+xml
+<dependency>
+<groupId>org.springframework.boot</groupId>
+<artifactId>spring-boot-devtools</artifactId>
+<scope>runtime</scope>
+<optional>true</optional>
+</dependency>
+🐛 Решение проблем
+❌ «Cannot connect to database»
+Причины:
 
-```bash
-# Создание задачи
-curl -X POST http://localhost:8080/api/voice/create-task \
-  -H "Content-Type: application/json" \
-  -d '{"text":"Test task tomorrow at 14:00","telegramUserId":123}'
+PostgreSQL не запущен
 
-# Получение статистики
-curl http://localhost:8080/api/voice/stats
+Неверные учётные данные в application.properties
 
-# Поиск
-curl http://localhost:8080/api/voice/search?q=test
-```
+БД не существует
 
-### Тест через Telegram
+Решение:
 
-1. Найди бота в Telegram: @voice_task_manager_bot
-2. Пришли сообщение: "Купить молоко завтра"
-3. Получи ответ: ✅ Задача создана!
+bash
+# Проверка PostgreSQL (Windows)
+tasklist | findstr postgres
 
----
+# Проверка PostgreSQL (macOS/Linux)
+ps aux | grep postgres
 
-## 📄 Документация
+# Проверка существования БД
+psql -U postgres -l
 
-- **[SETUP.md](docs/SETUP.md)** — подробная установка и решение проблем
-- **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** — описание архитектуры (обновлена для ФАЗЫ 2)
-- **[TELEGRAM_SETUP.md](docs/TELEGRAM_SETUP.md)** — инструкция по Telegram боту
+# Перезапуск PostgreSQL
+# Windows: Services → PostgreSQL → Restart
+# macOS: brew services restart postgresql
+# Linux: sudo service postgresql restart
+❌ «relation "tasks" does not exist»
+Причина: Таблицы не созданы
 
----
+Решение:
 
-## 🎯 Версии
+Запусти приложение один раз с ddl-auto=update - Hibernate создаст таблицы
 
-| Версия | Дата | Статус | Что нового |
-|--------|------|--------|-----------|
-| 1.0.0 | 01.12.2024 | ✅ Released | ФАЗА 1: JavaFX UI + CRUD |
-| 2.0.0 | 01.01.2026 | ✅ Released | ФАЗА 2: Telegram + Voice Input |
-| 3.0.0 | TBD | 🔄 Planning | ФАЗА 3: Smart Parsing + Categories |
+Или вручную: psql -U postgres -d taskmanager -f src/main/resources/db/schema.sql
 
----
+❌ «JavaFX runtime components are missing»
+Причина: Используешь JRE вместо JDK или неправильная версия Java
 
-## 📄 Лицензия
+Решение:
 
-All Rights Reserved — см. файл [LICENSE](LICENSE)
+bash
+# Проверка версии Java
+java -version  # Должна быть 21+
+
+# Убедись, что JDK 21, а не JRE
+# Переустанови JDK если нужно
+
+# Для Maven используй:
+mvn javafx:run  # плагин автоматически настраивает модули
+
+# Для IDE укажи VM options:
+--add-modules javafx.controls,javafx.fxml,javafx.graphics
+❌ Автозаполнение даты не работает
+Проверка:
+
+Введи несколько цифр (например 0812)
+
+Нажми Enter или кликни на другое поле
+
+Должно автоматически заполниться 08.12.2026 00:00
+
+Если не работает:
+
+Проверь, что используешь новую версию MainController.java
+
+Проверь логи в консоли (возможна ошибка парсинга)
+
+❌ Тёмная тема не применяется к всплывающему окну
+Решение:
+
+Обновлена в последней версии
+
+Окно редактирования задачи теперь учитывает текущую тему
+
+📚 Документация
+SETUP.md - подробное руководство по установке
+
+ARCHITECTURE.md - описание архитектуры проекта
+
+🎯 Версии
+Версия	Дата	Статус	Что нового
+1.0.0	01.12.2024	✅ Released	Базовый CRUD + JavaFX UI
+1.2.0	15.12.2024	✅ Released	Система оповещений + фильтрация
+1.5.0	08.01.2026	✅ Released	Автозаполнение даты + тёмная тема + редактирование
+📊 Статистика проекта
+Языки: Java 21, FXML, SQL
+
+Строк кода: ~3000+
+
+Зависимостей: 12 (Maven)
+
+Таблиц БД: 3 (tasks, alerts, audio_files)
+
+📄 Лицензия
+All Rights Reserved
 
 Авторское право защищено. Копирование, модификация, распространение без письменного разрешения запрещены.
 
----
+👨‍💻 Автор
+Adam Rubinstein
+GitHub: @Adam-Rubinstein
+Email: adam.rubinstein@example.com
 
-## 👨‍💻 Автор
+🔮 Планы развития
+Версия 2.0.0 (в планах)
+Повторяющиеся задачи (ежедневные, еженедельные, ежемесячные)
 
-**Adam Rubinstein**  
-**GitHub:** [@Adam-Rubinstein](https://github.com/Adam-Rubinstein/)
+Категории и теги задач
 
----
+Экспорт/импорт задач (JSON, CSV)
 
-**Версия:** 2.0.0  
-**Последнее обновление:** 01.01.2026  
-**Статус:** ✅ В активной разработке
+Системные уведомления (Windows/macOS/Linux)
+
+Горячие клавиши (Ctrl+N для новой задачи и т.д.)
+
+Версия 3.0.0 (далёкое будущее)
+Web-интерфейс (React + REST API)
+
+Mobile приложение (синхронизация)
+
+Голосовой ввод через Telegram Bot
+
+ML для автоматической категоризации
+
+Версия документа: 1.5.0
+Последнее обновление: 08.01.2026
+Статус: ✅ Готов к использованию
