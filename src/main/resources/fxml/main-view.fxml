@@ -83,7 +83,7 @@
 
             <!-- Таблица задач -->
             <Label text="СПИСОК ЗАДАЧ" style="-fx-font-size: 14; -fx-font-weight: bold;" />
-            <TableView fx:id="tasksTable" prefHeight="250.0" VBox.vgrow="ALWAYS" onMouseClicked="#handleTaskClick">
+            <TableView fx:id="tasksTable" prefHeight="250.0" VBox.vgrow="ALWAYS">
                 <columns>
                     <TableColumn fx:id="titleColumn" text="Название" prefWidth="150.0" />
                     <TableColumn fx:id="statusColumn" text="Статус" prefWidth="80.0" />
