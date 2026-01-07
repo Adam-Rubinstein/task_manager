@@ -24,20 +24,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-/**
- * ✅ ФИНАЛЬНАЯ ВЕРСИЯ MainController.java
- *
- * Версия: 3.0 (БЕЗ ОШИБОК)
- *
- * Исправлено:
- * - ✅ Импорт ThemeManager из config (правильный путь)
- * - ✅ Сортировка БЕЗ setOnSortTypeChange (используется правильный способ)
- * - ✅ Все методы работают корректно
- * - ✅ Полная обработка ошибок
- *
- * Дата: 07 января 2026
- */
-
 @Component
 public class MainController {
 
@@ -180,7 +166,7 @@ public class MainController {
         priorityColumn.setSortable(true);
         dueDateColumn.setSortable(true);
 
-        // Слушатель сортировки через ObservableList
+        // ✅ ИСПРАВЛЕНО: Использование InvalidationListener вместо ListChangeListener
         tasksTable.getSortOrder().addListener((javafx.beans.InvalidationListener) obs -> {
             if (!tasksTable.getSortOrder().isEmpty()) {
                 sortTasks();
@@ -319,7 +305,7 @@ public class MainController {
                 return;
             }
 
-            Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+            javafx.scene.control.Alert confirmAlert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
             confirmAlert.setTitle("Подтверждение");
             confirmAlert.setHeaderText(null);
             confirmAlert.setContentText("Удалить задачу: \"" + selected.getTitle() + "\"?");
@@ -683,10 +669,10 @@ public class MainController {
     }
 
     /**
-     * Показать алерт
+     * Показать алерт (использует JavaFX Alert)
      */
     private void showAlert(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
