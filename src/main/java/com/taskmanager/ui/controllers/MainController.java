@@ -181,7 +181,7 @@ public class MainController {
         dueDateColumn.setSortable(true);
 
         // Слушатель сортировки через ObservableList
-        tasksTable.getSortOrder().addListener((obs, oldVal, newVal) -> {
+        tasksTable.getSortOrder().addListener((javafx.beans.InvalidationListener) obs -> {
             if (!tasksTable.getSortOrder().isEmpty()) {
                 sortTasks();
             }
