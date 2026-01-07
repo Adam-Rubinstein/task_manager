@@ -3,7 +3,7 @@ package com.taskmanager.ui.controllers;
 import com.taskmanager.service.TaskService;
 import com.taskmanager.service.AlertService;
 import com.taskmanager.service.AudioFileService;
-import com.taskmanager.service.ThemeManager;
+import com.taskmanager.config.ThemeManager;
 import com.taskmanager.model.Task;
 import com.taskmanager.model.TaskStatus;
 import com.taskmanager.model.RecurrenceType;
