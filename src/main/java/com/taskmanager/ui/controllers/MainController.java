@@ -645,6 +645,92 @@ public class MainController {
                 dueDateTimeInput.setText(formatted);
             }
         });
+        // ОБРАБОТЧИК НА ПОТЕРЮ ФОКУСА
+        dueDateTimeInput.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+            if (wasFocused && !isFocused) {
+                autoFillDateTime();
+            }
+        });
+
+        // ОБРАБОТЧИК НА ENTER
+        dueDateTimeInput.setOnKeyPressed(event -> {
+            if (event.getCode() == javafx.scene.input.KeyCode.ENTER) {
+                autoFillDateTime();
+            }
+        });
+    }
+
+    /**
+     * АВТОЗАПОЛНЕНИЕ ГОДА И ВРЕМЕНИ
+     */
+    private void autoFillDateTime() {
+        String digitsOnly = dueDateTimeInput.getText().replaceAll("[^0-9]", "");
+        if (digitsOnly.isEmpty()) {
+            return;
+        }
+
+        LocalDate now = LocalDate.now();
+        int currentYear = now.getYear();
+        int currentMonth = now.getMonthValue();
+        int currentDay = now.getDayOfMonth();
+        int day = currentDay;
+        int month = currentMonth;
+        int year = currentYear;
+        int hour = 0;
+        int minute = 0;
+
+        // Парсим ДЕНЬ
+        if (digitsOnly.length() >= 2) {
+            int d = Integer.parseInt(digitsOnly.substring(0, 2));
+            if (d >= 1 && d <= 31) {
+                day = d;
+            }
+        }
+
+        // Парсим МЕСЯЦ
+        if (digitsOnly.length() >= 4) {
+            int m = Integer.parseInt(digitsOnly.substring(2, 4));
+            if (m >= 1 && m <= 12) {
+                month = m;
+            }
+        }
+
+        // Парсим ГОД
+        if (digitsOnly.length() >= 8) {
+            int y = Integer.parseInt(digitsOnly.substring(4, 8));
+            if (y >= 1900 && y <= 9999) {
+                year = y;
+            }
+        }
+
+        // Парсим ЧАСЫ
+        if (digitsOnly.length() >= 10) {
+            int h = Integer.parseInt(digitsOnly.substring(8, 10));
+            if (h >= 0 && h <= 23) {
+                hour = h;
+            }
+        }
+
+        // Парсим МИНУТЫ
+        if (digitsOnly.length() >= 12) {
+            int min = Integer.parseInt(digitsOnly.substring(10, 12));
+            if (min >= 0 && min <= 59) {
+                minute = min;
+            }
+        }
+
+        // ПРОВЕРКА ВАЛИДНОСТИ ДАТЫ
+        try {
+            LocalDate.of(year, month, day);
+        } catch (java.time.DateTimeException e) {
+            day = currentDay;
+            month = currentMonth;
+            year = currentYear;
+        }
+
+        String formatted = String.format("%02d.%02d.%04d %02d:%02d",
+                day, month, year, hour, minute);
+        dueDateTimeInput.setText(formatted);
     }
 
     /**
