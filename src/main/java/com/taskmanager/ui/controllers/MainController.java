@@ -480,6 +480,25 @@ public class MainController {
             ScrollPane scrollPane = new ScrollPane(mainVBox);
             scrollPane.setFitToWidth(true);
             javafx.scene.Scene scene = new javafx.scene.Scene(scrollPane);
+
+            ScrollPane scrollPane = new ScrollPane(mainVBox);
+            scrollPane.setFitToWidth(true);
+
+            // ПРИМЕНЯЕМ ТЕМУ К SCROLL PANE
+            if (isDarkTheme) {
+                scrollPane.setStyle("-fx-background-color: #1e1e1e; -fx-control-inner-background: #2b2b2b;");
+            }
+
+            javafx.scene.Scene scene = new javafx.scene.Scene(scrollPane);
+
+            // ПРИМЕНЯЕМ ТЕМУ К САМОЙ СЦЕНЕ
+            if (isDarkTheme) {
+                scene.setFill(javafx.scene.paint.Color.web("#1e1e1e"));
+            }
+
+            detailStage.setScene(scene);
+            detailStage.show();
+
             detailStage.setScene(scene);
             detailStage.show();
 
