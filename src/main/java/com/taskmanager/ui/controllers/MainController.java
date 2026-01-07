@@ -87,7 +87,7 @@ public class MainController {
             // Инициализация ComboBox для типа повтора
             recurrenceCombo.setItems(FXCollections.observableArrayList(RecurrenceType.values()));
             recurrenceCombo.setValue(RecurrenceType.NONE);
-            recurrenceCombo.setOnAction(e -> handleRecurrenceComboChange());
+            recurrenceCombo.setOnAction(e -> handleRecurrenceChange());
 
             // Инициализация TextField для даты
             dueDateTimeInput.setText("");
@@ -457,7 +457,7 @@ public class MainController {
     /**
      * Обработчик изменения типа рекурсии
      */
-    private void handleRecurrenceComboChange() {
+    private void handleRecurrenceChange() {
         if (isUpdatingCombo) return;
 
         RecurrenceType selected = recurrenceCombo.getValue();
