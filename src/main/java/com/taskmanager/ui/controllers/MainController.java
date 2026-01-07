@@ -390,6 +390,29 @@ public class MainController {
                 dateField.setText(task.getDueDate().format(inputFormatter));
             }
 
+            dateField.textProperty().addListener((obs, oldValue, newValue) -> {
+                String digitsOnly = newValue.replaceAll("[^0-9]", "");
+                if (digitsOnly.length() > 12) {
+                    digitsOnly = digitsOnly.substring(0, 12);
+                }
+                String formatted = formatDateTime(digitsOnly);
+                if (!formatted.equals(newValue)) {
+                    dateField.setText(formatted);
+                }
+            });
+
+            dateField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+                if (wasFocused && !isFocused) {
+                    autoFillDateTimeForField(dateField);
+                }
+            });
+
+            dateField.setOnKeyPressed(event -> {
+                if (event.getCode() == javafx.scene.input.KeyCode.ENTER) {
+                    autoFillDateTimeForField(dateField);
+                }
+            });
+
             // Статус
             Label statusLabel = new Label("Статус:");
             statusLabel.setStyle("-fx-font-weight: bold;");
@@ -788,6 +811,73 @@ public class MainController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    /**
+     * АВТОЗАПОЛНЕНИЕ ДЛЯ ЛЮБОГО TextField (универсальный)
+     */
+    private void autoFillDateTimeForField(TextField field) {
+        String digitsOnly = field.getText().replaceAll("[^0-9]", "");
+        if (digitsOnly.isEmpty()) {
+            return;
+        }
+
+        LocalDate now = LocalDate.now();
+        int currentYear = now.getYear();
+        int currentMonth = now.getMonthValue();
+        int currentDay = now.getDayOfMonth();
+        int day = currentDay;
+        int month = currentMonth;
+        int year = currentYear;
+        int hour = 0;
+        int minute = 0;
+
+        if (digitsOnly.length() >= 2) {
+            int d = Integer.parseInt(digitsOnly.substring(0, 2));
+            if (d >= 1 && d <= 31) {
+                day = d;
+            }
+        }
+
+        if (digitsOnly.length() >= 4) {
+            int m = Integer.parseInt(digitsOnly.substring(2, 4));
+            if (m >= 1 && m <= 12) {
+                month = m;
+            }
+        }
+
+        if (digitsOnly.length() >= 8) {
+            int y = Integer.parseInt(digitsOnly.substring(4, 8));
+            if (y >= 1900 && y <= 9999) {
+                year = y;
+            }
+        }
+
+        if (digitsOnly.length() >= 10) {
+            int h = Integer.parseInt(digitsOnly.substring(8, 10));
+            if (h >= 0 && h <= 23) {
+                hour = h;
+            }
+        }
+
+        if (digitsOnly.length() >= 12) {
+            int min = Integer.parseInt(digitsOnly.substring(10, 12));
+            if (min >= 0 && min <= 59) {
+                minute = min;
+            }
+        }
+
+        try {
+            LocalDate.of(year, month, day);
+        } catch (java.time.DateTimeException e) {
+            day = currentDay;
+            month = currentMonth;
+            year = currentYear;
+        }
+
+        String formatted = String.format("%02d.%02d.%04d %02d:%02d",
+                day, month, year, hour, minute);
+        field.setText(formatted);
     }
 
     /**
