@@ -157,7 +157,7 @@ public class MainController {
             return new javafx.beans.property.SimpleStringProperty("-");
         });
 
-        // ✅ Применить стиль подсвечивания задач на основе категории
+        // Применить стиль подсвечивания задач на основе категории
         tasksTable.setRowFactory(tableView -> new TableRow<Task>() {
             @Override
             protected void updateItem(Task task, boolean empty) {
@@ -189,7 +189,7 @@ public class MainController {
 
         intervalContainer.setVisible(false);
 
-        // ✅ Загрузить задачи при запуске (NEW + IN_PROGRESS по умолчанию)
+        // Загрузить задачи при запуске (NEW + IN_PROGRESS по умолчанию)
         loadTasksByStatuses(TaskStatus.NEW, TaskStatus.IN_PROGRESS);
         updateAlertsCount();
 
@@ -221,7 +221,7 @@ public class MainController {
                 ? recurrenceCombo.getValue()
                 : RecurrenceType.NONE;
 
-        // ✅ Парсим дату и время из маскированного поля
+        // Парсим дату и время из маскированного поля
         LocalDateTime dueDate;
         String dateTimeStr = dueDateTimeInput.getText().trim();
 
@@ -507,7 +507,7 @@ public class MainController {
                         newFullDescription = newTitle + "\n" + newDescRest;
                     }
 
-                    // ✅ Парсим дату и время
+                    // Парсим дату и время
                     LocalDateTime newDueDate = null;
                     String dateTimeStr = dueDateTimeField.getText().trim();
                     if (!dateTimeStr.isEmpty() && dateTimeStr.length() == 16) {
