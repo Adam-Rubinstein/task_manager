@@ -24,21 +24,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-/**
- * ✅ ФИНАЛЬНАЯ ВЕРСИЯ MainController.java
- *
- * Версия: 3.2 (БЕЗ ОШИБОК - ИСПРАВЛЕНО СТОЛКНОВЕНИЕ ИМЁН ALERT)
- *
- * Исправлено:
- * - ✅ Использование javafx.scene.control.Alert вместо com.taskmanager.model.Alert
- * - ✅ InvalidationListener вместо ListChangeListener (строка 184)
- * - ✅ Импорт ThemeManager из config (правильный путь)
- * - ✅ Все методы работают корректно
- * - ✅ Полная обработка ошибок
- *
- * Дата: 07 января 2026
- */
-
 @Component
 public class MainController {
 
