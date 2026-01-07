@@ -16,635 +16,505 @@ Task Manager — настольное приложение для управле
 ✅ Редактирование задач через всплывающее окно
 
 Слоистая архитектура
-text
-┌──────────────────────────────────────────┐
-│ Presentation Layer (UI)                  │
-│ ├─ JavaFX UI                             │
-│ │  ├─ main-view.fxml                     │
-│ │  └─ MainController.java                │
-│ └─ Темы оформления (CSS)                 │
-└──────────────────┬───────────────────────┘
-                   │
-┌──────────────────▼───────────────────────┐
-│ Service Layer (Business Logic)          │
-│ ├─ TaskService                           │
-│ │  ├─ createTask()                       │
-│ │  ├─ updateTask()                       │
-│ │  ├─ deleteTask()                       │
-│ │  ├─ getTasksByStatus()                 │
-│ │  └─ getAllTasks()                      │
-│ ├─ AlertService                          │
-│ │  ├─ createAlert()                      │
-│ │  ├─ getUnreadAlerts()                  │
-│ │  └─ markAsRead()                       │
-│ └─ AudioFileService                      │
-│    ├─ saveAudioFile()                    │
-│    ├─ getAudioFile()                     │
-│    └─ deleteExpiredAudio()               │
-└──────────────────┬───────────────────────┘
-                   │
-┌──────────────────▼───────────────────────┐
-│ Data Access Layer (DAO/Repository)      │
-│ ├─ TaskRepository                        │
-│ ├─ AlertRepository                       │
-│ └─ AudioFileRepository                   │
-└──────────────────┬───────────────────────┘
-                   │
-┌──────────────────▼───────────────────────┐
-│ Persistence Layer                        │
-│ └─ PostgreSQL + Hibernate/JPA            │
-│    ├─ tasks table                        │
-│    ├─ alerts table                       │
-│    └─ audio_files table                  │
-└──────────────────────────────────────────┘
+Приложение построено на основе трёхслойной архитектуры:
+
+1. Presentation Layer (UI)
+JavaFX UI - графический интерфейс
+
+main-view.fxml - разметка интерфейса
+
+MainController.java - логика взаимодействия с UI
+
+Темы оформления - CSS стили для светлой/тёмной темы
+
+2. Service Layer (Business Logic)
+TaskService - управление задачами
+
+createTask() - создание новой задачи
+
+updateTask() - изменение существующей задачи
+
+deleteTask() - удаление задачи
+
+getTasksByStatus() - поиск по статусу
+
+getAllTasks() - получить все задачи
+
+AlertService - управление оповещениями
+
+createAlert() - создание оповещения
+
+getUnreadAlerts() - получить непрочитанные
+
+markAsRead() - отметить как прочитанное
+
+AudioFileService - работа с аудиофайлами
+
+saveAudioFile() - сохранить аудиозапись
+
+getAudioFile() - получить аудио по задаче
+
+deleteExpiredAudio() - удалить старые аудио
+
+3. Data Access Layer (DAO/Repository)
+TaskRepository - Spring Data JPA для работы с задачами
+
+AlertRepository - Spring Data JPA для оповещений
+
+AudioFileRepository - Spring Data JPA для аудиофайлов
+
+4. Persistence Layer
+PostgreSQL - реляционная база данных
+
+Hibernate/JPA - маппинг объектов на таблицы
+
+Таблица tasks - все задачи
+
+Таблица alerts - все оповещения
+
+Таблица audio_files - все аудиофайлы
+
 Модульная структура проекта
+Проект организован по функциональным пакетам:
+
 text
 com.taskmanager/
-│
-├── TaskManagerApp.java                    # Entry point (@SpringBootApplication)
+├── TaskManagerApp.java
+│   Точка входа приложения (@SpringBootApplication)
+│   Инициализирует Spring контекст и JavaFX окно
 │
 ├── config/
-│   ├── DatabaseConfig.java                # БД конфигурация
-│   └── ThemeManager.java                  # Управление темами (если есть)
+│   ├── DatabaseConfig.java
+│   │   Конфигурация подключения к PostgreSQL
+│   │
+│   └── ThemeManager.java
+│       Управление темами (если используется)
 │
-├── dao/ (Data Access)
-│   ├── TaskRepository.java                # JpaRepository<Task, Long>
-│   ├── AlertRepository.java               # JpaRepository<Alert, Long>
-│   └── AudioFileRepository.java           # JpaRepository<AudioFile, Long>
+├── dao/
+│   ├── TaskRepository.java
+│   │   Spring Data JPA репозиторий для Task
+│   │   Наследует JpaRepository<Task, Long>
+│   │
+│   ├── AlertRepository.java
+│   │   Spring Data JPA репозиторий для Alert
+│   │
+│   └── AudioFileRepository.java
+│       Spring Data JPA репозиторий для AudioFile
 │
-├── model/ (Entity классы)
-│   ├── Task.java                          # @Entity задача
-│   ├── Alert.java                         # @Entity оповещение
-│   ├── AudioFile.java                     # @Entity аудиофайл
-│   ├── TaskStatus.java                    # enum (NEW, IN_PROGRESS, ...)
-│   ├── AlertType.java                     # enum (NOTIFICATION, REMINDER, ...)
-│   └── RecurrenceType.java                # enum (NONE, DAILY, WEEKLY, ...)
+├── model/
+│   ├── Task.java
+│   │   @Entity - сущность задачи
+│   │   Поля: id, title, description, dueDate, status, priority
+│   │
+│   ├── Alert.java
+│   │   @Entity - сущность оповещения
+│   │   Поля: id, taskId, alertTime, type, message, isRead
+│   │
+│   ├── AudioFile.java
+│   │   @Entity - сущность аудиофайла
+│   │   Поля: id, taskId, audioData, durationSeconds, fileName
+│   │
+│   ├── TaskStatus.java
+│   │   Enum: NEW, IN_PROGRESS, COMPLETED, CANCELLED
+│   │
+│   ├── AlertType.java
+│   │   Enum: NOTIFICATION, REMINDER, DEADLINE
+│   │
+│   └── RecurrenceType.java
+│       Enum: NONE, DAILY, WEEKLY, MONTHLY, CUSTOM
 │
-├── service/ (Business Logic)
-│   ├── TaskService.java                   # Бизнес-логика задач
-│   ├── AlertService.java                  # Бизнес-логика оповещений
-│   └── AudioFileService.java              # Работа с аудиофайлами
+├── service/
+│   ├── TaskService.java
+│   │   Бизнес-логика работы с задачами
+│   │   Использует TaskRepository для сохранения
+│   │
+│   ├── AlertService.java
+│   │   Бизнес-логика работы с оповещениями
+│   │   Использует AlertRepository для сохранения
+│   │
+│   └── AudioFileService.java
+│       Бизнес-логика работы с аудиофайлами
+│       Использует AudioFileRepository для сохранения
 │
-└── ui/controllers/
-    └── MainController.java                # JavaFX контроллер (@Component)
+└── ui/
+    └── controllers/
+        └── MainController.java
+            JavaFX контроллер (@Component)
+            Связывает UI с сервисным слоем
+            Обрабатывает все действия пользователя
 Поток данных
-Создание задачи
-text
-┌─────────────────────────┐
-│  User вводит данные     │
-│  - Название             │
-│  - Описание             │
-│  - Приоритет            │
-│  - Дата (0812 → auto)   │
-│  - Тип повтора          │
-└────────────┬────────────┘
-             │ нажимает "Создать задачу"
-┌────────────▼──────────────────────────┐
-│  MainController                       │
-│  @FXML handleCreateTask()             │
-│  ├─ Валидация полей                   │
-│  ├─ Парсинг даты (parseDateTimeInput) │
-│  └─ Вызов TaskService                 │
-└────────────┬──────────────────────────┘
-             │
-┌────────────▼──────────────────────────┐
-│  TaskService                          │
-│  createTask(title, desc, priority,    │
-│             dueDate, recurrenceType)  │
-│  ├─ Создаёт объект Task              │
-│  ├─ Устанавливает status = NEW       │
-│  └─ Вызывает TaskRepository.save()   │
-└────────────┬──────────────────────────┘
-             │
-┌────────────▼──────────────────────────┐
-│  TaskRepository.save(task)            │
-│  └─ Spring Data JPA                   │
-└────────────┬──────────────────────────┘
-             │ SQL INSERT
-┌────────────▼──────────────────────────┐
-│  PostgreSQL - tasks table             │
-│  INSERT INTO tasks                    │
-│    (title, description, due_date,     │
-│     priority, status, created_at)     │
-│  VALUES (...)                         │
-└────────────┬──────────────────────────┘
-             │
-┌────────────▼──────────────────────────┐
-│  MainController                       │
-│  ├─ Добавляет задачу в ObservableList │
-│  ├─ Таблица обновляется автоматически│
-│  └─ Показывает Alert "Успех!"         │
-└───────────────────────────────────────┘
-Редактирование задачи (двойной клик)
-text
-┌─────────────────────────┐
-│  User делает двойной    │
-│  клик на строке задачи  │
-└────────────┬────────────┘
-             │
-┌────────────▼──────────────────────────┐
-│  MainController                       │
-│  handleDoubleClickTask()              │
-│  └─ Вызывает openTaskDetailWindow()  │
-└────────────┬──────────────────────────┘
-             │
-┌────────────▼──────────────────────────┐
-│  Создаётся новое окно (Stage)         │
-│  ├─ VBox с полями редактирования      │
-│  ├─ TextField (название)              │
-│  ├─ TextArea (описание)               │
-│  ├─ Spinner (приоритет)               │
-│  ├─ TextField (дата) + autoFill       │
-│  ├─ ComboBox (статус)                 │
-│  └─ Кнопки (Сохранить / Отмена)       │
-└────────────┬──────────────────────────┘
-             │ User нажимает "Сохранить"
-┌────────────▼──────────────────────────┐
-│  saveButton.setOnAction()             │
-│  ├─ Обновляет поля Task объекта       │
-│  ├─ Вызывает TaskService.updateTask() │
-│  └─ Обновляет строку в таблице        │
-└────────────┬──────────────────────────┘
-             │
-┌────────────▼──────────────────────────┐
-│  TaskRepository.save(task)            │
-│  └─ SQL UPDATE tasks SET ... WHERE id │
-└────────────┬──────────────────────────┘
-             │
-┌────────────▼──────────────────────────┐
-│  Окно закрывается                     │
-│  Таблица обновлена                    │
-│  Alert "Задача обновлена!"            │
-└───────────────────────────────────────┘
+Сценарий 1: Создание новой задачи
+Этап 1 - Ввод данных
+
+Пользователь заполняет форму на левой панели:
+
+Название (опционально)
+
+Описание (обязательно)
+
+Приоритет (0-10)
+
+Дата выполнения (автозаполнение: 0812 → 08.12.2026 00:00)
+
+Тип повтора
+
+Нажимает кнопку "Создать задачу"
+
+Этап 2 - Обработка в контроллере
+
+Вызывается метод MainController.handleCreateTask()
+
+Валидация полей ввода
+
+Парсинг даты через autoFillDateTime()
+
+Вызов TaskService.createTask()
+
+Этап 3 - Сервис
+
+Сервис TaskService создаёт объект Task
+
+Устанавливает статус = NEW
+
+Устанавливает время создания
+
+Вызывает TaskRepository.save()
+
+Этап 4 - Сохранение в БД
+
+Repository выполняет SQL INSERT в таблицу tasks
+
+PostgreSQL вставляет строку в базу
+
+Возвращает созданный объект с присвоенным ID
+
+Этап 5 - Обновление UI
+
+Контроллер добавляет задачу в ObservableList
+
+TableView автоматически обновляется
+
+Пользователь видит новую задачу в таблице
+
+Показывается Alert "Задача успешно создана"
+
+Сценарий 2: Редактирование задачи (двойной клик)
+Этап 1 - Выбор задачи
+
+Пользователь делает двойной клик на строке задачи в таблице
+
+Срабатывает обработчик handleDoubleClickTask()
+
+Этап 2 - Открытие окна редактирования
+
+Создаётся новое окно Stage
+
+Заполняются поля редактирования с текущими значениями:
+
+TextField для названия
+
+TextArea для описания
+
+Spinner для приоритета
+
+TextField для даты (с автозаполнением)
+
+ComboBox для статуса
+
+Кнопки "Сохранить" и "Отмена"
+
+Этап 3 - Редактирование
+
+Пользователь изменяет нужные поля
+
+Автозаполнение даты работает и в этом окне
+
+Тема окна применяется автоматически (светлая или тёмная)
+
+Этап 4 - Сохранение
+
+Пользователь нажимает "Сохранить"
+
+Обновляются поля объекта Task
+
+Вызывается TaskService.updateTask()
+
+Сервис устанавливает updatedAt = NOW()
+
+Repository сохраняет через save()
+
+Этап 5 - Обновление БД
+
+Выполняется SQL UPDATE в таблицу tasks
+
+WHERE условие по id задачи
+
+Строка в БД обновляется
+
+Этап 6 - Обновление UI
+
+Окно редактирования закрывается
+
+Строка в таблице обновляется автоматически
+
+Пользователь видит изменения
+
+Alert "Задача обновлена"
+
 Модель данных (Entity классы)
 Task (таблица: tasks)
-java
-@Entity
-@Table(name = "tasks")
-public class Task {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;                        // Primary Key
-    
-    @Column(nullable = false)
-    private String title;                   // Название задачи
-    
-    @Column(columnDefinition = "TEXT")
-    private String description;             // Описание
-    
-    private LocalDateTime dueDate;          // Срок выполнения
-    private LocalDateTime createdAt;        // Дата создания
-    private LocalDateTime updatedAt;        // Дата обновления
-    
-    @Enumerated(EnumType.STRING)
-    private TaskStatus status;              // NEW, IN_PROGRESS, COMPLETED, CANCELLED
-    
-    private Integer priority;               // 0-10
-    
-    @Enumerated(EnumType.STRING)
-    private RecurrenceType recurrenceType;  // Тип повтора (резерв)
-    
-    private Integer recurrenceInterval;     // Интервал повтора (дни)
-    
-    private Integer version;                // Для оптимистичной блокировки
-    
-    // Методы для UI (цветовая подсветка)
-    public boolean isOverdue() {
-        return dueDate != null && 
-               dueDate.isBefore(LocalDateTime.now()) && 
-               status != TaskStatus.COMPLETED;
-    }
-    
-    public boolean isTodayOrTomorrow() {
-        // логика проверки
-    }
-    
-    public boolean isThisWeek() {
-        // логика проверки
-    }
-}
+Главная сущность приложения - представляет одну задачу в системе.
+
+Поля:
+
+id (BIGINT) - уникальный идентификатор (Primary Key)
+
+title (VARCHAR 255) - название/заголовок задачи
+
+description (TEXT) - подробное описание задачи
+
+due_date (TIMESTAMP) - срок выполнения
+
+created_at (TIMESTAMP) - когда задача была создана
+
+updated_at (TIMESTAMP) - когда задача была последний раз изменена
+
+status (VARCHAR 50) - текущий статус (NEW, IN_PROGRESS, COMPLETED, CANCELLED)
+
+priority (INTEGER, 0-10) - приоритет (0 = низкий, 10 = высокий)
+
+recurrence_type (VARCHAR 50) - тип повтора (для будущих версий)
+
+recurrence_interval (INTEGER) - интервал повтора в днях
+
+version (INTEGER) - для оптимистичной блокировки
+
+Методы для UI:
+
+isOverdue() - просрочена ли задача
+
+isTodayOrTomorrow() - задача на сегодня или завтра
+
+isThisWeek() - задача на текущую неделю
+
 Alert (таблица: alerts)
-java
-@Entity
-@Table(name = "alerts")
-public class Alert {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    
-    @ManyToOne
-    @JoinColumn(name = "task_id")
-    private Task task;                      // FK → tasks.id
-    
-    private LocalDateTime alertTime;        // Когда сработать
-    
-    @Enumerated(EnumType.STRING)
-    private AlertType type;                 // NOTIFICATION, REMINDER, DEADLINE
-    
-    private String message;                 // Текст оповещения
-    
-    private Boolean isRead = false;         // Прочитано ли
-    
-    private LocalDateTime createdAt;        // Дата создания
-}
+Оповещения и напоминания, связанные с задачами.
+
+Поля:
+
+id (BIGINT) - уникальный идентификатор
+
+task_id (BIGINT) - Foreign Key на задачу (связь Many-to-One)
+
+alert_time (TIMESTAMP) - когда должно сработать оповещение
+
+type (VARCHAR 50) - тип: NOTIFICATION, REMINDER, DEADLINE
+
+message (TEXT) - текст сообщения оповещения
+
+is_read (BOOLEAN) - прочитано ли оповещение
+
+created_at (TIMESTAMP) - когда было создано оповещение
+
+Связь:
+
+Один Alert связан с одной Task
+
+Одна Task может иметь много Alert
+
 AudioFile (таблица: audio_files)
-java
-@Entity
-@Table(name = "audio_files")
-public class AudioFile {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    
-    @OneToOne
-    @JoinColumn(name = "task_id", unique = true)
-    private Task task;                      // FK → tasks.id (UNIQUE)
-    
-    @Lob
-    private byte[] audioData;               // BYTEA (бинарные данные)
-    
-    private Integer durationSeconds;        // Длительность
-    private String fileName;                // Имя файла
-    private LocalDateTime createdAt;        // Дата загрузки
-    private LocalDateTime expiresAt;        // Дата удаления (30 дней)
-}
+Хранилище аудиозаписей, связанных с задачами.
+
+Поля:
+
+id (BIGINT) - уникальный идентификатор
+
+task_id (BIGINT) - Foreign Key на задачу (UNIQUE - один аудио на задачу)
+
+audio_data (BYTEA) - бинарные данные аудиофайла
+
+duration_seconds (INTEGER) - длительность записи в секундах
+
+file_name (VARCHAR 255) - имя файла
+
+created_at (TIMESTAMP) - когда был загружен файл
+
+expires_at (TIMESTAMP) - когда файл будет удалён (по умолчанию +30 дней)
+
+Связь:
+
+One-to-One с Task (один аудиофайл на одну задачу максимум)
+
 Сервисный слой
 TaskService
+Основной сервис для работы с задачами.
+
 Основные методы:
 
-java
-@Service
-public class TaskService {
-    
-    @Autowired
-    private TaskRepository taskRepository;
-    
-    // Создать задачу
-    public Task createTask(String title, String description, 
-                          Integer priority, LocalDateTime dueDate,
-                          RecurrenceType recurrenceType) {
-        Task task = new Task();
-        task.setTitle(title);
-        task.setDescription(description);
-        task.setPriority(priority);
-        task.setDueDate(dueDate);
-        task.setStatus(TaskStatus.NEW);
-        task.setRecurrenceType(recurrenceType);
-        task.setCreatedAt(LocalDateTime.now());
-        return taskRepository.save(task);
-    }
-    
-    // Получить по ID
-    public Task getTask(Long id) {
-        return taskRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Task not found"));
-    }
-    
-    // Все задачи
-    public List<Task> getAllTasks() {
-        return taskRepository.findAll();
-    }
-    
-    // По статусу
-    public List<Task> getTasksByStatus(TaskStatus status) {
-        return taskRepository.findByStatus(status);
-    }
-    
-    // Обновить задачу
-    public Task updateTask(Task task) {
-        task.setUpdatedAt(LocalDateTime.now());
-        return taskRepository.save(task);
-    }
-    
-    // Обновить статус
-    public void updateTaskStatus(Long id, TaskStatus status) {
-        Task task = getTask(id);
-        task.setStatus(status);
-        task.setUpdatedAt(LocalDateTime.now());
-        taskRepository.save(task);
-    }
-    
-    // Удалить задачу
-    public void deleteTask(Long id) {
-        taskRepository.deleteById(id);
-    }
-    
-    // Важные задачи (приоритет > 5)
-    public List<Task> getImportantTasks() {
-        return taskRepository.findByPriorityGreaterThan(5);
-    }
-    
-    // Активные (не завершённые)
-    public List<Task> getActiveTasks() {
-        return taskRepository.findByStatusNot(TaskStatus.COMPLETED);
-    }
-}
+Метод	Параметры	Возвращает	Описание
+createTask()	title, description, priority, dueDate, recurrenceType	Task	Создаёт новую задачу
+getTask()	id	Task	Получает задачу по ID
+getAllTasks()	—	List<Task>	Возвращает все задачи
+getTasksByStatus()	status	List<Task>	Фильтр по статусу
+updateTask()	task	Task	Сохраняет изменения задачи
+updateTaskStatus()	id, status	void	Меняет статус задачи
+deleteTask()	id	void	Удаляет задачу по ID
+getImportantTasks()	—	List<Task>	Задачи с приоритетом > 5
+getActiveTasks()	—	List<Task>	Не завершённые задачи
+Используемые компоненты:
+
+@Autowired TaskRepository - для доступа к БД
+
+@Service - аннотация Spring для компонента сервиса
+
 AlertService
+Сервис для работы с оповещениями.
+
 Основные методы:
 
-java
-@Service
-public class AlertService {
-    
-    @Autowired
-    private AlertRepository alertRepository;
-    
-    // Создать оповещение
-    public Alert createAlert(Task task, LocalDateTime alertTime,
-                            AlertType type, String message) {
-        Alert alert = new Alert();
-        alert.setTask(task);
-        alert.setAlertTime(alertTime);
-        alert.setType(type);
-        alert.setMessage(message);
-        alert.setIsRead(false);
-        alert.setCreatedAt(LocalDateTime.now());
-        return alertRepository.save(alert);
-    }
-    
-    // Непрочитанные оповещения
-    public List<Alert> getUnreadAlerts() {
-        return alertRepository.findByIsReadFalse();
-    }
-    
-    // Отметить как прочитанное
-    public void markAsRead(Long alertId) {
-        Alert alert = alertRepository.findById(alertId)
-            .orElseThrow(() -> new RuntimeException("Alert not found"));
-        alert.setIsRead(true);
-        alertRepository.save(alert);
-    }
-    
-    // Удалить старые оповещения
-    public void deleteOldAlerts(LocalDateTime before) {
-        alertRepository.deleteByCreatedAtBefore(before);
-    }
-}
+Метод	Параметры	Возвращает	Описание
+createAlert()	task, alertTime, type, message	Alert	Создаёт оповещение
+getUnreadAlerts()	—	List<Alert>	Непрочитанные оповещения
+markAsRead()	alertId	void	Отмечает как прочитанное
+deleteOldAlerts()	before	void	Удаляет старые оповещения
 AudioFileService
+Сервис для работы с аудиофайлами.
+
 Основные методы:
 
-java
-@Service
-public class AudioFileService {
-    
-    @Autowired
-    private AudioFileRepository audioFileRepository;
-    
-    // Сохранить аудиофайл
-    public AudioFile saveAudioFile(Task task, byte[] audioData,
-                                   String fileName, Integer duration) {
-        AudioFile audioFile = new AudioFile();
-        audioFile.setTask(task);
-        audioFile.setAudioData(audioData);
-        audioFile.setFileName(fileName);
-        audioFile.setDurationSeconds(duration);
-        audioFile.setCreatedAt(LocalDateTime.now());
-        audioFile.setExpiresAt(LocalDateTime.now().plusDays(30));
-        return audioFileRepository.save(audioFile);
-    }
-    
-    // Получить по задаче
-    public AudioFile getAudioFile(Task task) {
-        return audioFileRepository.findByTask(task)
-            .orElse(null);
-    }
-    
-    // Удалить истёкшие
-    public void deleteExpiredAudio() {
-        LocalDateTime now = LocalDateTime.now();
-        audioFileRepository.deleteByExpiresAtBefore(now);
-    }
-}
+Метод	Параметры	Возвращает	Описание
+saveAudioFile()	task, audioData, fileName, duration	AudioFile	Сохраняет аудиофайл
+getAudioFile()	task	AudioFile	Получает аудио по задаче
+deleteExpiredAudio()	—	void	Удаляет истёкшие аудио
 UI-слой (JavaFX)
-main-view.fxml
-Структура:
+Компоненты main-view.fxml
+Левая панель (форма создания):
 
-xml
-<VBox fx:id="rootPane">
-    <!-- Меню бар -->
-    <MenuBar>
-        <Menu text="Файл">
-            <MenuItem text="Выход" onAction="#handleExit"/>
-        </Menu>
-    </MenuBar>
-    
-    <HBox>
-        <!-- Левая панель: форма создания -->
-        <VBox>
-            <Label text="СОЗДАНИЕ ЗАДАЧИ"/>
-            <ScrollPane>
-                <VBox>
-                    <Label text="Название:"/>
-                    <TextField fx:id="taskNameInput"/>
-                    
-                    <Label text="Описание:" style="-fx-text-fill: red"/>
-                    <TextArea fx:id="taskDescriptionInput"/>
-                    
-                    <Label text="Приоритет (0-10):"/>
-                    <Spinner fx:id="prioritySpinner"/>
-                    
-                    <Label text="Дата выполнения:"/>
-                    <TextField fx:id="dueDateTimeInput"/>
-                    
-                    <Label text="Тип повтора:"/>
-                    <ComboBox fx:id="recurrenceCombo"/>
-                    
-                    <VBox fx:id="intervalContainer" visible="false">
-                        <Label text="Интервал (дней):"/>
-                        <Spinner fx:id="intervalSpinner"/>
-                    </VBox>
-                </VBox>
-            </ScrollPane>
-            
-            <Button fx:id="createTaskButtonLeft" 
-                    text="Создать задачу"
-                    onAction="#handleCreateTask"/>
-        </VBox>
-        
-        <!-- Правая панель: таблица + оповещения -->
-        <VBox>
-            <HBox>
-                <Button text="Удалить задачу" 
-                        onAction="#handleDeleteTask"/>
-                <ComboBox fx:id="statusFilter"
-                          onAction="#handleFilterByStatus"/>
-                <Region HBox.hgrow="ALWAYS"/>
-                <Button fx:id="themeToggleButton"
-                        onAction="#handleToggleTheme"
-                        text="🌙"/>
-            </HBox>
-            
-            <TableView fx:id="tasksTable">
-                <columns>
-                    <TableColumn fx:id="titleColumn" text="Название"/>
-                    <TableColumn fx:id="statusColumn" text="Статус"/>
-                    <TableColumn fx:id="priorityColumn" text="Приоритет"/>
-                    <TableColumn fx:id="dueDateColumn" text="Срок"/>
-                </columns>
-            </TableView>
-            
-            <Label text="ОПОВЕЩЕНИЯ"/>
-            <Label fx:id="alertsCountLabel" text="Оповещения: 0"/>
-            <ListView fx:id="alertsListView"/>
-        </VBox>
-    </HBox>
-</VBox>
-MainController.java
-Ключевые особенности:
+Заголовок "СОЗДАНИЕ ЗАДАЧИ"
 
-java
-@Component
-public class MainController {
-    
-    @Autowired
-    private TaskService taskService;
-    
-    @Autowired
-    private AlertService alertService;
-    
-    @FXML private TableView<Task> tasksTable;
-    @FXML private TextField dueDateTimeInput;
-    @FXML private Button themeToggleButton;
-    @FXML private VBox rootPane;
-    
-    private ObservableList<Task> tasksList;
-    private boolean isDarkTheme = false;
-    
-    @FXML
-    public void initialize() {
-        // Настройка компонентов
-        setupTableColumns();
-        setupTableRowFactory();  // Цветовая подсветка
-        setupDateTimeInputMask(); // Автозаполнение даты
-        
-        // Загрузка данных
-        loadTasksByStatuses(TaskStatus.NEW, TaskStatus.IN_PROGRESS);
-        updateAlertsCount();
-        
-        // Фоновое обновление оповещений (каждые 10 сек)
-        startAlertsUpdateThread();
-    }
-    
-    // ============ АВТОЗАПОЛНЕНИЕ ДАТЫ ============
-    
-    private void setupDateTimeInputMask() {
-        // Форматирование при вводе
-        dueDateTimeInput.textProperty().addListener(...);
-        
-        // Автозаполнение при потере фокуса
-        dueDateTimeInput.focusedProperty().addListener((obs, was, is) -> {
-            if (was && !is) autoFillDateTime();
-        });
-        
-        // Автозаполнение по Enter
-        dueDateTimeInput.setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.ENTER) {
-                autoFillDateTime();
-            }
-        });
-    }
-    
-    private void autoFillDateTime() {
-        // Парсинг "0812" → "08.12.2026 00:00"
-        // С валидацией (31 февраля → текущая дата)
-    }
-    
-    // ============ ЦВЕТОВАЯ ПОДСВЕТКА ============
-    
-    private void setupTableRowFactory() {
-        tasksTable.setRowFactory(tv -> new TableRow<Task>() {
-            @Override
-            protected void updateItem(Task task, boolean empty) {
-                super.updateItem(task, empty);
-                if (empty || task == null || isSelected()) {
-                    setStyle("");
-                    return;
-                }
-                
-                if (task.isOverdue()) {
-                    setStyle("-fx-background-color: rgba(255,100,100,0.15);");
-                } else if (task.isTodayOrTomorrow()) {
-                    setStyle("-fx-background-color: rgba(255,200,100,0.15);");
-                } else if (task.isThisWeek()) {
-                    setStyle("-fx-background-color: rgba(100,150,255,0.15);");
-                } else {
-                    setStyle("");
-                }
-            }
-        });
-    }
-    
-    // ============ СМЕНА ТЕМЫ ============
-    
-    @FXML
-    private void handleToggleTheme() {
-        isDarkTheme = !isDarkTheme;
-        
-        if (isDarkTheme) {
-            rootPane.setStyle("-fx-base: #2b2b2b; " +
-                            "-fx-background-color: #1e1e1e; " +
-                            "-fx-text-fill: #ffffff;");
-            tasksTable.setStyle("-fx-background-color: #2b2b2b; " +
-                              "-fx-text-fill: #ffffff;");
-            themeToggleButton.setText("☀");
-        } else {
-            rootPane.setStyle("-fx-base: #ffffff; " +
-                            "-fx-background-color: #f5f5f5;");
-            tasksTable.setStyle("-fx-background-color: #ffffff;");
-            themeToggleButton.setText("🌙");
-        }
-    }
-    
-    // ============ РЕДАКТИРОВАНИЕ ЗАДАЧИ ============
-    
-    @FXML
-    private void handleDoubleClickTask() {
-        Task selected = tasksTable.getSelectionModel().getSelectedItem();
-        if (selected != null) {
-            openTaskDetailWindow(selected);
-        }
-    }
-    
-    private void openTaskDetailWindow(Task task) {
-        Stage detailStage = new Stage();
-        VBox mainVBox = new VBox(10);
-        
-        // Применение темы к всплывающему окну
-        if (isDarkTheme) {
-            mainVBox.setStyle("...");
-        }
-        
-        // Поля редактирования с автозаполнением даты
-        TextField dateField = new TextField();
-        dateField.textProperty().addListener(...);
-        dateField.focusedProperty().addListener(...);
-        dateField.setOnKeyPressed(...);
-        
-        // Кнопка "Сохранить"
-        saveButton.setOnAction(e -> {
-            taskService.updateTask(task);
-            tasksList.set(index, task);
-            detailStage.close();
-        });
-    }
-}
-Интеграция Spring Boot + JavaFX
-text
-┌─ TaskManagerApp.java (@SpringBootApplication)
-│  └─ Запускает Spring контекст
-│     ├─ Загружает сервисы (TaskService, AlertService, AudioFileService)
-│     ├─ Создаёт репозитории (TaskRepository, AlertRepository, AudioFileRepository)
-│     ├─ Инициализирует JavaFX
-│     │  └─ FXMLLoader с controllerFactory
-│     │     └─ MainController как Spring bean (@Component)
-│     └─ Показывает главное окно (Stage)
-│
-└─ MainController получает Autowired зависимости
-   └─ Вызывает TaskService, AlertService через @Autowired
+TextField для названия задачи
+
+TextArea для описания (обязательное поле - красная метка)
+
+Spinner для приоритета (значения 0-10)
+
+TextField для даты выполнения (с автозаполнением)
+
+ComboBox для типа повтора
+
+VBox для интервала повтора (скрыт по умолчанию)
+
+Кнопка "Создать задачу"
+
+Правая панель (таблица и оповещения):
+
+Кнопка "Удалить задачу"
+
+ComboBox "Фильтр по статусу" (ALL, NEW, IN_PROGRESS, COMPLETED, CANCELLED)
+
+Кнопка смены темы (🌙/☀)
+
+TableView с колонками: Название, Статус, Приоритет, Срок
+
+Заголовок "ОПОВЕЩЕНИЯ"
+
+Label с количеством непрочитанных оповещений
+
+ListView для отображения оповещений
+
+MainController.java - ключевые методы
+Инициализация:
+
+initialize() - вызывается автоматически при загрузке FXML
+
+Настраивает колонки таблицы
+
+Устанавливает row factory для цветовой подсветки
+
+Инициализирует автозаполнение дат
+
+Загружает задачи из БД
+
+Запускает фоновый поток обновления оповещений
+
+Автозаполнение даты:
+
+setupDateTimeInputMask() - устанавливает listeners для поля даты
+
+autoFillDateTime() - парсит текст типа "0812" → "08.12.2026 00:00"
+
+Работает на потере фокуса
+
+Работает при нажатии Enter
+
+Валидирует дату (31 февраля → текущая дата)
+
+Цветовая подсветка задач:
+
+setupTableRowFactory() - создаёт custom row factory
+
+Красный фон - просроченные задачи
+
+Жёлтый фон - задачи на сегодня/завтра
+
+Синий фон - задачи на текущую неделю
+
+Без цвета - остальные задачи
+
+Смена темы:
+
+handleToggleTheme() - переключает между светлой и тёмной темой
+
+Применяется ко всем компонентам
+
+Применяется к всплывающим окнам редактирования
+
+Кнопка меняется 🌙 ↔ ☀
+
+Редактирование задачи:
+
+handleDoubleClickTask() - слушатель двойного клика
+
+openTaskDetailWindow() - открывает окно редактирования
+
+Создаёт новый Stage
+
+Заполняет поля текущими значениями
+
+Применяет текущую тему
+
+Включает автозаполнение даты
+
+На кнопке "Сохранить" вызывает update
+
+Интеграция компонентов
+Spring Boot инициализирует:
+
+Загружает application.properties с конфигом БД
+
+Создаёт Spring контекст
+
+Инициализирует сервисы (TaskService, AlertService, AudioFileService)
+
+Создаёт репозитории через Spring Data JPA
+
+Инициализирует JavaFX приложение
+
+Передаёт Spring бины в FXMLLoader через controllerFactory
+
+Создаёт MainController как Spring bean
+
+MainController получает:
+
+@Autowired TaskService - для работы с задачами
+
+@Autowired AlertService - для работы с оповещениями
+
+Вызывает методы сервисов для CRUD операций
+
 База данных (PostgreSQL)
-Схема БД
+Таблица tasks
 sql
--- Таблица задач
 CREATE TABLE tasks (
     id BIGSERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
@@ -662,8 +532,16 @@ CREATE TABLE tasks (
 CREATE INDEX idx_tasks_due_date ON tasks(due_date);
 CREATE INDEX idx_tasks_status ON tasks(status);
 CREATE INDEX idx_tasks_priority ON tasks(priority);
+Индексы для оптимизации:
 
--- Таблица оповещений
+idx_tasks_status - ускоряет фильтрацию по статусу
+
+idx_tasks_due_date - ускоряет сортировку по дате
+
+idx_tasks_priority - ускоряет поиск важных задач
+
+Таблица alerts
+sql
 CREATE TABLE alerts (
     id BIGSERIAL PRIMARY KEY,
     task_id BIGINT NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
@@ -676,8 +554,14 @@ CREATE TABLE alerts (
 
 CREATE INDEX idx_alerts_is_read ON alerts(is_read);
 CREATE INDEX idx_alerts_time ON alerts(alert_time);
+Индексы:
 
--- Таблица аудиофайлов
+idx_alerts_is_read - быстрый поиск непрочитанных оповещений
+
+idx_alerts_time - сортировка по времени
+
+Таблица audio_files
+sql
 CREATE TABLE audio_files (
     id BIGSERIAL PRIMARY KEY,
     task_id BIGINT UNIQUE NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
@@ -687,35 +571,45 @@ CREATE TABLE audio_files (
     created_at TIMESTAMP DEFAULT NOW(),
     expires_at TIMESTAMP
 );
+UNIQUE constraint:
+
+На task_id - гарантирует один аудиофайл на задачу
+
+ON DELETE CASCADE - при удалении задачи удаляется и её аудиофайл
+
 Ключевые технические решения
-Spring Data JPA — автоматический CRUD через репозитории
+Spring Data JPA - автоматический CRUD без писания SQL
 
-Hibernate + ddl-auto=update — автосоздание таблиц при запуске
+Hibernate - автоматическое маппирование объектов на таблицы
 
-FXMLLoader + Spring beans — JavaFX контроллеры как компоненты Spring
+@Service/@Component - управление зависимостями через Spring
 
-ObservableList — автообновление таблицы при изменении данных
+@Autowired - внедрение зависимостей
 
-Platform.runLater() — потокобезопасность для UI обновлений
+FXMLLoader - разделение UI разметки и логики
 
-CSS стили — динамическая смена темы через setStyle()
+ObservableList - автоматическое обновление таблицы при изменении данных
 
-PostgreSQL индексы — оптимизация запросов по статусу, дате, приоритету
+Platform.runLater() - потокобезопасное обновление UI
 
-LocalDateTime — работа с датами без временных зон
+CSS стили - динамическая смена темы
 
-Enum для статусов — типобезопасность и валидация
+LocalDateTime - работа с датами и временем
 
-Производительность и оптимизация
-Индексы БД
+Enum для статусов - типобезопасность вместо строк
+
+Оптимизация и производительность
+Индексы в PostgreSQL
+Индексы ускоряют выполнение запросов:
+
 sql
--- Ускоряют фильтрацию по статусу
+-- Ускоряют WHERE status = 'NEW'
 CREATE INDEX idx_tasks_status ON tasks(status);
 
--- Ускоряют сортировку по дате
+-- Ускоряют ORDER BY due_date
 CREATE INDEX idx_tasks_due_date ON tasks(due_date);
 
--- Ускоряют поиск важных задач
+-- Ускоряют WHERE priority > 5
 CREATE INDEX idx_tasks_priority ON tasks(priority);
 Кэширование (будущее улучшение)
 java
@@ -725,7 +619,7 @@ public List<Task> getAllTasks() {
 }
 Batch операции
 java
-// Вместо N запросов делаем 1
+// Вместо 100 запросов делаем 1
 taskRepository.saveAll(tasks);
 Безопасность
 SQL Injection
@@ -734,16 +628,20 @@ SQL Injection
 Оптимистичная блокировка
 java
 @Version
-private Integer version;  // Hibernate автоматически проверяет версию при UPDATE
+private Integer version;  // Hibernate проверяет версию при UPDATE
+Предотвращает конфликты при одновременном редактировании.
+
 Планы развития (будущие версии)
 Версия 2.0.0
 Повторяющиеся задачи (DAILY, WEEKLY, MONTHLY)
 
-Категории и теги
+Категории и теги для группировки
 
-Экспорт/импорт задач (JSON, CSV)
+Экспорт/импорт задач (JSON, CSV, XML)
 
 Системные уведомления (Windows/macOS/Linux)
+
+Горячие клавиши (Ctrl+N для новой задачи)
 
 Версия 3.0.0
 REST API для мобильного приложения
@@ -752,6 +650,8 @@ Web-интерфейс (React)
 
 Синхронизация между устройствами
 
+Облачное хранилище
+
 Версия документа: 1.5.0
-Обновлено: 08.01.2026
+Последнее обновление: 08.01.2026
 Статус: ✅ ГОТОВО
