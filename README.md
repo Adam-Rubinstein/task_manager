@@ -128,8 +128,9 @@ TaskManager/
 │   │       ├── 📁 fxml/
 │   │       │   └── 📄 main-view.fxml          # 🖼️ Разметка интерфейса
 │   │       │
-│   │       ├── 📁 css/
-│   │       │   └── 📄 style.css               # 🎨 Стили
+│   │       ├── 📁 styles/
+│   │       │   ├── 📄 light-theme.css         # 🎨 Стили
+│   │       │   └── 📄 dark-theme.css               
 │   │       │
 │   │       └── 📁 db/
 │   │           └── 📄 schema.sql              # 🗄️ SQL схема БД

@@ -1,557 +1,489 @@
-🚀 Руководство по установке Task Manager v1.5.0
-Пошаговая инструкция по развёртыванию JavaFX приложения с PostgreSQL базой данных.
+# 🛠️ SETUP.md - Подробная инструкция по установке
 
-1. Предварительные требования
-   Обязательное ПО
-   Java 21+ — https://www.oracle.com/java/technologies/downloads/#java21
+Пошаговое руководство по установке и настройке Task Manager
 
-Maven 3.8+ — https://maven.apache.org/download.cgi
+---
 
-PostgreSQL 12+ — https://www.postgresql.org/download/ (рекомендуется 14+)
+## 📋 Содержание
 
-Git — https://git-scm.com/
+- [Системные требования](#системные-требования)
+- [Установка зависимостей](#установка-зависимостей)
+- [Настройка базы данных](#настройка-базы-данных)
+- [Конфигурация приложения](#конфигурация-приложения)
+- [Сборка и запуск](#сборка-и-запуск)
+- [Решение проблем](#решение-проблем)
 
-Проверка установки
-bash
-java -version     # Должна быть 21+
-mvn -version      # Должна быть 3.8+
-psql --version    # Должна быть 12+
-git --version     # Любая версия
-Пример вывода:
+---
 
-bash
-$ java -version
-openjdk version "21.0.1" 2023-10-17
-OpenJDK Runtime Environment (build 21.0.1+12-29)
-OpenJDK 64-Bit Server VM (build 21.0.1+12-29, mixed mode, sharing)
+## 💻 Системные требования
 
-$ mvn -version
-Apache Maven 3.9.6
+### Минимальные требования
 
-$ psql --version
-psql (PostgreSQL) 15.3
-2. Установка и запуск PostgreSQL
-   Windows
-   Скачай инсталлятор: https://www.postgresql.org/download/windows/
+- **ОС:** Windows 10/11, macOS 10.14+, Linux (Ubuntu 20.04+)
+- **Процессор:** 2 ядра, 2 GHz
+- **ОЗУ:** 4 GB
+- **Свободное место:** 500 MB
 
-Запусти инсталлятор
+### Рекомендуемые требования
 
-Важно: Запомни пароль пользователя postgres
+- **ОС:** Windows 11, macOS 12+, Linux (Ubuntu 22.04+)
+- **Процессор:** 4 ядра, 3 GHz
+- **ОЗУ:** 8 GB
+- **Свободное место:** 1 GB
 
-Убедись, что сервис PostgreSQL запущен:
+---
 
-Открой Services (Win+R → services.msc)
+## 📥 Установка зависимостей
 
-Найди PostgreSQL
+### 1. Установка Java 21
 
-Статус должен быть Running
+#### Windows
 
-macOS (Homebrew)
-bash
-# Установка
+- Скачай [Oracle JDK 21](https://www.oracle.com/java/technologies/downloads/)
+- Запусти установщик
+- Добавь в PATH:
+  - `Панель управления → Система → Дополнительные параметры системы → Переменные среды`
+  - Добавь `JAVA_HOME` → `C:\Program Files\Java\jdk-21`
+  - Добавь в `Path` → `%JAVA_HOME%\bin`
+- Проверка:
+  ```bash
+  java -version
+  ```
+
+#### macOS
+
+```bash
+# Через Homebrew
+brew install openjdk@21
+
+# Добавить в PATH (в ~/.zshrc или ~/.bash_profile)
+export PATH="/opt/homebrew/opt/openjdk@21/bin:$PATH"
+
+# Проверка
+java -version
+```
+
+#### Linux (Ubuntu/Debian)
+
+```bash
+# Обновить пакеты
+sudo apt update
+
+# Установить JDK 21
+sudo apt install openjdk-21-jdk
+
+# Проверка
+java -version
+```
+
+---
+
+### 2. Установка PostgreSQL 12+
+
+#### Windows
+
+- Скачай [PostgreSQL](https://www.postgresql.org/download/windows/)
+- Запусти установщик
+- Запомни пароль для пользователя `postgres`
+- Проверка:
+  ```bash
+  psql --version
+  ```
+
+#### macOS
+
+```bash
+# Через Homebrew
 brew install postgresql@15
 
-# Запуск сервиса
+# Запустить службу
 brew services start postgresql@15
 
-# Проверка подключения
-psql postgres
-Linux (Ubuntu/Debian)
-bash
+# Проверка
+psql --version
+```
+
+#### Linux (Ubuntu/Debian)
+
+```bash
 # Установка
-sudo apt-get update
-sudo apt-get install postgresql postgresql-contrib
+sudo apt install postgresql postgresql-contrib
 
-# Запуск сервиса
-sudo service postgresql start
+# Запуск службы
+sudo systemctl start postgresql
+sudo systemctl enable postgresql
 
-# Проверка подключения
-sudo -u postgres psql
-3. Создание базы данных
-   Шаг 1: Подключись к PostgreSQL
-   bash
-   psql -U postgres
-   При запросе пароля введи тот, что указал при установке.
+# Проверка
+psql --version
+```
 
-Шаг 2: Создай базу данных
-sql
+---
+
+### 3. Установка Maven 3.8+
+
+#### Windows
+
+- Скачай [Apache Maven](https://maven.apache.org/download.cgi)
+- Распакуй в `C:\Program Files\Apache\maven`
+- Добавь в PATH:
+  - `MAVEN_HOME` → `C:\Program Files\Apache\maven`
+  - В `Path` → `%MAVEN_HOME%\bin`
+- Проверка:
+  ```bash
+  mvn -version
+  ```
+
+#### macOS
+
+```bash
+# Через Homebrew
+brew install maven
+
+# Проверка
+mvn -version
+```
+
+#### Linux (Ubuntu/Debian)
+
+```bash
+# Установка
+sudo apt install maven
+
+# Проверка
+mvn -version
+```
+
+---
+
+### 4. Установка Git
+
+#### Windows
+
+- Скачай [Git for Windows](https://git-scm.com/download/win)
+- Запусти установщик
+- Проверка:
+  ```bash
+  git --version
+  ```
+
+#### macOS
+
+```bash
+# Через Homebrew
+brew install git
+
+# Проверка
+git --version
+```
+
+#### Linux (Ubuntu/Debian)
+
+```bash
+# Установка
+sudo apt install git
+
+# Проверка
+git --version
+```
+
+---
+
+## 🗄️ Настройка базы данных
+
+### Создание базы данных
+
+#### Способ 1: Через psql (командная строка)
+
+```bash
+# Подключиться к PostgreSQL
+psql -U postgres
+
+# Создать базу данных
 CREATE DATABASE taskmanager;
-Шаг 3: Проверь создание
-sql
-\l
-Должна появиться строка:
 
-text
-taskmanager | postgres | UTF8     | ...
-Шаг 4: Выйди из psql
-sql
+# Создать пользователя (опционально)
+CREATE USER taskmanager_user WITH PASSWORD 'your_password';
+
+# Дать права
+GRANT ALL PRIVILEGES ON DATABASE taskmanager TO taskmanager_user;
+
+# Выйти
 \q
-Проверка из командной строки
-bash
-psql -U postgres -l | grep taskmanager
-Должна быть видна БД taskmanager.
+```
 
-4. Клонирование репозитория
-   bash
-   git clone https://github.com/Adam-Rubinstein/task_manager.git
-   cd task_manager
-5. Конфигурация приложения
-   Открой файл src/main/resources/application.properties и отредактируй:
+#### Способ 2: Через pgAdmin (GUI)
 
-Обязательные настройки PostgreSQL
-text
+- Открой pgAdmin
+- Правый клик на `Databases` → `Create` → `Database...`
+- Введи имя: `taskmanager`
+- Нажми `Save`
+
+---
+
+### Запуск SQL схемы
+
+```bash
+# Перейти в директорию проекта
+cd task_manager
+
+# Запустить схему
+psql -U postgres -d taskmanager -f src/main/resources/db/schema.sql
+```
+
+**Примечание:** Если не запускать `schema.sql`, Hibernate создаст таблицы автоматически.
+
+---
+
+## ⚙️ Конфигурация приложения
+
+### Редактирование application.properties
+
+Открой файл `src/main/resources/application.properties`:
+
+```properties
 # PostgreSQL подключение
 spring.datasource.url=jdbc:postgresql://localhost:5432/taskmanager
 spring.datasource.username=postgres
-spring.datasource.password=ВАШ_ПАРОЛЬ_POSTGRES_ЗДЕСЬ
+spring.datasource.password=ВАШ_ПАРОЛЬ_ЗДЕСЬ
 
 spring.datasource.driver-class-name=org.postgresql.Driver
-⚠️ ВАЖНО: Замени ВАШ_ПАРОЛЬ_POSTGRES_ЗДЕСЬ на реальный пароль!
 
-Настройки JPA/Hibernate
-text
 # JPA / Hibernate
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=false
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
 spring.jpa.properties.hibernate.format_sql=true
-Пояснение:
 
-ddl-auto=update — автоматическое создание/обновление таблиц
-
-show-sql=false — не выводить SQL запросы (для production)
-
-Для отладки можно поставить show-sql=true
-
-Настройки логирования
-text
 # Логирование
 logging.level.root=INFO
 logging.level.com.taskmanager=DEBUG
 logging.level.org.hibernate=WARN
-Для отладки можно увеличить уровень:
+```
 
-text
-logging.level.com.taskmanager=TRACE
-logging.level.org.hibernate.SQL=DEBUG
-6. Инициализация схемы БД (опционально)
-   SQL-скрипт src/main/resources/db/schema.sql содержит полную схему с индексами и триггерами.
+### Параметры конфигурации
 
-Запуск вручную (рекомендуется для production)
-bash
-psql -U postgres -d taskmanager -f src/main/resources/db/schema.sql
-Автоматическое создание (для разработки)
-Если не запускать schema.sql, Hibernate с ddl-auto=update создаст таблицы автоматически при первом запуске, но без дополнительных индексов и триггеров.
+| Параметр | Описание | Значение по умолчанию |
+|----------|----------|----------------------|
+| `spring.datasource.url` | URL базы данных | `jdbc:postgresql://localhost:5432/taskmanager` |
+| `spring.datasource.username` | Имя пользователя БД | `postgres` |
+| `spring.datasource.password` | Пароль пользователя БД | (не указан) |
+| `spring.jpa.hibernate.ddl-auto` | Режим обновления схемы | `update` |
+| `spring.jpa.show-sql` | Показывать SQL запросы | `false` |
 
-Что будет создано автоматически:
+---
 
-Таблицы: tasks, alerts, audio_files
+## 🚀 Сборка и запуск
 
-Колонки и типы данных
+### Клонирование репозитория
 
-Foreign Keys
+```bash
+git clone https://github.com/Adam-Rubinstein/task_manager.git
+cd task_manager
+```
 
-Что НЕ будет создано автоматически:
+---
 
-Индексы для оптимизации (кроме первичных ключей)
+### Сборка проекта
 
-Триггеры для updated_at
+```bash
+# Полная сборка
+mvn clean install
 
-Check constraints
+# Или без тестов (быстрее)
+mvn clean install -DskipTests
+```
 
-Рекомендация: Для production используй schema.sql вручную.
+---
 
-7. Сборка проекта
-   Полная сборка с тестами
-   bash
-   mvn clean install
-   Сборка без тестов (быстрее)
-   bash
-   mvn clean install -DskipTests
-   Только компиляция (без упаковки JAR)
-   bash
-   mvn clean compile
-   Ожидаемый результат:
+### Запуск приложения
 
-text
-[INFO] BUILD SUCCESS
-[INFO] Total time:  15.234 s
-[INFO] Finished at: 2026-01-08T02:30:00+03:00
-8. Запуск приложения
-   Вариант 1: Maven JavaFX Plugin (рекомендуется для разработки)
-   bash
-   mvn javafx:run
-   Плюсы:
+#### Вариант 1: Maven (рекомендуется)
 
-Автоматическая настройка JavaFX модулей
+```bash
+mvn javafx:run
+```
 
-Не нужно указывать VM options вручную
+#### Вариант 2: JAR файл
 
-Минусы:
-
-Немного медленнее, чем прямой запуск
-
-Вариант 2: IntelliJ IDEA
-Шаг 1: Импорт проекта
-File → Open
-
-Выбери папку task_manager
-
-IntelliJ автоматически распознает Maven проект
-
-Шаг 2: Настройка SDK
-File → Project Structure (Ctrl+Alt+Shift+S)
-
-Project → SDK → выбери 21 (или скачай, если нет)
-
-Project → Language Level → выбери 21 - Sealed types, always-strict floating-point semantics
-
-Шаг 3: Создание конфигурации запуска
-Run → Edit Configurations
-
-Нажми + → Application
-
-Заполни поля:
-
-Name: TaskManager
-
-Main class: com.taskmanager.TaskManagerApp
-
-VM options: --add-modules javafx.controls,javafx.fxml,javafx.graphics
-
-Working directory: $ProjectFileDir$
-
-Use classpath of module: TaskManager
-
-Нажми OK
-
-Шаг 4: Запуск
-Нажми Run (Shift+F10)
-
-Или нажми зелёную кнопку ▶️ рядом с конфигурацией
-
-Вариант 3: Командная строка с JAR файлом
-Шаг 1: Создай исполняемый JAR
-bash
+```bash
+# Собрать JAR
 mvn clean package
-Шаг 2: Запусти JAR
-bash
-java --add-modules javafx.controls,javafx.fxml,javafx.graphics \
--jar target/TaskManager-1.5.0.jar
-Для Windows:
 
-powershell
+# Запустить
 java --add-modules javafx.controls,javafx.fxml,javafx.graphics -jar target/TaskManager-1.5.0.jar
-9. Успешный запуск
-   При успешном запуске ты увидишь:
-   ✅ Окно приложения откроется с интерфейсом:
+```
 
-Левая панель: форма создания задачи
+#### Вариант 3: IntelliJ IDEA
 
-Правая панель: таблица задач + оповещения
+- Открой проект в IntelliJ IDEA
+- `File → Project Structure → Project → SDK` → выбери JDK 21
+- Создай конфигурацию запуска:
+  - `Run → Edit Configurations → + → Application`
+  - **Main class:** `com.taskmanager.TaskManagerApp`
+  - **VM options:** `--add-modules javafx.controls,javafx.fxml,javafx.graphics`
+  - **Module:** `TaskManager`
+- Нажми `Run` (Shift+F10)
 
-✅ В консоли логи:
+---
 
-text
-2026-01-08 02:30:00 INFO  TaskManagerApp - Starting TaskManager...
-2026-01-08 02:30:01 INFO  DatabaseConfig - Connected to PostgreSQL
-2026-01-08 02:30:02 INFO  TaskService - TaskService initialized
-2026-01-08 02:30:03 INFO  MainController - UI loaded successfully
-✅ Таблица задач:
+## 🐛 Решение проблем
 
-Если БД пустая — таблица пустая
+### Проблема: «Cannot connect to database»
 
-Если есть задачи — они отображаются
+**Возможные причины:**
 
-✅ Счётчик оповещений внизу справа
+- PostgreSQL не запущен
+- Неверные учётные данные
+- База данных не существует
+- Порт 5432 занят
 
-10. Проверка работоспособности
-    Тест 1: Создание задачи
-    В поле "Описание" введи: Тестовая задача
+**Решение:**
 
-В поле "Дата выполнения" введи: 0901 (нажми Enter)
-
-Должно автозаполниться до 09.01.2026 00:00
-
-Нажми "Создать задачу"
-
-Должно появиться окно: "Задача создана: Тестовая задача"
-
-Задача появится в таблице
-
-Тест 2: Редактирование задачи
-Двойной клик на созданной задаче
-
-Откроется окно редактирования
-
-Измени статус на IN_PROGRESS
-
-Нажми "Сохранить"
-
-Статус в таблице обновится
-
-Тест 3: Смена темы
-Нажми кнопку 🌙 в правом верхнем углу
-
-Интерфейс должен стать тёмным
-
-Кнопка изменится на ☀
-
-Нажми ещё раз → вернётся светлая тема
-
-Тест 4: Проверка БД
-bash
-psql -U postgres -d taskmanager
-
-SELECT * FROM tasks;
-Должна появиться строка с твоей тестовой задачей:
-
-text
-id |      title       |   description    |     due_date      | status | priority
-----+------------------+------------------+-------------------+--------+----------
-1 | Тестовая задача  | Тестовая задача  | 2026-01-09 00:00  | NEW    | 5
-Выход из psql:
-
-sql
-\q
-11. Типовые проблемы и решения
-    ❌ «Cannot connect to database»
-    Причины:
-
-PostgreSQL не запущен
-
-Неверные учётные данные в application.properties
-
-БД taskmanager не существует
-
-Решение:
-
-bash
-# Проверка запущен ли PostgreSQL
-
-# Windows
+```bash
+# Проверка статуса PostgreSQL (Windows)
 tasklist | findstr postgres
 
-# macOS/Linux
+# Проверка статуса PostgreSQL (macOS/Linux)
 ps aux | grep postgres
 
-# Если не запущен, запусти:
-# Windows: Services → PostgreSQL → Start
-# macOS: brew services start postgresql@15
-# Linux: sudo service postgresql start
+# Перезапуск PostgreSQL (Windows)
+# Services → PostgreSQL → Restart
+
+# Перезапуск PostgreSQL (macOS)
+brew services restart postgresql
+
+# Перезапуск PostgreSQL (Linux)
+sudo systemctl restart postgresql
 
 # Проверка существования БД
-psql -U postgres -l | grep taskmanager
+psql -U postgres -l
+```
 
-# Если нет БД — создай:
-psql -U postgres -c "CREATE DATABASE taskmanager;"
-❌ «relation "tasks" does not exist»
-Причина: Таблицы не созданы в БД
+---
 
-Решение 1 (автоматически):
+### Проблема: «JavaFX runtime components are missing»
 
-Убедись, что в application.properties:
+**Возможные причины:**
 
-text
-spring.jpa.hibernate.ddl-auto=update
-Запусти приложение один раз → Hibernate создаст таблицы
+- Установлен JRE вместо JDK
+- Неправильная версия Java
+- Не указаны VM options
 
-Решение 2 (вручную):
+**Решение:**
 
-bash
-psql -U postgres -d taskmanager -f src/main/resources/db/schema.sql
-❌ «JavaFX runtime components are missing»
-Причины:
-
-Используешь JRE вместо JDK
-
-Неправильная версия Java (не 21)
-
-Отсутствуют JavaFX модули
-
-Решение:
-
-bash
+```bash
 # Проверка версии Java
 java -version
 
-# Должна быть "openjdk version 21..." или "java version 21..."
-# Если показывает JRE, переустанови JDK 21
+# Должно быть: openjdk version "21.x.x"
+# Если нет — переустанови JDK 21
 
 # Для Maven используй:
-mvn javafx:run  # плагин автоматически настраивает модули
+mvn javafx:run
 
-# Для IDE укажи VM options:
+# Для IDE добавь VM options:
 --add-modules javafx.controls,javafx.fxml,javafx.graphics
-Скачать JDK 21:
+```
 
-Oracle: https://www.oracle.com/java/technologies/downloads/#java21
+---
 
-OpenJDK: https://jdk.java.net/21/
+### Проблема: «BUILD FAILURE» при сборке Maven
 
-❌ «No visible @SpringBootApplication class»
-Причина: Spring не находит класс TaskManagerApp
+**Возможные причины:**
 
-Решение:
+- Нет интернет-соединения
+- Maven не может загрузить зависимости
+- Конфликт версий
 
-bash
-# Перекомпилируй проект
-mvn clean compile
+**Решение:**
 
-# Или в IntelliJ:
-# File → Invalidate Caches / Restart
-❌ Автозаполнение даты не работает
-Симптомы:
-
-Ввожу 0812, ничего не происходит
-
-Причина: Используешь старую версию MainController.java
-
-Решение:
-
-Убедись, что в MainController.java есть метод autoFillDateTime()
-
-Убедись, что в setupDateTimeInputMask() есть listeners:
-
-java
-dueDateTimeInput.focusedProperty().addListener(...)
-dueDateTimeInput.setOnKeyPressed(...)
-Пересобери проект: mvn clean install
-
-Перезапусти приложение
-
-❌ Тёмная тема не работает во всплывающем окне
-Симптом: При двойном клике на задаче окно остаётся светлым, хотя основное окно тёмное
-
-Причина: Используешь старую версию MainController.java
-
-Решение:
-
-Обновлён в версии 1.5.0. Убедись, что в методе openTaskDetailWindow() есть:
-
-java
-if (isDarkTheme) {
-mainVBox.setStyle("...");
-scrollPane.setStyle("...");
-scene.setFill(Color.web("#1e1e1e"));
-}
-❌ «Port 8080 already in use»
-Причина: Другое приложение занимает порт 8080
-
-Решение 1: Измени порт в application.properties
-
-text
-server.port=8081
-Решение 2: Останови процесс на порту 8080
-
-bash
-# Windows
-netstat -ano | findstr :8080
-taskkill /PID <PID> /F
-
-# macOS/Linux
-lsof -ti:8080 | xargs kill -9
-12. Полезные команды
-    Maven
-    bash
-# Сборка и запуск всё сразу
-mvn clean javafx:run
-
-# Только сборка
-mvn clean install
-
-# Сборка без тестов (быстро)
-mvn clean install -DskipTests
-
-# Проверка синтаксиса
-mvn clean compile
-
-# Запуск конкретного теста
-mvn test -Dtest=TaskServiceTest
-
-# Чистка проекта
+```bash
+# Очистить кэш Maven
 mvn clean
 
-# Проверка зависимостей
-mvn dependency:tree
-PostgreSQL
-bash
-# Подключение к БД
+# Принудительно обновить зависимости
+mvn clean install -U
+
+# Если не помогает — удалить кэш вручную
+# Windows: удали C:\Users\<Пользователь>\.m2\repository
+# macOS/Linux: удали ~/.m2/repository
+```
+
+---
+
+### Проблема: «Port 5432 is already in use»
+
+**Возможные причины:**
+
+- Другое приложение использует порт 5432
+- Несколько экземпляров PostgreSQL
+
+**Решение:**
+
+```bash
+# Найти процесс, использующий порт (Windows)
+netstat -ano | findstr :5432
+
+# Найти процесс, использующий порт (macOS/Linux)
+lsof -i :5432
+
+# Убить процесс (macOS/Linux)
+kill -9 <PID>
+
+# Или изменить порт в application.properties:
+spring.datasource.url=jdbc:postgresql://localhost:5433/taskmanager
+```
+
+---
+
+### Проблема: «Schema "public" does not exist»
+
+**Возможные причины:**
+
+- База данных создана некорректно
+- Нет прав доступа
+
+**Решение:**
+
+```bash
+# Подключиться к БД
 psql -U postgres -d taskmanager
 
-# Список таблиц
-\dt
+# Создать схему
+CREATE SCHEMA IF NOT EXISTS public;
 
-# Описание таблицы
-\d tasks
+# Дать права
+GRANT ALL ON SCHEMA public TO postgres;
+GRANT ALL ON SCHEMA public TO public;
 
-# Вывод всех задач
-SELECT * FROM tasks;
-
-# Вывод задач с приоритетом > 5
-SELECT * FROM tasks WHERE priority > 5;
-
-# Удалить все задачи (осторожно!)
-TRUNCATE TABLE tasks CASCADE;
-
-# Выход
+# Выйти
 \q
-Git
-bash
-# Проверка статуса
-git status
+```
 
-# Добавить изменения
-git add .
+---
 
-# Создать коммит
-git commit -m "feat: описание изменений"
+## ✅ Проверка установки
 
-# Отправить в репозиторий
-git push origin main
+После успешного запуска должно открыться окно приложения:
 
-# Создать новую ветку
-git checkout -b feature/my-feature
+- ✅ Окно Task Manager открылось
+- ✅ Нет ошибок в консоли
+- ✅ Можно создать задачу
+- ✅ Задача сохраняется в БД
+- ✅ Смена темы работает
 
-# Переключиться на ветку
-git checkout main
+---
 
-# Обновить локальную копию
-git pull origin main
-13. Разработка
-    Горячая перезагрузка (Spring Boot DevTools)
-    Добавь в pom.xml:
+## 📚 Дополнительные ресурсы
 
-xml
-<dependency>
-<groupId>org.springframework.boot</groupId>
-<artifactId>spring-boot-devtools</artifactId>
-<scope>runtime</scope>
-<optional>true</optional>
-</dependency>
-После сборки (Ctrl+F9 в IntelliJ) приложение автоматически перезагрузится.
+- [Официальная документация Java](https://docs.oracle.com/en/java/)
+- [Документация JavaFX](https://openjfx.io/)
+- [Документация Spring Boot](https://spring.io/projects/spring-boot)
+- [Документация PostgreSQL](https://www.postgresql.org/docs/)
+- [Документация Maven](https://maven.apache.org/guides/)
 
-Тестирование
-bash
-# Запуск всех тестов
-mvn test
+---
 
-# Запуск конкретного теста
-mvn test -Dtest=TaskServiceTest
-
-# Тесты с отчётом покрытия
-mvn test jacoco:report
-14. Дополнительные ресурсы
-    JavaFX: https://openjfx.io/
-
-Spring Boot: https://spring.io/projects/spring-boot
-
-Hibernate: https://hibernate.org/
-
-PostgreSQL: https://www.postgresql.org/docs/
-
-Maven: https://maven.apache.org/guides/
-
-Версия документа: 1.5.0
-Обновлено: 08.01.2026
-Статус: ✅ ГОТОВО К ИСПОЛЬЗОВАНИЮ
+**Версия документа:** 1.5.0  
+**Последнее обновление:** 08.01.2026  
+**Статус:** ✅ Готов к использованию
