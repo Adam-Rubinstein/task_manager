@@ -23,30 +23,30 @@ Task Manager построен на основе **многослойной ар�
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    Presentation Layer                    │
-│                    (JavaFX UI + FXML)                    │
-│                   MainController.java                    │
+│                    Presentation Layer                   │
+│                    (JavaFX UI + FXML)                   │
+│                   MainController.java                   │
 └─────────────────────┬───────────────────────────────────┘
                       │
                       ▼
 ┌─────────────────────────────────────────────────────────┐
-│                     Business Layer                       │
-│              (Service Classes + Logic)                   │
-│      TaskService, AlertService, AudioFileService         │
+│                     Business Layer                      │
+│              (Service Classes + Logic)                  │
+│      TaskService, AlertService, AudioFileService        │
 └─────────────────────┬───────────────────────────────────┘
                       │
                       ▼
 ┌─────────────────────────────────────────────────────────┐
-│                   Persistence Layer                      │
-│            (Spring Data JPA Repositories)                │
-│   TaskRepository, AlertRepository, AudioFileRepository   │
+│                   Persistence Layer                     │
+│            (Spring Data JPA Repositories)               │
+│   TaskRepository, AlertRepository, AudioFileRepository  │
 └─────────────────────┬───────────────────────────────────┘
                       │
                       ▼
 ┌─────────────────────────────────────────────────────────┐
-│                     Data Layer                           │
-│                 (PostgreSQL Database)                    │
-│            tasks, alerts, audio_files                    │
+│                     Data Layer                          │
+│                 (PostgreSQL Database)                   │
+│            tasks, alerts, audio_files                   │
 └─────────────────────────────────────────────────────────┘
 ```
 
