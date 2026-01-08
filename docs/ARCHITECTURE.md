@@ -57,10 +57,8 @@ Task Manager построен на основе **многослойной ар�
 ```
 TaskManager/
 │
-├── 📄 pom.xml                                # Maven конфигурация
-├── 📄 README.md                              # Основная документация
-├── 📄 SETUP.md                               # Инструкция по установке
-├── 📄 ARCHITECTURE.md                        # Этот файл
+├── 📄 pom.xml                                 # Maven конфигурация
+├── 📄 README.md                               # Основная документация
 │
 ├── 📁 src/
 │   │
@@ -68,7 +66,7 @@ TaskManager/
 │   │   │
 │   │   ├── 📁 java/com/taskmanager/
 │   │   │   │
-│   │   │   ├── 📄 TaskManagerApp.java        # 🚀 Точка входа
+│   │   │   ├── 📄 TaskManagerApp.java         # 🚀 Точка входа
 │   │   │   │
 │   │   │   ├── 📁 config/                     # ⚙️ Конфигурация
 │   │   │   │   ├── DatabaseConfig.java
@@ -101,9 +99,13 @@ TaskManager/
 │   │       ├── 📁 css/                        # Стили
 │   │       └── 📁 db/                         # SQL схемы
 │   │
-│   └── 📁 test/                                # 🧪 Тесты
+│   ├── 📁 test/                               # 🧪 Тесты
+│   │
+│   └── 📁 docks/                              # 📄 Документация
+│       ├── 📄 SETUP.md                        # Инструкция по установке
+│       └── 📄 ARCHITECTURE.md                 # Этот файл
 │
-└── 📁 target/                                  # ⚙️ Собранные файлы
+└── 📁 target/                                 # ⚙️ Собранные файлы
 ```
 
 ---
