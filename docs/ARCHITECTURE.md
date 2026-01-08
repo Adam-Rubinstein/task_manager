@@ -16,16 +16,20 @@ Task Manager — настольное приложение для управле
 ✅ Редактирование задач через всплывающее окно
 
 Слоистая архитектура
-Приложение построено на основе трёхслойной архитектуры:
+Приложение построено на основе четырёхслойной архитектуры:
 
 1. Presentation Layer (UI)
-JavaFX UI - графический интерфейс
+JavaFX UI - графический интерфейс пользователя
 
-main-view.fxml - разметка интерфейса
+main-view.fxml - разметка интерфейса в XML формате
 
-MainController.java - логика взаимодействия с UI
+MainController.java - логика взаимодействия с UI компонентами
 
-Темы оформления - CSS стили для светлой/тёмной темы
+Темы оформления - CSS стили
+
+Светлая тема (по умолчанию)
+
+Тёмная тема (переключение кнопкой)
 
 2. Service Layer (Business Logic)
 TaskService - управление задачами
@@ -58,14 +62,11 @@ deleteExpiredAudio() - удалить старые аудио
 
 3. Data Access Layer (DAO/Repository)
 TaskRepository - Spring Data JPA для работы с задачами
-
 AlertRepository - Spring Data JPA для оповещений
-
 AudioFileRepository - Spring Data JPA для аудиофайлов
 
 4. Persistence Layer
 PostgreSQL - реляционная база данных
-
 Hibernate/JPA - маппинг объектов на таблицы
 
 Таблица tasks - все задачи
@@ -75,73 +76,99 @@ Hibernate/JPA - маппинг объектов на таблицы
 Таблица audio_files - все аудиофайлы
 
 Модульная структура проекта
-Проект организован по функциональным пакетам:
-
 text
 com.taskmanager/
-├── TaskManagerApp.java
-│   Точка входа приложения (@SpringBootApplication)
-│   Инициализирует Spring контекст и JavaFX окно
 │
-├── config/
-│   ├── DatabaseConfig.java
-│   │   Конфигурация подключения к PostgreSQL
-│   │
-│   └── ThemeManager.java
-│       Управление темами (если используется)
+├─── TaskManagerApp.java
+│    Точка входа приложения (@SpringBootApplication)
+│    Инициализирует Spring контекст и JavaFX окно
 │
-├── dao/
-│   ├── TaskRepository.java
-│   │   Spring Data JPA репозиторий для Task
-│   │   Наследует JpaRepository<Task, Long>
-│   │
-│   ├── AlertRepository.java
-│   │   Spring Data JPA репозиторий для Alert
-│   │
-│   └── AudioFileRepository.java
-│       Spring Data JPA репозиторий для AudioFile
+├─── config/
+│    │
+│    ├─── DatabaseConfig.java
+│    │    Конфигурация подключения к PostgreSQL
+│    │    Настройка пула соединений HikariCP
+│    │
+│    └─── ThemeManager.java
+│         Управление темами оформления (опционально)
 │
-├── model/
-│   ├── Task.java
-│   │   @Entity - сущность задачи
-│   │   Поля: id, title, description, dueDate, status, priority
-│   │
-│   ├── Alert.java
-│   │   @Entity - сущность оповещения
-│   │   Поля: id, taskId, alertTime, type, message, isRead
-│   │
-│   ├── AudioFile.java
-│   │   @Entity - сущность аудиофайла
-│   │   Поля: id, taskId, audioData, durationSeconds, fileName
-│   │
-│   ├── TaskStatus.java
-│   │   Enum: NEW, IN_PROGRESS, COMPLETED, CANCELLED
-│   │
-│   ├── AlertType.java
-│   │   Enum: NOTIFICATION, REMINDER, DEADLINE
-│   │
-│   └── RecurrenceType.java
-│       Enum: NONE, DAILY, WEEKLY, MONTHLY, CUSTOM
+├─── dao/
+│    │
+│    ├─── TaskRepository.java
+│    │    Spring Data JPA репозиторий для Task
+│    │    Наследует JpaRepository<Task, Long>
+│    │    Автоматический CRUD без SQL
+│    │
+│    ├─── AlertRepository.java
+│    │    Spring Data JPA репозиторий для Alert
+│    │    Методы для поиска непрочитанных оповещений
+│    │
+│    └─── AudioFileRepository.java
+│         Spring Data JPA репозиторий для AudioFile
+│         Методы для работы с аудиофайлами
 │
-├── service/
-│   ├── TaskService.java
-│   │   Бизнес-логика работы с задачами
-│   │   Использует TaskRepository для сохранения
-│   │
-│   ├── AlertService.java
-│   │   Бизнес-логика работы с оповещениями
-│   │   Использует AlertRepository для сохранения
-│   │
-│   └── AudioFileService.java
-│       Бизнес-логика работы с аудиофайлами
-│       Использует AudioFileRepository для сохранения
+├─── model/
+│    │
+│    ├─── Task.java
+│    │    @Entity - сущность задачи
+│    │    Поля: id, title, description, dueDate, status, priority
+│    │    Методы: isOverdue(), isTodayOrTomorrow(), isThisWeek()
+│    │
+│    ├─── Alert.java
+│    │    @Entity - сущность оповещения
+│    │    Поля: id, taskId, alertTime, type, message, isRead
+│    │    Связь: Many-to-One с Task
+│    │
+│    ├─── AudioFile.java
+│    │    @Entity - сущность аудиофайла
+│    │    Поля: id, taskId, audioData, durationSeconds, fileName
+│    │    Связь: One-to-One с Task
+│    │
+│    ├─── TaskStatus.java
+│    │    Enum для статусов задачи
+│    │    Значения: NEW, IN_PROGRESS, COMPLETED, CANCELLED
+│    │
+│    ├─── AlertType.java
+│    │    Enum для типов оповещений
+│    │    Значения: NOTIFICATION, REMINDER, DEADLINE
+│    │
+│    └─── RecurrenceType.java
+│         Enum для типов повторения задач
+│         Значения: NONE, DAILY, WEEKLY, MONTHLY, CUSTOM
 │
-└── ui/
-    └── controllers/
-        └── MainController.java
-            JavaFX контроллер (@Component)
-            Связывает UI с сервисным слоем
-            Обрабатывает все действия пользователя
+├─── service/
+│    │
+│    ├─── TaskService.java
+│    │    Бизнес-логика работы с задачами
+│    │    Использует TaskRepository для сохранения
+│    │    Аннотация @Service
+│    │
+│    ├─── AlertService.java
+│    │    Бизнес-логика работы с оповещениями
+│    │    Использует AlertRepository для сохранения
+│    │    Аннотация @Service
+│    │
+│    └─── AudioFileService.java
+│         Бизнес-логика работы с аудиофайлами
+│         Использует AudioFileRepository для сохранения
+│         Аннотация @Service
+│
+└─── ui/
+     │
+     └─── controllers/
+          │
+          └─── MainController.java
+               JavaFX контроллер (@Component)
+               Связывает UI с сервисным слоем
+               Обрабатывает все действия пользователя
+               
+               Основные методы:
+               - initialize() - инициализация UI
+               - handleCreateTask() - создание задачи
+               - handleDeleteTask() - удаление задачи
+               - handleToggleTheme() - смена темы
+               - autoFillDateTime() - автозаполнение даты
+               - openTaskDetailWindow() - редактирование задачи
 Поток данных
 Сценарий 1: Создание новой задачи
 Этап 1 - Ввод данных
@@ -346,11 +373,7 @@ expires_at (TIMESTAMP) - когда файл будет удалён (по ум�
 One-to-One с Task (один аудиофайл на одну задачу максимум)
 
 Сервисный слой
-TaskService
-Основной сервис для работы с задачами.
-
-Основные методы:
-
+TaskService - управление задачами
 Метод	Параметры	Возвращает	Описание
 createTask()	title, description, priority, dueDate, recurrenceType	Task	Создаёт новую задачу
 getTask()	id	Task	Получает задачу по ID
@@ -367,21 +390,13 @@ getActiveTasks()	—	List<Task>	Не завершённые задачи
 
 @Service - аннотация Spring для компонента сервиса
 
-AlertService
-Сервис для работы с оповещениями.
-
-Основные методы:
-
+AlertService - управление оповещениями
 Метод	Параметры	Возвращает	Описание
 createAlert()	task, alertTime, type, message	Alert	Создаёт оповещение
 getUnreadAlerts()	—	List<Alert>	Непрочитанные оповещения
 markAsRead()	alertId	void	Отмечает как прочитанное
 deleteOldAlerts()	before	void	Удаляет старые оповещения
-AudioFileService
-Сервис для работы с аудиофайлами.
-
-Основные методы:
-
+AudioFileService - работа с аудиофайлами
 Метод	Параметры	Возвращает	Описание
 saveAudioFile()	task, audioData, fileName, duration	AudioFile	Сохраняет аудиофайл
 getAudioFile()	task	AudioFile	Получает аудио по задаче
@@ -488,6 +503,7 @@ openTaskDetailWindow() - открывает окно редактировани�
 На кнопке "Сохранить" вызывает update
 
 Интеграция компонентов
+Как работает Spring Boot + JavaFX
 Spring Boot инициализирует:
 
 Загружает application.properties с конфигом БД
