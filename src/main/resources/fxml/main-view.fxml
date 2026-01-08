@@ -45,7 +45,7 @@
 
                     <!-- Дата выполнения -->
                     <Label text="Дата выполнения:" />
-                    <TextField fx:id="dueDateTimeInput" promptText="dd.MM.yyyy HH:mm" prefWidth="Infinity" />
+                    <TextField fx:id="dueDateTimeInput" promptText="dd.mm.yyyy HH:mm" prefWidth="Infinity" />
 
                     <!-- Тип повтора -->
                     <Label text="Тип повтора:" />
