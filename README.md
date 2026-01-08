@@ -400,7 +400,7 @@ All Rights Reserved
 👨‍💻 Автор
 Adam Rubinstein
 GitHub: @Adam-Rubinstein
-Email: adam.rubinstein@example.com
+Email: adam-rubinstein@mail.ru
 
 🔮 Планы развития
 Версия 2.0.0 (в планах)
