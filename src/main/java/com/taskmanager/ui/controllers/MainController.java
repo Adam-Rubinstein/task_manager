@@ -1356,7 +1356,6 @@ public class MainController {
      * @param alert Alert, к которому нужно добавить обработчик
      */
     private void addEscapeHandlerToAlert(javafx.scene.control.Alert alert) {
-        // Ждём, пока DialogPane получит Scene
         alert.getDialogPane().sceneProperty().addListener((obs, oldScene, newScene) -> {
             if (newScene != null) {
                 newScene.setOnKeyPressed(event -> {
