@@ -381,6 +381,8 @@ public class MainController {
             confirmAlert.setHeaderText(null);
             confirmAlert.setContentText("Удалить задачу: \"" + selected.getTitle() + "\"?");
 
+            addEscapeHandlerToAlert(confirmAlert);
+
             Optional<ButtonType> result = confirmAlert.showAndWait();
             if (result.isPresent() && result.get() == ButtonType.OK) {
                 taskService.deleteTask(selected.getId());
