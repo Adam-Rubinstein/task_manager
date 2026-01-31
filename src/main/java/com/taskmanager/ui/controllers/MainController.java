@@ -1,8 +1,10 @@
 package com.taskmanager.ui.controllers;
 
+import com.taskmanager.model.AppSettings;
 import com.taskmanager.service.TaskService;
 import com.taskmanager.service.AlertService;
 import com.taskmanager.service.AudioFileService;
+import com.taskmanager.service.SettingsService;
 import com.taskmanager.config.ThemeManager;
 import com.taskmanager.model.Task;
 import com.taskmanager.model.TaskStatus;
@@ -35,6 +37,9 @@ public class MainController {
 
     @Autowired
     private AudioFileService audioFileService;
+
+    @Autowired
+    private SettingsService settingsService;
 
     @Autowired(required = false)
     private ThemeManager themeManager;
@@ -129,15 +134,69 @@ public class MainController {
             // Обновлять оповещения каждые 10 секунд
             startAlertsUpdateThread();
 
-            // Инициализация кнопки темы
-            if (themeToggleButton != null) {
-                themeToggleButton.setText("🌙");
-                isDarkTheme = false;
-            }
+            // ЗАГРУЗИТЬ НАСТРОЙКИ ИЗ JSON
+            loadSettingsOnStartup();
 
         } catch (Exception e) {
             showAlert("Ошибка инициализации", "Ошибка при инициализации интерфейса: " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    // ==================== ЗАГРУЗКА НАСТРОЕК ====================
+
+    /**
+     * Загрузить настройки при запуске приложения
+     */
+    private void loadSettingsOnStartup() {
+        try {
+            AppSettings settings = settingsService.getCurrentSettings();
+
+            // Применить тему из настроек
+            if ("DARK".equals(settings.getTheme())) {
+                isDarkTheme = true;
+                applyDarkTheme();
+            } else {
+                isDarkTheme = false;
+                applyLightTheme();
+            }
+
+            // Применить приоритет по умолчанию
+            prioritySpinner.getValueFactory().setValue(settings.getDefaultPriority());
+
+            System.out.println("✅ Настройки применены: тема=" + settings.getTheme() +
+                    ", приоритет=" + settings.getDefaultPriority());
+
+        } catch (Exception e) {
+            System.err.println("⚠️ Ошибка загрузки настроек: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Применить светлую тему
+     */
+    private void applyLightTheme() {
+        if (rootPane != null) {
+            rootPane.setStyle("-fx-base: #ffffff; -fx-background-color: #f5f5f5; -fx-text-fill: #000000;");
+        }
+        tasksTable.setStyle("-fx-background-color: #ffffff; -fx-text-fill: #000000;");
+        if (themeToggleButton != null) {
+            themeToggleButton.setText("🌙");
+            themeToggleButton.setStyle("-fx-text-fill: #0000ff;");
+        }
+    }
+
+    /**
+     * Применить тёмную тему
+     */
+    private void applyDarkTheme() {
+        if (rootPane != null) {
+            rootPane.setStyle("-fx-base: #2b2b2b; -fx-background-color: #1e1e1e; -fx-text-fill: #ffffff;");
+        }
+        tasksTable.setStyle("-fx-background-color: #2b2b2b; -fx-text-fill: #ffffff;");
+        if (themeToggleButton != null) {
+            themeToggleButton.setText("☀");
+            themeToggleButton.setStyle("-fx-text-fill: #ffff00;");
         }
     }
 
@@ -274,7 +333,7 @@ public class MainController {
             }
 
             if (title.isEmpty()) {
-                String[] lines = description.split("\n");
+                String[] lines = description.split("\\n");
                 title = lines[0].trim();
                 if (title.isEmpty()) {
                     showAlert("Ошибка", "Первая строка описания пуста!");
@@ -354,7 +413,7 @@ public class MainController {
             VBox mainVBox = new VBox(10);
             mainVBox.setStyle("-fx-padding: 15;");
 
-            // ДОБАВЛЯЕМ СТИЛЬ В ЗАВИСИМОСТИ ОТ ТЕКУЩЕЙ ТЕМЫ
+            // ПРИМЕНЯЕМ ТЕКУЩУЮ ТЕМУ К ОКНУ
             if (isDarkTheme) {
                 mainVBox.setStyle("-fx-padding: 15; -fx-background-color: #1e1e1e; -fx-text-fill: #ffffff;");
             }
@@ -481,18 +540,11 @@ public class MainController {
             scrollPane.setFitToWidth(true);
             javafx.scene.Scene scene = new javafx.scene.Scene(scrollPane);
 
-            // ПРИМЕНЯЕМ ТЕМУ К SCROLL PANE
+            // ПРИМЕНЯЕМ ТЕМУ К SCROLL PANE И СЦЕНЕ
             if (isDarkTheme) {
                 scrollPane.setStyle("-fx-background-color: #1e1e1e; -fx-control-inner-background: #2b2b2b;");
-            }
-
-            // ПРИМЕНЯЕМ ТЕМУ К САМОЙ СЦЕНЕ
-            if (isDarkTheme) {
                 scene.setFill(javafx.scene.paint.Color.web("#1e1e1e"));
             }
-
-            detailStage.setScene(scene);
-            detailStage.show();
 
             detailStage.setScene(scene);
             detailStage.show();
@@ -563,7 +615,7 @@ public class MainController {
     }
 
     /**
-     * Переключить тему (РЕАЛЬНАЯ смена цветов, не текст на кнопке)
+     * Переключить тему (с автосохранением в JSON)
      */
     @FXML
     private void handleToggleTheme() {
@@ -571,26 +623,13 @@ public class MainController {
             isDarkTheme = !isDarkTheme;
 
             if (isDarkTheme) {
-                // Переключение на ТЁМНУЮ тему
-                if (rootPane != null) {
-                    rootPane.setStyle("-fx-base: #2b2b2b; -fx-background-color: #1e1e1e; -fx-text-fill: #ffffff;");
-                }
-                tasksTable.setStyle("-fx-background-color: #2b2b2b; -fx-text-fill: #ffffff;");
-                if (themeToggleButton != null) {
-                    themeToggleButton.setText("☀");
-                    themeToggleButton.setStyle("-fx-text-fill: #ffff00;");
-                }
+                applyDarkTheme();
+                settingsService.updateTheme("DARK");
             } else {
-                // Переключение на СВЕТЛУЮ тему
-                if (rootPane != null) {
-                    rootPane.setStyle("-fx-base: #ffffff; -fx-background-color: #f5f5f5; -fx-text-fill: #000000;");
-                }
-                tasksTable.setStyle("-fx-background-color: #ffffff; -fx-text-fill: #000000;");
-                if (themeToggleButton != null) {
-                    themeToggleButton.setText("🌙");
-                    themeToggleButton.setStyle("-fx-text-fill: #0000ff;");
-                }
+                applyLightTheme();
+                settingsService.updateTheme("LIGHT");
             }
+
         } catch (Exception e) {
             showAlert("Ошибка", "Не удалось переключить тему: " + e.getMessage());
         }
@@ -687,6 +726,7 @@ public class MainController {
                 dueDateTimeInput.setText(formatted);
             }
         });
+
         // ОБРАБОТЧИК НА ПОТЕРЮ ФОКУСА
         dueDateTimeInput.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
             if (wasFocused && !isFocused) {
@@ -765,6 +805,7 @@ public class MainController {
         try {
             LocalDate.of(year, month, day);
         } catch (java.time.DateTimeException e) {
+            showAlert("Ошибка", "Неверная дата: " + day + "." + month + "." + year);
             day = currentDay;
             month = currentMonth;
             year = currentYear;
@@ -812,7 +853,11 @@ public class MainController {
     private void clearTaskForm() {
         taskNameInput.clear();
         taskDescriptionInput.clear();
-        prioritySpinner.getValueFactory().setValue(5);
+
+        // Получить приоритет по умолчанию из настроек
+        AppSettings settings = settingsService.getCurrentSettings();
+        prioritySpinner.getValueFactory().setValue(settings.getDefaultPriority());
+
         dueDateTimeInput.clear();
         recurrenceCombo.setValue(RecurrenceType.NONE);
         intervalSpinner.getValueFactory().setValue(7);
@@ -903,7 +948,7 @@ public class MainController {
      * Фоновый поток для обновления оповещений
      */
     private void startAlertsUpdateThread() {
-        new Thread(() -> {
+        Thread alertThread = new Thread(() -> {
             while (true) {
                 try {
                     Thread.sleep(10000); // 10 секунд
@@ -913,6 +958,8 @@ public class MainController {
                     break;
                 }
             }
-        }).start();
+        });
+        alertThread.setDaemon(true);
+        alertThread.start();
     }
 }
