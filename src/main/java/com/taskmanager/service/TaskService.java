@@ -11,12 +11,17 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Service
 @Transactional
 public class TaskService {
 
     @Autowired
     private TaskRepository taskRepository;
+
+    
 
     /**
      * Получить все задачи
