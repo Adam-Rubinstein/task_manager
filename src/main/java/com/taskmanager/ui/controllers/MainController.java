@@ -141,6 +141,7 @@ public class MainController {
             showAlert("Ошибка инициализации", "Ошибка при инициализации интерфейса: " + e.getMessage());
             e.printStackTrace();
         }
+        setupKeyboardShortcuts();
     }
 
     // ==================== ЗАГРУЗКА НАСТРОЕК ====================
