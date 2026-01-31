@@ -1304,31 +1304,23 @@ public class MainController {
         alert.showAndWait();
     }
 
+    /**
+     * Обработка нажатия ESC на главном окне
+     */
     private void handleEscapeKey() {
-        // Получаем все открытые окна (Stage)
-        javafx.collections.ObservableList<javafx.stage.Window> windows = javafx.stage.Window.getWindows();
+        // Проверяем, есть ли открытые модальные окна
+        long modalCount = javafx.stage.Window.getWindows().stream()
+                .filter(w -> w instanceof javafx.stage.Stage)
+                .map(w -> (javafx.stage.Stage) w)
+                .filter(s -> s.getModality() != javafx.stage.Modality.NONE)
+                .count();
 
-        // Ищем модальное окно (всплывающее)
-        javafx.stage.Stage modalStage = null;
-        for (javafx.stage.Window window : windows) {
-            if (window instanceof javafx.stage.Stage stage) {
-                // Проверяем, является ли окно модальным
-                if (stage.getModality() != javafx.stage.Modality.NONE) {
-                    modalStage = stage;
-                    break;
-                }
-            }
-        }
-
-        // Если найдено модальное окно - закрыть его
-        if (modalStage != null) {
-            modalStage.close();
-            System.out.println("✅ ESC: Закрыто всплывающее окно");
-        } else {
+        if (modalCount == 0) {
             // Если модальных окон нет - очистить форму
             clearTaskForm();
-            showAlert("ESC", "Нет открытых окон. Форма очищена.");
+            System.out.println("✅ ESC: Форма очищена (нет открытых окон)");
         }
+        // Если есть модальные окна - ничего не делаем (они сами обработают ESC)
     }
 
     /**
