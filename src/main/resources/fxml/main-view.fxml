@@ -13,48 +13,31 @@
             <!-- Меню "Файл" -->
             <Menu text="Файл">
                 <items>
-                    <MenuItem text="Выход" onAction="#handleExit">
-                        <accelerator>
-                            <KeyCodeCombination alt="UP" code="Q" control="DOWN" meta="UP" shift="UP" shortcut="UP"/>
-                        </accelerator>
-                    </MenuItem>
+                    <MenuItem text="Выход" onAction="#handleExit"/>
                 </items>
             </Menu>
 
             <!-- Меню "Настройки" -->
             <Menu text="Настройки">
                 <items>
-                    <!-- Подменю смены темы -->
-                    <MenuItem text="Сменить тему" onAction="#handleToggleTheme">
-                        <accelerator>
-                            <KeyCodeCombination alt="UP" code="T" control="DOWN" meta="UP" shift="UP" shortcut="UP"/>
-                        </accelerator>
-                    </MenuItem>
-
+                    <MenuItem text="Сменить тему" onAction="#handleToggleTheme"/>
                     <SeparatorMenuItem />
-
-                    <!-- Горячие клавиши -->
-                    <MenuItem text="Горячие клавиши" onAction="#handleShowHotkeys">
-                        <accelerator>
-                            <KeyCodeCombination alt="UP" code="F1" control="UP" meta="UP" shift="UP" shortcut="UP"/>
-                        </accelerator>
-                    </MenuItem>
-
-                    <!-- О программе -->
-                    <MenuItem text="О программе" onAction="#handleShowAbout" />
+                    <MenuItem text="Горячие клавиши" onAction="#handleShowHotkeys"/>
+                    <MenuItem text="О программе" onAction="#handleShowAbout"/>
                 </items>
             </Menu>
 
             <!-- Меню "Помощь" -->
             <Menu text="Помощь">
                 <items>
-                    <MenuItem text="Руководство пользователя" onAction="#handleShowUserGuide" />
+                    <MenuItem text="Руководство пользователя" onAction="#handleShowUserGuide"/>
                     <SeparatorMenuItem />
-                    <MenuItem text="Сообщить об ошибке" onAction="#handleReportBug" />
+                    <MenuItem text="Сообщить об ошибке" onAction="#handleReportBug"/>
                 </items>
             </Menu>
         </menus>
     </MenuBar>
+
 
     <!-- Основной контент -->
     <HBox VBox.vgrow="ALWAYS" spacing="10.0" style="-fx-padding: 10;">
