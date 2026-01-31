@@ -1295,8 +1295,8 @@ public class MainController {
                         "2. Укажите шаги для воспроизведения\n" +
                         "3. Приложите скриншот (если возможно)\n\n" +
                         "Отправьте отчёт на:\n" +
-                        "📧 Email: support@taskmanager.com\n" +
-                        "🐛 GitHub Issues: github.com/Adam-Rubinstein/voice-task-manager/issues"
+                        "📧 Email: adamrubinstein228@gmail.com\n" +
+                        "🐛 GitHub Issues: github.com/Adam-Rubinstein/task_manager/issues"
         );
 
         addEscapeHandlerToAlert(alert);
