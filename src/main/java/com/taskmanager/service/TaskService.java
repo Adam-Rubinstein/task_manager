@@ -42,10 +42,17 @@ public class TaskService {
     /**
      * Создать новую задачу
      */
-    public Task createTask(String title, String description, Integer priority, LocalDateTime dueDate, RecurrenceType recurrenceType) {
-        // Объединяем title и description в одно поле
-        String fullDescription = (title != null ? title : "Без названия") + "\n" + (description != null ? description : "");
+    public Task createTask(String title, String description, Integer priority,
+                           LocalDateTime dueDate, RecurrenceType recurrenceType) {
+        // Валидация
+        if (title == null || title.trim().isEmpty()) {
+            throw new IllegalArgumentException("Название задачи не может быть пустым");
+        }
+        if (priority < 0 || priority > 10) {
+            throw new IllegalArgumentException("Приоритет должен быть от 0 до 10");
+        }
 
+        String fullDescription = title.trim() + "\n" + (description != null ? description : "");
         Task task = new Task(fullDescription, priority, dueDate, recurrenceType);
         return taskRepository.save(task);
     }
