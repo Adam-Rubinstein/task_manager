@@ -29,7 +29,7 @@ public class TaskService {
      * Получить задачу по ID
      */
     public Task getTaskById(Long id) {
-        return taskRepository.findById(id).orElse(null);
+            return taskRepository.findById(id).orElse(null);
     }
 
     /**
