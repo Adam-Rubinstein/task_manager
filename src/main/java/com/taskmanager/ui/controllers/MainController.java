@@ -657,7 +657,7 @@ public class MainController {
     private void handleFilterByStatus() {
         try {
             String selectedStatus = statusFilter.getValue();
-            if (selectedStatus == null || selectedStatus.equals("ALL")) {
+            if (selectedStatus == null || selectedStatus.equals(FILTER_ALL)) {
                 loadTasksByStatuses(TaskStatus.NEW, TaskStatus.IN_PROGRESS, TaskStatus.COMPLETED, TaskStatus.CANCELLED);
             } else {
                 TaskStatus status = TaskStatus.valueOf(selectedStatus);
