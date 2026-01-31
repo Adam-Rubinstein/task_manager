@@ -961,23 +961,32 @@ public class MainController {
     }
 
     /**
-     * Фоновый поток для обновления оповещений
+     * Фоновое обновление оповещений (JavaFX Timeline)
      */
+    private javafx.animation.Timeline alertsTimeline;
+
     private void startAlertsUpdateThread() {
-        Thread alertThread = new Thread(() -> {
-            while (true) {
-                try {
-                    Thread.sleep(10000); // 10 секунд
-                    Platform.runLater(this::updateAlertsCount);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    break;
-                }
-            }
-        });
-        alertThread.setDaemon(true);
-        alertThread.start();
+        alertsTimeline = new javafx.animation.Timeline(
+                new javafx.animation.KeyFrame(
+                        javafx.util.Duration.seconds(10),
+                        event -> updateAlertsCount()
+                )
+        );
+        alertsTimeline.setCycleCount(javafx.animation.Timeline.INDEFINITE);
+        alertsTimeline.play();
+        System.out.println("✅ Timeline запущен для обновления оповещений");
     }
+
+    /**
+     * Timeline при закрытии
+     */
+    public void shutdown() {
+        if (alertsTimeline != null) {
+            alertsTimeline.stop();
+            System.out.println("⏹ Timeline остановлен");
+        }
+    }
+
 
     private void setupKeyboardShortcuts() {
         // Получаем Scene из rootPane
