@@ -261,7 +261,10 @@ public class MainController {
      */
     private void applyDarkTheme() {
         if (rootPane != null) {
-            rootPane.setStyle("-fx-base: #2b2b2b; -fx-background-color: #1e1e1e; -fx-text-fill: #ffffff;");
+            rootPane.setStyle(String.format(
+                    "-fx-base: %s; -fx-background-color: %s; -fx-text-fill: %s;",
+                    COLOR_DARK_SURFACE, COLOR_DARK_BG, COLOR_DARK_TEXT
+            ));
         }
         tasksTable.setStyle("-fx-background-color: #2b2b2b; -fx-text-fill: #ffffff;");
         if (themeToggleButton != null) {
