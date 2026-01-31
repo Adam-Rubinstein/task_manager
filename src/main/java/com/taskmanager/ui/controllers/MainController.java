@@ -776,7 +776,7 @@ public class MainController {
                 alertsListView.setItems(alertItems);
             }
         } catch (Exception e) {
-            System.err.println("Ошибка при обновлении оповещений: " + e.getMessage());
+            log.error("Ошибка при обновлении оповещений", e);
         }
     }
 
@@ -1042,7 +1042,7 @@ public class MainController {
         );
         alertsTimeline.setCycleCount(javafx.animation.Timeline.INDEFINITE);
         alertsTimeline.play();
-        System.out.println("✅ Timeline запущен для обновления оповещений");
+        log.info("Timeline запущен для обновления оповещений");
     }
 
     /**
