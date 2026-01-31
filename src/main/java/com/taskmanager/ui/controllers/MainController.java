@@ -1401,7 +1401,7 @@ public class MainController {
         if (modalCount == 0) {
             // Если модальных окон нет - очистить форму
             clearTaskForm();
-            System.out.println("ESC: Форма очищена (нет открытых окон)");
+            log.debug("ESC: Форма очищена (нет открытых окон)");
         }
         // Если есть модальные окна - ничего не делаем (они сами обработают ESC)
     }
@@ -1416,7 +1416,7 @@ public class MainController {
                 if (event.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
                     event.consume();
                     stage.close();
-                    System.out.println("ESC: Закрыто окно - " + stage.getTitle());
+                    log.debug("ESC: Закрыто окно '{}'", stage.getTitle());
                 }
             });
         } else {
@@ -1426,7 +1426,7 @@ public class MainController {
                         if (event.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
                             event.consume();
                             stage.close();
-                            System.out.println("ESC: Закрыто окно - " + stage.getTitle());
+                            log.debug("ESC: Закрыто окно '{}'", stage.getTitle());
                         }
                     });
                 }
