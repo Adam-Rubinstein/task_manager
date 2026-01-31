@@ -1296,8 +1296,7 @@ public class MainController {
                         "3. Приложите скриншот (если возможно)\n\n" +
                         "Отправьте отчёт на:\n" +
                         "📧 Email: support@taskmanager.com\n" +
-                        "🐛 GitHub Issues: github.com/yourname/voice-task-manager/issues\n" +
-                        "💬 Telegram: @YourSupportBot"
+                        "🐛 GitHub Issues: github.com/Adam-Rubinstein/voice-task-manager/issues"
         );
 
         addEscapeHandlerToAlert(alert);
@@ -1318,7 +1317,7 @@ public class MainController {
         if (modalCount == 0) {
             // Если модальных окон нет - очистить форму
             clearTaskForm();
-            System.out.println("✅ ESC: Форма очищена (нет открытых окон)");
+            System.out.println("ESC: Форма очищена (нет открытых окон)");
         }
         // Если есть модальные окна - ничего не делаем (они сами обработают ESC)
     }
