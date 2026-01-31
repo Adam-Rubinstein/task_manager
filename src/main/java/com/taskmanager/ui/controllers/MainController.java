@@ -1331,13 +1331,29 @@ public class MainController {
      * @param stage Окно, к которому нужно добавить обработчик
      */
     private void addEscapeHandler(javafx.stage.Stage stage) {
-        stage.getScene().setOnKeyPressed(event -> {
-            if (event.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
-                event.consume();
-                stage.close();
-                System.out.println("✅ ESC: Закрыто окно - " + stage.getTitle());
-            }
-        });
+        // Проверяем, что Scene уже установлена
+        if (stage.getScene() != null) {
+            stage.getScene().setOnKeyPressed(event -> {
+                if (event.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
+                    event.consume();
+                    stage.close();
+                    System.out.println("✅ ESC: Закрыто окно - " + stage.getTitle());
+                }
+            });
+        } else {
+            // Если Scene ещё не установлена, ждём её появления
+            stage.sceneProperty().addListener((obs, oldScene, newScene) -> {
+                if (newScene != null) {
+                    newScene.setOnKeyPressed(event -> {
+                        if (event.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
+                            event.consume();
+                            stage.close();
+                            System.out.println("✅ ESC: Закрыто окно - " + stage.getTitle());
+                        }
+                    });
+                }
+            });
+        }
     }
 
 }
