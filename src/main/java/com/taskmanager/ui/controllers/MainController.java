@@ -1201,6 +1201,7 @@ public class MainController {
 
         javafx.scene.Scene scene = new javafx.scene.Scene(vbox);
         hotkeysStage.setScene(scene);
+        addEscapeHandler(hotkeysStage);
         hotkeysStage.show();
     }
 
