@@ -873,7 +873,7 @@ public class MainController {
         // Парсим МИНУТЫ
         if (digitsOnly.length() >= 12) {
             int min = Integer.parseInt(digitsOnly.substring(10, 12));
-            if (min >= 0 && min <= 59) {
+            if (min >= MINUTE_MIN && min <= MINUTE_MAX) {
                 minute = min;
             }
         }
@@ -1003,7 +1003,7 @@ public class MainController {
 
         if (digitsOnly.length() >= 12) {
             int min = Integer.parseInt(digitsOnly.substring(10, 12));
-            if (min >= 0 && min <= 59) {
+            if (min >= MINUTE_MIN && min <= MINUTE_MAX) {
                 minute = min;
             }
         }
