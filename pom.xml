@@ -231,9 +231,17 @@
                 <version>0.0.8</version>
                 <configuration>
                     <mainClass>com.taskmanager.TaskManagerApp</mainClass>
+                    <launcher>app</launcher>
+                    <jlinkImageName>voice-task-manager</jlinkImageName>
+                    <jlinkZipName>voice-task-manager-zip</jlinkZipName>
+                    <noManPages>true</noManPages>
+                    <stripDebug>true</stripDebug>
+                    <noHeaderFiles>true</noHeaderFiles>
                     <options>
                         <option>--add-modules</option>
                         <option>javafx.controls,javafx.fxml,javafx.graphics,javafx.media</option>
+                        <option>--add-exports</option>
+                        <option>javafx.graphics/com.sun.javafx.application=ALL-UNNAMED</option>
                     </options>
                 </configuration>
             </plugin>
