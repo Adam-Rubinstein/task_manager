@@ -552,6 +552,7 @@ public class MainController {
             }
 
             detailStage.setScene(scene);
+            addEscapeHandler(detailStage);
             detailStage.show();
 
         } catch (Exception e) {
