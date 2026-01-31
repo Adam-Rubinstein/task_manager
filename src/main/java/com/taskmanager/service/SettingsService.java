@@ -8,11 +8,16 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Сервис для работы с настройками приложения (JSON)
  */
 @Service
 public class SettingsService {
+
+    private static final Logger log = LoggerFactory.getLogger(TaskService.class);
 
     private static final String SETTINGS_FILE = "settings.json";
     private final ObjectMapper objectMapper;
