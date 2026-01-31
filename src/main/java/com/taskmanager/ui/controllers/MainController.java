@@ -1046,12 +1046,12 @@ public class MainController {
     }
 
     /**
-     * Timeline при закрытии
+     * Timeline при закрытииа
      */
     public void shutdown() {
         if (alertsTimeline != null) {
             alertsTimeline.stop();
-            System.out.println("⏹ Timeline остановлен");
+            log.info("Timeline остановлен");
         }
     }
 
@@ -1149,7 +1149,7 @@ public class MainController {
             }
         });
 
-        System.out.println("Горячие клавиши настроены");
+        log.info("Горячие клавиши настроены");
     }
 
     /**
