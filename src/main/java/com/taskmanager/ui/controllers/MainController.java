@@ -1328,7 +1328,6 @@ public class MainController {
      * @param stage Окно, к которому нужно добавить обработчик
      */
     private void addEscapeHandler(javafx.stage.Stage stage) {
-        // Проверяем, что Scene уже установлена
         if (stage.getScene() != null) {
             stage.getScene().setOnKeyPressed(event -> {
                 if (event.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
@@ -1338,7 +1337,6 @@ public class MainController {
                 }
             });
         } else {
-            // Если Scene ещё не установлена, ждём её появления
             stage.sceneProperty().addListener((obs, oldScene, newScene) -> {
                 if (newScene != null) {
                     newScene.setOnKeyPressed(event -> {
