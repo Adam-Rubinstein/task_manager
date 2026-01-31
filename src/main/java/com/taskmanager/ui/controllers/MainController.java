@@ -1356,4 +1356,23 @@ public class MainController {
         }
     }
 
+    /**
+     * Добавить обработчик ESC для Alert
+     * @param alert Alert, к которому нужно добавить обработчик
+     */
+    private void addEscapeHandlerToAlert(javafx.scene.control.Alert alert) {
+        // Ждём, пока DialogPane получит Scene
+        alert.getDialogPane().sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene != null) {
+                newScene.setOnKeyPressed(event -> {
+                    if (event.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
+                        event.consume();
+                        alert.close();
+                        System.out.println("✅ ESC: Закрыт Alert - " + alert.getTitle());
+                    }
+                });
+            }
+        });
+    }
+
 }
