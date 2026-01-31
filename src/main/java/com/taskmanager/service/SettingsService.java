@@ -55,8 +55,6 @@ public class SettingsService {
     public void saveSettings(AppSettings settings) {
         try {
             objectMapper.writeValue(new File(SETTINGS_FILE), settings);
-            this.currentSettings = settings;
-            System.out.println("Настройки сохранены: " + settings);
         } catch (IOException e) {
             System.err.println("Ошибка сохранения настроек: " + e.getMessage());
             e.printStackTrace();
