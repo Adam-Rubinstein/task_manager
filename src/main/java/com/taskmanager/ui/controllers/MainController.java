@@ -857,7 +857,7 @@ public class MainController {
         // Парсим ГОД
         if (digitsOnly.length() >= 8) {
             int y = Integer.parseInt(digitsOnly.substring(4, 8));
-            if (y >= 1900 && y <= 9999) {
+            if (y >= YEAR_MIN && y <= YEAR_MAX) {
                 year = y;
             }
         }
@@ -865,7 +865,7 @@ public class MainController {
         // Парсим ЧАСЫ
         if (digitsOnly.length() >= 10) {
             int h = Integer.parseInt(digitsOnly.substring(8, 10));
-            if (h >= 0 && h <= 23) {
+            if (h >= HOUR_MIN && h <= HOUR_MAX) {
                 hour = h;
             }
         }
@@ -989,14 +989,14 @@ public class MainController {
 
         if (digitsOnly.length() >= 8) {
             int y = Integer.parseInt(digitsOnly.substring(4, 8));
-            if (y >= 1900 && y <= 9999) {
+            if (y >= YEAR_MIN && y <= YEAR_MAX) {
                 year = y;
             }
         }
 
         if (digitsOnly.length() >= 10) {
             int h = Integer.parseInt(digitsOnly.substring(8, 10));
-            if (h >= 0 && h <= 23) {
+            if (h >= HOUR_MIN && h <= HOUR_MAX) {
                 hour = h;
             }
         }
