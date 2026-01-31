@@ -183,7 +183,7 @@ public class MainController {
 
             // Двойной клик на строку таблицы
             tasksTable.setOnMouseClicked(event -> {
-                if (event.getClickCount() == 2) {
+                if (event.getClickCount() == DOUBLE_CLICK_COUNT) {
                     handleDoubleClickTask();
                 }
             });
@@ -1029,7 +1029,7 @@ public class MainController {
     private void startAlertsUpdateThread() {
         alertsTimeline = new javafx.animation.Timeline(
                 new javafx.animation.KeyFrame(
-                        javafx.util.Duration.seconds(10),
+                        javafx.util.Duration.seconds(ALERTS_UPDATE_INTERVAL_SEC),
                         event -> updateAlertsCount()
                 )
         );
