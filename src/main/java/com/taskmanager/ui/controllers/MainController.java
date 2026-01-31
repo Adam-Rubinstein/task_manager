@@ -1324,4 +1324,18 @@ public class MainController {
         }
     }
 
+    /**
+     * Добавить обработчик ESC для закрытия окна
+     * @param stage Окно, к которому нужно добавить обработчик
+     */
+    private void addEscapeHandler(javafx.stage.Stage stage) {
+        stage.getScene().setOnKeyPressed(event -> {
+            if (event.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
+                event.consume();
+                stage.close();
+                System.out.println("✅ ESC: Закрыто окно - " + stage.getTitle());
+            }
+        });
+    }
+
 }
