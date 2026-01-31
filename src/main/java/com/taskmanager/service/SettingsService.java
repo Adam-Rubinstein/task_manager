@@ -32,7 +32,7 @@ public class SettingsService {
         File file = new File(SETTINGS_FILE);
 
         if (!file.exists()) {
-            System.out.println("Файл настроек не найден, создаём новый с настройками по умолчанию");
+            log.info("Файл настроек не найден, создаём новый с настройками по умолчанию");
             currentSettings = new AppSettings();
             saveSettings(currentSettings);
             return currentSettings;
