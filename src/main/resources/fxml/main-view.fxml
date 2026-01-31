@@ -8,11 +8,49 @@
       xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.taskmanager.ui.controllers.MainController">
 
     <!-- Меню бар -->
-    <MenuBar>
+    <MenuBar fx:id="menuBar">
         <menus>
+            <!-- Меню "Файл" -->
             <Menu text="Файл">
                 <items>
-                    <MenuItem text="Выход" onAction="#handleExit"/>
+                    <MenuItem text="Выход" onAction="#handleExit">
+                        <accelerator>
+                            <KeyCodeCombination alt="UP" code="Q" control="DOWN" meta="UP" shift="UP" shortcut="UP"/>
+                        </accelerator>
+                    </MenuItem>
+                </items>
+            </Menu>
+
+            <!-- Меню "Настройки" -->
+            <Menu text="Настройки">
+                <items>
+                    <!-- Подменю смены темы -->
+                    <MenuItem text="Сменить тему" onAction="#handleToggleTheme">
+                        <accelerator>
+                            <KeyCodeCombination alt="UP" code="T" control="DOWN" meta="UP" shift="UP" shortcut="UP"/>
+                        </accelerator>
+                    </MenuItem>
+
+                    <SeparatorMenuItem />
+
+                    <!-- Горячие клавиши -->
+                    <MenuItem text="Горячие клавиши" onAction="#handleShowHotkeys">
+                        <accelerator>
+                            <KeyCodeCombination alt="UP" code="F1" control="UP" meta="UP" shift="UP" shortcut="UP"/>
+                        </accelerator>
+                    </MenuItem>
+
+                    <!-- О программе -->
+                    <MenuItem text="О программе" onAction="#handleShowAbout" />
+                </items>
+            </Menu>
+
+            <!-- Меню "Помощь" -->
+            <Menu text="Помощь">
+                <items>
+                    <MenuItem text="Руководство пользователя" onAction="#handleShowUserGuide" />
+                    <SeparatorMenuItem />
+                    <MenuItem text="Сообщить об ошибке" onAction="#handleReportBug" />
                 </items>
             </Menu>
         </menus>
