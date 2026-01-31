@@ -1026,17 +1026,17 @@ public class MainController {
                 handleToggleTheme();
             }
 
-            // Ctrl + Q - Выход
+            // Ctrl + Q - ОЧИСТИТЬ ФОРМУ (вместо выхода)
             else if (event.isControlDown() && event.getCode() == javafx.scene.input.KeyCode.Q) {
                 event.consume();
-                handleExit();
+                clearTaskForm();
+                showAlert("Форма очищена", "Все поля сброшены (Ctrl+Q)");
             }
 
-            // Escape - Очистить форму
+            // Escape - Закрыть всплывающее окно (если открыто)
             else if (event.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
                 event.consume();
-                clearTaskForm();
-                showAlert("Форма очищена", "Все поля сброшены");
+                handleEscapeKey();
             }
 
             // F1 - Показать горячие клавиши
@@ -1051,7 +1051,7 @@ public class MainController {
                 handleRefreshTasks();
             }
 
-            // Ctrl + 1..5 - Быстрая установка приоритета
+            // Ctrl + 0..9 - Быстрая установка приоритета
             else if (event.isControlDown() && event.getCode().isDigitKey()) {
                 event.consume();
                 int priority = Integer.parseInt(event.getCode().getChar());
@@ -1062,7 +1062,7 @@ public class MainController {
             }
         });
 
-        System.out.println("✅ Горячие клавиши настроены");
+        System.out.println("Горячие клавиши настроены");
     }
 
     /**
