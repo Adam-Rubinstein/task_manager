@@ -981,7 +981,6 @@ public class MainController {
             }
         });
 
-        // Если Scene уже есть, настроить сразу
         if (rootPane.getScene() != null) {
             setupSceneShortcuts(rootPane.getScene());
         }
