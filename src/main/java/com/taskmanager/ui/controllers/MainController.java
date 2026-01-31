@@ -1246,6 +1246,7 @@ public class MainController {
                         "© 2026 Все права защищены"
         );
 
+        addEscapeHandlerToAlert(alert);
         alert.showAndWait();
     }
 
@@ -1273,7 +1274,8 @@ public class MainController {
                         "5. Горячие клавиши:\n" +
                         "   - Нажмите F1 для полного списка"
         );
-
+        
+        addEscapeHandlerToAlert(alert);
         alert.showAndWait();
     }
 
