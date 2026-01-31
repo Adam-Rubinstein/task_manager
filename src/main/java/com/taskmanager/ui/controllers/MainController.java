@@ -238,11 +238,11 @@ public class MainController {
             // Применить приоритет по умолчанию
             prioritySpinner.getValueFactory().setValue(settings.getDefaultPriority());
 
-            System.out.println("✅ Настройки применены: тема=" + settings.getTheme() +
-                    ", приоритет=" + settings.getDefaultPriority());
+            log.info("✅ Настройки применены: тема={}, приоритет={}",
+                    settings.getTheme(), settings.getDefaultPriority());
 
         } catch (Exception e) {
-            System.err.println("⚠️ Ошибка загрузки настроек: " + e.getMessage());
+            log.error("⚠️ Ошибка загрузки настроек", e);
         }
     }
 
