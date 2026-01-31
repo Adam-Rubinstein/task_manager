@@ -223,7 +223,7 @@ public class MainController {
             AppSettings settings = settingsService.getCurrentSettings();
 
             // Применить тему из настроек
-            if ("DARK".equals(settings.getTheme())) {
+            if (THEME_DARK.equals(settings.getTheme())) {
                 isDarkTheme = true;
                 applyDarkTheme();
             } else {
@@ -532,8 +532,8 @@ public class MainController {
 
             dateField.textProperty().addListener((obs, oldValue, newValue) -> {
                 String digitsOnly = newValue.replaceAll("[^0-9]", "");
-                if (digitsOnly.length() > 12) {
-                    digitsOnly = digitsOnly.substring(0, 12);
+                if (digitsOnly.length() > DATE_TIME_MAX_DIGITS) {
+                    digitsOnly = digitsOnly.substring(0, DATE_TIME_MAX_DIGITS);
                 }
                 String formatted = formatDateTime(digitsOnly);
                 if (!formatted.equals(newValue)) {
@@ -794,8 +794,8 @@ public class MainController {
     private void setupDateTimeInputMask() {
         dueDateTimeInput.textProperty().addListener((obs, oldValue, newValue) -> {
             String digitsOnly = newValue.replaceAll("[^0-9]", "");
-            if (digitsOnly.length() > 12) {
-                digitsOnly = digitsOnly.substring(0, 12);
+            if (digitsOnly.length() > DATE_TIME_MAX_DIGITS) {
+                digitsOnly = digitsOnly.substring(0, DATE_TIME_MAX_DIGITS);
             }
 
             String formatted = formatDateTime(digitsOnly);
