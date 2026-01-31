@@ -142,6 +142,7 @@ public class MainController {
             e.printStackTrace();
         }
         setupKeyboardShortcuts();
+        setupTooltips();
     }
 
     // ==================== ЗАГРУЗКА НАСТРОЕК ====================
@@ -1072,5 +1073,35 @@ public class MainController {
             showAlert("Ошибка", "Не удалось обновить задачи: " + e.getMessage());
         }
     }
+
+    /**
+     * Настройка подсказок (Tooltip) для элементов UI
+     */
+    private void setupTooltips() {
+        // Кнопка создания задачи
+        if (createTaskButtonLeft != null) {
+            Tooltip createTooltip = new Tooltip("Создать задачу (Ctrl+S)");
+            createTaskButtonLeft.setTooltip(createTooltip);
+        }
+
+        // Кнопка удаления задачи
+        if (deleteTaskButtonRight != null) {
+            Tooltip deleteTooltip = new Tooltip("Удалить задачу (Ctrl+D или Delete)");
+            deleteTaskButtonRight.setTooltip(deleteTooltip);
+        }
+
+        // Кнопка смены темы
+        if (themeToggleButton != null) {
+            Tooltip themeTooltip = new Tooltip("Сменить тему (Ctrl+T)");
+            themeToggleButton.setTooltip(themeTooltip);
+        }
+
+        // Таблица задач
+        if (tasksTable != null) {
+            Tooltip tableTooltip = new Tooltip("Enter - редактировать, Delete - удалить, F5 - обновить");
+            Tooltip.install(tasksTable, tableTooltip);
+        }
+    }
+
 
 }
