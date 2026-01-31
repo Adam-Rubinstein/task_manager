@@ -483,8 +483,8 @@ public class MainController {
         try {
             javafx.stage.Stage detailStage = new javafx.stage.Stage();
             detailStage.setTitle("Редактирование: " + task.getTitle());
-            detailStage.setWidth(600);
-            detailStage.setHeight(650);
+            detailStage.setWidth(DETAIL_WINDOW_WIDTH);
+            detailStage.setHeight(DETAIL_WINDOW_HEIGHT);
 
             VBox mainVBox = new VBox(10);
             mainVBox.setStyle("-fx-padding: 15;");
