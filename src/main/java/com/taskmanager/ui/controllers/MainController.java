@@ -738,14 +738,14 @@ public class MainController {
         // ОБРАБОТЧИК НА ПОТЕРЮ ФОКУСА
         dueDateTimeInput.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
             if (wasFocused && !isFocused) {
-                autoFillDateTime();
+                autoFillDateTimeForField(dueDateTimeInput);
             }
         });
 
         // ОБРАБОТЧИК НА ENTER
         dueDateTimeInput.setOnKeyPressed(event -> {
             if (event.getCode() == javafx.scene.input.KeyCode.ENTER) {
-                autoFillDateTime();
+                autoFillDateTimeForField(dueDateTimeInput);
             }
         });
     }
