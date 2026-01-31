@@ -991,7 +991,7 @@ public class MainController {
      */
     private void setupSceneShortcuts(javafx.scene.Scene scene) {
         scene.setOnKeyPressed(event -> {
-            // Ctrl + N - Новая задача (фокус на описание)
+            // Ctrl + N - Новая задача
             if (event.isControlDown() && event.getCode() == javafx.scene.input.KeyCode.N) {
                 event.consume();
                 taskDescriptionInput.requestFocus();
@@ -1025,14 +1025,14 @@ public class MainController {
                 handleToggleTheme();
             }
 
-            // Ctrl + Q - ОЧИСТИТЬ ФОРМУ (вместо выхода)
+            // Ctrl + Q - Очистить форму
             else if (event.isControlDown() && event.getCode() == javafx.scene.input.KeyCode.Q) {
                 event.consume();
                 clearTaskForm();
                 showAlert("Форма очищена", "Все поля сброшены (Ctrl+Q)");
             }
 
-            // Escape - Закрыть всплывающее окно (если открыто)
+            // Escape - Закрыть всплывающее окно
             else if (event.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
                 event.consume();
                 handleEscapeKey();
