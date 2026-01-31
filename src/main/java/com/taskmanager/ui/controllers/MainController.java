@@ -71,6 +71,7 @@ public class MainController {
     @FXML private ListView<String> alertsListView;
     @FXML private Button themeToggleButton;
     @FXML private VBox rootPane;
+    @FXML private MenuBar menuBar;
 
     private ObservableList<Task> tasksList;
     private boolean isUpdatingCombo = false;
@@ -968,7 +969,7 @@ public class MainController {
     private void setupKeyboardShortcuts() {
         // Получаем Scene из rootPane
         if (rootPane == null) {
-            System.err.println("⚠️ rootPane is null, cannot setup keyboard shortcuts");
+            System.err.println("⚠ rootPane is null, cannot setup keyboard shortcuts");
             return;
         }
 
@@ -1034,6 +1035,12 @@ public class MainController {
                 event.consume();
                 clearTaskForm();
                 showAlert("Форма очищена", "Все поля сброшены");
+            }
+
+            // F1 - Показать горячие клавиши
+            else if (event.getCode() == javafx.scene.input.KeyCode.F1) {
+                event.consume();
+                handleShowHotkeys();
             }
 
             // F5 - Обновить список задач
@@ -1103,5 +1110,187 @@ public class MainController {
         }
     }
 
+    /**
+     * Показать окно с горячими клавишами (меню "Настройки" -> "Горячие клавиши")
+     */
+    @FXML
+    private void handleShowHotkeys() {
+        javafx.stage.Stage hotkeysStage = new javafx.stage.Stage();
+        hotkeysStage.setTitle("⌨️ Горячие клавиши");
+        hotkeysStage.setWidth(550);
+        hotkeysStage.setHeight(650);
+        hotkeysStage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+
+        VBox vbox = new VBox(15);
+        vbox.setStyle("-fx-padding: 20;");
+
+        Label title = new Label("⌨️ Горячие клавиши");
+        title.setStyle("-fx-font-size: 22; -fx-font-weight: bold;");
+
+        TextArea textArea = new TextArea();
+        textArea.setEditable(false);
+        textArea.setWrapText(true);
+        textArea.setStyle("-fx-font-family: 'Consolas', 'Courier New', monospace; -fx-font-size: 13;");
+
+        String hotkeysText = """
+    ╔═══════════════════════════════════════════════════════╗
+    ║            ГОРЯЧИЕ КЛАВИШИ ПРИЛОЖЕНИЯ                ║
+    ╚═══════════════════════════════════════════════════════╝
+    
+    📋 ОСНОВНЫЕ ДЕЙСТВИЯ:
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    Ctrl + N       │ Новая задача (фокус на поле описания)
+    Ctrl + S       │ Сохранить задачу
+    Ctrl + D       │ Удалить выбранную задачу
+    Delete         │ Удалить выбранную задачу
+    Ctrl + E       │ Редактировать выбранную задачу
+    Enter          │ Открыть редактирование (при фокусе на таблице)
+    
+    🎨 ИНТЕРФЕЙС И НАВИГАЦИЯ:
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    Ctrl + T       │ Сменить тему (светлая ↔ тёмная)
+    Ctrl + Q       │ Выход из приложения
+    Escape         │ Очистить форму создания задачи
+    F1             │ Показать это окно горячих клавиш
+    F5             │ Обновить список задач из базы данных
+    
+    ⚡ БЫСТРАЯ УСТАНОВКА ПРИОРИТЕТА:
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    Ctrl + 0..9    │ Установить приоритет от 0 до 9
+    
+    💡 ПРИМЕРЫ ИСПОЛЬЗОВАНИЯ:
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    1️⃣  Создание задачи:
+       Ctrl+N → введите описание → Ctrl+S
+    
+    2️⃣  Редактирование:
+       Выберите задачу → Enter → редактируйте → сохраните
+    
+    3️⃣  Удаление:
+       Выберите задачу → Delete → подтвердите удаление
+    
+    4️⃣  Смена темы:
+       Ctrl+T → тема мгновенно изменится
+    
+    5️⃣  Быстрый приоритет:
+       Ctrl+3 → приоритет установлен на 3
+    
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    💡 Совет: Используйте горячие клавиши для ускорения работы!
+    """;
+
+        textArea.setText(hotkeysText);
+        VBox.setVgrow(textArea, javafx.scene.layout.Priority.ALWAYS);
+
+        Button closeButton = new Button("✔ Закрыть");
+        closeButton.setOnAction(e -> hotkeysStage.close());
+        closeButton.setStyle("-fx-padding: 10 30; -fx-font-size: 14; -fx-font-weight: bold;");
+        closeButton.setPrefWidth(150);
+
+        HBox buttonBox = new HBox(closeButton);
+        buttonBox.setStyle("-fx-alignment: center;");
+
+        vbox.getChildren().addAll(title, textArea, buttonBox);
+
+        // Применить текущую тему
+        applyThemeToWindow(vbox, title, textArea);
+
+        javafx.scene.Scene scene = new javafx.scene.Scene(vbox);
+        hotkeysStage.setScene(scene);
+        hotkeysStage.show();
+    }
+
+    /**
+     * Применить текущую тему к окну справки
+     */
+    private void applyThemeToWindow(VBox vbox, Label title, TextArea textArea) {
+        if (isDarkTheme) {
+            vbox.setStyle("-fx-padding: 20; -fx-background-color: #1e1e1e;");
+            title.setStyle("-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: #ffffff;");
+            textArea.setStyle("-fx-font-family: 'Consolas', 'Courier New', monospace; -fx-font-size: 13; " +
+                    "-fx-control-inner-background: #2b2b2b; -fx-text-fill: #e0e0e0; " +
+                    "-fx-border-color: #444444; -fx-border-width: 1;");
+        } else {
+            vbox.setStyle("-fx-padding: 20; -fx-background-color: #f9f9f9;");
+            title.setStyle("-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: #333333;");
+            textArea.setStyle("-fx-font-family: 'Consolas', 'Courier New', monospace; -fx-font-size: 13; " +
+                    "-fx-control-inner-background: #ffffff; -fx-text-fill: #333333; " +
+                    "-fx-border-color: #cccccc; -fx-border-width: 1;");
+        }
+    }
+
+    /**
+     * Показать окно "О программе"
+     */
+    @FXML
+    private void handleShowAbout() {
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
+        alert.setTitle("О программе");
+        alert.setHeaderText("Voice Task Manager v1.0");
+        alert.setContentText(
+                "Менеджер задач с поддержкой голосового ввода\n\n" +
+                        "Разработчик: Ваше имя\n" +
+                        "Версия: 1.0.0\n" +
+                        "Год: 2026\n\n" +
+                        "Технологии:\n" +
+                        "• JavaFX 21\n" +
+                        "• Spring Boot 3.2\n" +
+                        "• H2 Database\n" +
+                        "• Telegram Bot API\n\n" +
+                        "© 2026 Все права защищены"
+        );
+
+        alert.showAndWait();
+    }
+
+    /**
+     * Показать руководство пользователя
+     */
+    @FXML
+    private void handleShowUserGuide() {
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
+        alert.setTitle("Руководство пользователя");
+        alert.setHeaderText("Как использовать приложение");
+        alert.setContentText(
+                "1. Создание задачи:\n" +
+                        "   - Введите описание (обязательно)\n" +
+                        "   - Установите приоритет (0-10)\n" +
+                        "   - Укажите дату выполнения\n" +
+                        "   - Нажмите 'Создать задачу' или Ctrl+S\n\n" +
+                        "2. Редактирование:\n" +
+                        "   - Дважды щёлкните по задаче\n" +
+                        "   - Или выберите задачу и нажмите Enter\n\n" +
+                        "3. Удаление:\n" +
+                        "   - Выберите задачу → Delete или Ctrl+D\n\n" +
+                        "4. Фильтрация:\n" +
+                        "   - Используйте выпадающий список 'Фильтр по статусу'\n\n" +
+                        "5. Горячие клавиши:\n" +
+                        "   - Нажмите F1 для полного списка"
+        );
+
+        alert.showAndWait();
+    }
+
+    /**
+     * Сообщить об ошибке
+     */
+    @FXML
+    private void handleReportBug() {
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
+        alert.setTitle("Сообщить об ошибке");
+        alert.setHeaderText("Как сообщить об ошибке");
+        alert.setContentText(
+                "Если вы нашли ошибку, пожалуйста:\n\n" +
+                        "1. Опишите проблему максимально подробно\n" +
+                        "2. Укажите шаги для воспроизведения\n" +
+                        "3. Приложите скриншот (если возможно)\n\n" +
+                        "Отправьте отчёт на:\n" +
+                        "📧 Email: support@taskmanager.com\n" +
+                        "🐛 GitHub Issues: github.com/yourname/voice-task-manager/issues\n" +
+                        "💬 Telegram: @YourSupportBot"
+        );
+
+        alert.showAndWait();
+    }
 
 }
