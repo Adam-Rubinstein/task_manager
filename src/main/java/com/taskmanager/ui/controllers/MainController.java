@@ -28,6 +28,9 @@ import java.util.stream.Collectors;
 import javafx.scene.layout.Priority;
 import javafx.scene.control.MenuBar;
 import java.util.function.Function;
+import javafx.animation.Timeline;
+import javafx.animation.KeyFrame;
+import javafx.util.Duration;
 
 @Component
 public class MainController {
