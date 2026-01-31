@@ -963,4 +963,114 @@ public class MainController {
         alertThread.setDaemon(true);
         alertThread.start();
     }
+
+    private void setupKeyboardShortcuts() {
+        // Получаем Scene из rootPane
+        if (rootPane == null) {
+            System.err.println("⚠️ rootPane is null, cannot setup keyboard shortcuts");
+            return;
+        }
+
+        rootPane.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene != null) {
+                setupSceneShortcuts(newScene);
+            }
+        });
+
+        // Если Scene уже есть, настроить сразу
+        if (rootPane.getScene() != null) {
+            setupSceneShortcuts(rootPane.getScene());
+        }
+    }
+
+    /**
+     * Настройка горячих клавиш для Scene
+     */
+    private void setupSceneShortcuts(javafx.scene.Scene scene) {
+        scene.setOnKeyPressed(event -> {
+            // Ctrl + N - Новая задача (фокус на описание)
+            if (event.isControlDown() && event.getCode() == javafx.scene.input.KeyCode.N) {
+                event.consume();
+                taskDescriptionInput.requestFocus();
+                showAlert("Горячая клавиша", "Ctrl+N: Создание новой задачи");
+            }
+
+            // Ctrl + S - Сохранить задачу
+            else if (event.isControlDown() && event.getCode() == javafx.scene.input.KeyCode.S) {
+                event.consume();
+                handleCreateTask();
+            }
+
+            // Ctrl + D или Delete - Удалить задачу
+            else if ((event.isControlDown() && event.getCode() == javafx.scene.input.KeyCode.D) ||
+                    event.getCode() == javafx.scene.input.KeyCode.DELETE) {
+                event.consume();
+                handleDeleteTask();
+            }
+
+            // Ctrl + E или Enter - Редактировать задачу
+            else if ((event.isControlDown() && event.getCode() == javafx.scene.input.KeyCode.E) ||
+                    (!event.isControlDown() && event.getCode() == javafx.scene.input.KeyCode.ENTER &&
+                            tasksTable.isFocused())) {
+                event.consume();
+                handleDoubleClickTask();
+            }
+
+            // Ctrl + T - Сменить тему
+            else if (event.isControlDown() && event.getCode() == javafx.scene.input.KeyCode.T) {
+                event.consume();
+                handleToggleTheme();
+            }
+
+            // Ctrl + Q - Выход
+            else if (event.isControlDown() && event.getCode() == javafx.scene.input.KeyCode.Q) {
+                event.consume();
+                handleExit();
+            }
+
+            // Escape - Очистить форму
+            else if (event.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
+                event.consume();
+                clearTaskForm();
+                showAlert("Форма очищена", "Все поля сброшены");
+            }
+
+            // F5 - Обновить список задач
+            else if (event.getCode() == javafx.scene.input.KeyCode.F5) {
+                event.consume();
+                handleRefreshTasks();
+            }
+
+            // Ctrl + 1..5 - Быстрая установка приоритета
+            else if (event.isControlDown() && event.getCode().isDigitKey()) {
+                event.consume();
+                int priority = Integer.parseInt(event.getCode().getChar());
+                if (priority >= 0 && priority <= 9) {
+                    prioritySpinner.getValueFactory().setValue(priority);
+                    showAlert("Приоритет изменён", "Установлен приоритет: " + priority);
+                }
+            }
+        });
+
+        System.out.println("✅ Горячие клавиши настроены");
+    }
+
+    /**
+     * Обновить список задач (горячая клавиша F5)
+     */
+    private void handleRefreshTasks() {
+        try {
+            String currentFilter = statusFilter.getValue();
+            if (currentFilter == null || currentFilter.equals("ALL")) {
+                loadTasksByStatuses(TaskStatus.NEW, TaskStatus.IN_PROGRESS, TaskStatus.COMPLETED, TaskStatus.CANCELLED);
+            } else {
+                TaskStatus status = TaskStatus.valueOf(currentFilter);
+                loadTasksByStatuses(status);
+            }
+            showAlert("Обновлено", "Список задач обновлён из базы данных");
+        } catch (Exception e) {
+            showAlert("Ошибка", "Не удалось обновить задачи: " + e.getMessage());
+        }
+    }
+
 }
