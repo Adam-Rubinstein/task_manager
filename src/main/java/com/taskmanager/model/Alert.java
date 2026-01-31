@@ -25,7 +25,15 @@ public class Alert {
     private String message;
 
     @Column(nullable = false)
-    private Boolean isRead = false;
+    private boolean isRead = false;
+
+    public boolean isRead() {
+        return isRead;
+    }
+
+    public void setIsRead(boolean isRead) {
+        this.isRead = isRead;
+    }
 
     // Getters and Setters
     public Long getId() {
