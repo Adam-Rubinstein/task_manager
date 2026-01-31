@@ -50,7 +50,68 @@ public class MainController {
     @Autowired(required = false)
     private ThemeManager themeManager;
 
-    // ==================== ФОРМАТЕРЫ ====================
+    // ==================== КОНСТАНТЫ (ДОБАВИТЬ В НАЧАЛО КЛАССА) ====================
+
+    public class MainController {
+
+        // ========== ПРИОРИТЕТ ==========
+        private static final int PRIORITY_MIN = 0;
+        private static final int PRIORITY_MAX = 10;
+        private static final int PRIORITY_DEFAULT = 5;
+
+        // ========== ИНТЕРВАЛ РЕКУРСИИ ==========
+        private static final int INTERVAL_MIN_DAYS = 1;
+        private static final int INTERVAL_MAX_DAYS = 365;
+        private static final int INTERVAL_DEFAULT_DAYS = 7;
+
+        // ========== ОБНОВЛЕНИЕ ОПОВЕЩЕНИЙ ==========
+        private static final long ALERTS_UPDATE_INTERVAL_SEC = 10;
+
+        // ========== ДАТА И ВРЕМЯ ==========
+        private static final int DATE_TIME_MAX_DIGITS = 12;
+        private static final int DAY_MIN = 1;
+        private static final int DAY_MAX = 31;
+        private static final int MONTH_MIN = 1;
+        private static final int MONTH_MAX = 12;
+        private static final int YEAR_MIN = 1900;
+        private static final int YEAR_MAX = 9999;
+        private static final int HOUR_MIN = 0;
+        private static final int HOUR_MAX = 23;
+        private static final int MINUTE_MIN = 0;
+        private static final int MINUTE_MAX = 59;
+
+        // ========== UI РАЗМЕРЫ ==========
+        private static final double DETAIL_WINDOW_WIDTH = 600;
+        private static final double DETAIL_WINDOW_HEIGHT = 650;
+        private static final double HOTKEYS_WINDOW_WIDTH = 550;
+        private static final double HOTKEYS_WINDOW_HEIGHT = 650;
+        private static final double DESCRIPTION_AREA_HEIGHT = 200;
+
+        // ========== ДВОЙНОЙ КЛИК ==========
+        private static final int DOUBLE_CLICK_COUNT = 2;
+
+        // ========== ТЕМЫ ==========
+        private static final String THEME_DARK = "DARK";
+        private static final String THEME_LIGHT = "LIGHT";
+
+        // ========== ФИЛЬТРЫ СТАТУСОВ ==========
+        private static final String FILTER_ALL = "ALL";
+
+        // ========== ЦВЕТА (HEX) ==========
+        private static final String COLOR_DARK_BG = "#1e1e1e";
+        private static final String COLOR_DARK_SURFACE = "#2b2b2b";
+        private static final String COLOR_DARK_TEXT = "#ffffff";
+        private static final String COLOR_LIGHT_BG = "#f5f5f5";
+        private static final String COLOR_LIGHT_SURFACE = "#ffffff";
+        private static final String COLOR_LIGHT_TEXT = "#000000";
+
+        // ========== ПРОЗРАЧНОСТЬ (RGBA) ==========
+        private static final String COLOR_OVERDUE = "rgba(255, 100, 100, 0.15)";
+        private static final String COLOR_TODAY_TOMORROW = "rgba(255, 200, 100, 0.15)";
+        private static final String COLOR_THIS_WEEK = "rgba(100, 150, 255, 0.15)";
+
+
+        // ==================== ФОРМАТЕРЫ ====================
     private static final DateTimeFormatter tableFormatter =
             DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
     private static final DateTimeFormatter inputFormatter =
