@@ -247,6 +247,25 @@ public class MainController {
     }
 
     /**
+     * Универсальный метод сортировки по Comparator
+     */
+    private <T extends Comparable<T>> void sortByComparator(
+            Function<Task, T> extractor, boolean ascending) {
+        tasksList.sort((t1, t2) -> {
+            T v1 = extractor.apply(t1);
+            T v2 = extractor.apply(t2);
+
+            // Обработка null значений
+            if (v1 == null && v2 == null) return 0;
+            if (v1 == null) return ascending ? 1 : -1;
+            if (v2 == null) return ascending ? -1 : 1;
+
+            int result = v1.compareTo(v2);
+            return ascending ? result : -result;
+        });
+    }
+
+    /**
      * Сортировка таблицы
      */
     private void sortTasks() {
@@ -258,28 +277,13 @@ public class MainController {
         boolean ascending = sortColumn.getSortType() == TableColumn.SortType.ASCENDING;
 
         if (sortColumn == titleColumn) {
-            tasksList.sort((t1, t2) -> {
-                int result = t1.getTitle().compareTo(t2.getTitle());
-                return ascending ? result : -result;
-            });
+            sortByComparator(Task::getTitle, ascending);
         } else if (sortColumn == statusColumn) {
-            tasksList.sort((t1, t2) -> {
-                int result = t1.getStatus().compareTo(t2.getStatus());
-                return ascending ? result : -result;
-            });
+            sortByComparator(Task::getStatus, ascending);
         } else if (sortColumn == priorityColumn) {
-            tasksList.sort((t1, t2) -> {
-                int result = Integer.compare(t1.getPriority(), t2.getPriority());
-                return ascending ? result : -result;
-            });
+            sortByComparator(Task::getPriority, ascending);
         } else if (sortColumn == dueDateColumn) {
-            tasksList.sort((t1, t2) -> {
-                if (t1.getDueDate() == null && t2.getDueDate() == null) return 0;
-                if (t1.getDueDate() == null) return ascending ? 1 : -1;
-                if (t2.getDueDate() == null) return ascending ? -1 : 1;
-                int result = t1.getDueDate().compareTo(t2.getDueDate());
-                return ascending ? result : -result;
-            });
+            sortByComparator(Task::getDueDate, ascending);
         }
     }
 
