@@ -147,12 +147,16 @@ public class MainController {
         try {
             // Инициализация Spinner для приоритета
             prioritySpinner.setValueFactory(
-                    new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 10, 5)
+                    new SpinnerValueFactory.IntegerSpinnerValueFactory(
+                            PRIORITY_MIN, PRIORITY_MAX, PRIORITY_DEFAULT
+                    )
             );
 
             // Инициализация Spinner для интервала повтора
             intervalSpinner.setValueFactory(
-                    new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 365, 7)
+                    new SpinnerValueFactory.IntegerSpinnerValueFactory(
+                            INTERVAL_MIN_DAYS, INTERVAL_MAX_DAYS, INTERVAL_DEFAULT_DAYS
+                    )
             );
 
             // Инициализация ComboBox для типа повтора
