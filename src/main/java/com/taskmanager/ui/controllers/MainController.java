@@ -1274,7 +1274,7 @@ public class MainController {
                         "5. Горячие клавиши:\n" +
                         "   - Нажмите F1 для полного списка"
         );
-        
+
         addEscapeHandlerToAlert(alert);
         alert.showAndWait();
     }
@@ -1298,6 +1298,7 @@ public class MainController {
                         "💬 Telegram: @YourSupportBot"
         );
 
+        addEscapeHandlerToAlert(alert);
         alert.showAndWait();
     }
 
