@@ -40,10 +40,10 @@ public class SettingsService {
 
         try {
             currentSettings = objectMapper.readValue(file, AppSettings.class);
-            System.out.println("Настройки загружены: " + currentSettings);
+            log.info("Настройки загружены: {}", currentSettings);
             return currentSettings;
         } catch (IOException e) {
-            System.err.println("Ошибка чтения настроек: " + e.getMessage());
+            log.error("Ошибка чтения настроек", e);
             currentSettings = new AppSettings();
             return currentSettings;
         }
