@@ -5,6 +5,6 @@ cd /d "%~dp0"
 echo Starting auto-commit script...
 echo.
 
-powershell -NoExit -ExecutionPolicy Bypass -File ".\auto-commit.ps1" -interval 120
+powershell -NoExit -ExecutionPolicy Bypass -File ".\auto-commit.ps1" -interval 30
 
 pause
