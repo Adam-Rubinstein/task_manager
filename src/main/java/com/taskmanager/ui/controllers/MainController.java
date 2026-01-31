@@ -841,7 +841,7 @@ public class MainController {
         // Парсим ДЕНЬ
         if (digitsOnly.length() >= 2) {
             int d = Integer.parseInt(digitsOnly.substring(0, 2));
-            if (d >= 1 && d <= 31) {
+            if (d >= DAY_MIN && d <= DAY_MAX) {
                 day = d;
             }
         }
@@ -849,7 +849,7 @@ public class MainController {
         // Парсим МЕСЯЦ
         if (digitsOnly.length() >= 4) {
             int m = Integer.parseInt(digitsOnly.substring(2, 4));
-            if (m >= 1 && m <= 12) {
+            if (m >= MONTH_MIN && m <= MONTH_MAX) {
                 month = m;
             }
         }
@@ -975,14 +975,14 @@ public class MainController {
 
         if (digitsOnly.length() >= 2) {
             int d = Integer.parseInt(digitsOnly.substring(0, 2));
-            if (d >= 1 && d <= 31) {
+            if (d >= DAY_MIN && d <= DAY_MAX) {
                 day = d;
             }
         }
 
         if (digitsOnly.length() >= 4) {
             int m = Integer.parseInt(digitsOnly.substring(2, 4));
-            if (m >= 1 && m <= 12) {
+            if (m >= MONTH_MIN && m <= MONTH_MAX) {
                 month = m;
             }
         }
