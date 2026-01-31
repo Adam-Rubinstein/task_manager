@@ -27,6 +27,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import javafx.scene.layout.Priority;
 import javafx.scene.control.MenuBar;
+import java.util.function.Function;
 
 @Component
 public class MainController {
