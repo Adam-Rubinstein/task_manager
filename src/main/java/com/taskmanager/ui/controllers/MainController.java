@@ -1231,7 +1231,7 @@ public class MainController {
         alert.setHeaderText("Voice Task Manager v1.0");
         alert.setContentText(
                 "Менеджер задач с поддержкой голосового ввода\n\n" +
-                        "Разработчик: Ваше имя\n" +
+                        "Разработчик: Адам Рубинштейн\n" +
                         "Версия: 1.0.0\n" +
                         "Год: 2026\n\n" +
                         "Технологии:\n" +
