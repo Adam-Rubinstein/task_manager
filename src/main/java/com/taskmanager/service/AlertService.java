@@ -43,12 +43,12 @@ public class AlertService {
 
     // Отметить как прочитано
     public Alert markAsRead(Long alertId) {
-        Alert alert = alertRepository.findById(alertId).orElse(null);
-        if (alert != null) {
-            alert.setIsRead(true);
-            return alertRepository.save(alert);
-        }
-        return null;
+        return alertRepository.findById(alertId)
+                .map(alert -> {
+                    alert.setIsRead(true);
+                    return alertRepository.save(alert);
+                })
+                .orElseThrow(() -> new IllegalArgumentException("Alert not found: " + alertId));
     }
 
     // Удалить оповещение
