@@ -1331,7 +1331,7 @@ public class MainController {
                 if (event.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
                     event.consume();
                     stage.close();
-                    System.out.println("✅ ESC: Закрыто окно - " + stage.getTitle());
+                    System.out.println("ESC: Закрыто окно - " + stage.getTitle());
                 }
             });
         } else {
@@ -1341,7 +1341,7 @@ public class MainController {
                         if (event.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
                             event.consume();
                             stage.close();
-                            System.out.println("✅ ESC: Закрыто окно - " + stage.getTitle());
+                            System.out.println("ESC: Закрыто окно - " + stage.getTitle());
                         }
                     });
                 }
@@ -1360,7 +1360,7 @@ public class MainController {
                     if (event.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
                         event.consume();
                         alert.close();
-                        System.out.println("✅ ESC: Закрыт Alert - " + alert.getTitle());
+                        System.out.println("ESC: Закрыт Alert - " + alert.getTitle());
                     }
                 });
             }
