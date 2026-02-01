@@ -449,13 +449,11 @@ public class MainController {
                 }
 
                 if (task.isOverdue()) {
-                    setStyle("-fx-background-color: rgba(255, 100, 100, 0.15);");
+                    setStyle("-fx-background-color: " + COLOR_OVERDUE + ";");
                 } else if (task.isTodayOrTomorrow()) {
-                    setStyle("-fx-background-color: rgba(255, 200, 100, 0.15);");
+                    setStyle("-fx-background-color: " + COLOR_TODAY_TOMORROW + ";");
                 } else if (task.isThisWeek()) {
-                    setStyle("-fx-background-color: rgba(100, 150, 255, 0.15);");
-                } else {
-                    setStyle("");
+                    setStyle("-fx-background-color: " + COLOR_THIS_WEEK + ";");
                 }
             }
         });
