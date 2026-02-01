@@ -149,6 +149,12 @@ public class MainController {
     private static final String STYLE_MONOSPACE_TEXTAREA = "-fx-font-family: " + FONT_MONOSPACE + "; -fx-font-size: " + FONT_SIZE_MONOSPACE + ";";
     private static final String STYLE_BUTTON_CLOSE = "-fx-padding: 10 30; -fx-font-size: 14; -fx-font-weight: bold;";
     private static final String STYLE_ALIGNMENT_CENTER = "-fx-alignment: center;";
+    private static final String STYLE_TEXTAREA_DARK =
+            STYLE_MONOSPACE_TEXTAREA +
+                    " -fx-control-inner-background: " + COLOR_DARK_SURFACE + ";" +
+                    " -fx-text-fill: #e0e0e0;" +
+                    " -fx-border-color: #444444;" +
+                    " -fx-border-width: 1;";
 
     // ==================== UI COMPONENTS ====================
     @FXML private TextField taskNameInput;
