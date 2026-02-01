@@ -1280,11 +1280,11 @@ public class MainController {
     private void handleShowHotkeys() {
         javafx.stage.Stage hotkeysStage = new javafx.stage.Stage();
         hotkeysStage.setTitle("⌨️ Горячие клавиши");
-        hotkeysStage.setWidth(550);
+        hotkeysStage.setWidth(HOTKEYS_WINDOW_WIDTH);
         hotkeysStage.setHeight(650);
         hotkeysStage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
 
-        VBox vbox = new VBox(15);
+        VBox vbox = new VBox(VBOX_SPACING_LARGE);
         vbox.setStyle(STYLE_PADDING_20);
 
         Label title = new Label("⌨️ Горячие клавиши");
