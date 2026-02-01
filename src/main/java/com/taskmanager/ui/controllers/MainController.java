@@ -692,7 +692,7 @@ public class MainController {
             // ПРИМЕНЯЕМ ТЕМУ К SCROLL PANE И СЦЕНЕ
             if (isDarkTheme) {
                 scrollPane.setStyle("-fx-background-color: " + COLOR_DARK_BG + "; -fx-control-inner-background: " + COLOR_DARK_SURFACE + ";");
-                scene.setFill(javafx.scene.paint.Color.web("#1e1e1e"));
+                scene.setFill(javafx.scene.paint.Color.web(COLOR_DARK_BG));
             }
 
             detailStage.setScene(scene);
