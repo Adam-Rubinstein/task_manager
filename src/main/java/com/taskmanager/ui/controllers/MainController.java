@@ -521,7 +521,7 @@ public class MainController {
 
             // ПРИМЕНЯЕМ ТЕКУЩУЮ ТЕМУ К ОКНУ
             if (isDarkTheme) {
-                mainVBox.setStyle("-fx-padding: 15; -fx-background-color: #1e1e1e; -fx-text-fill: #ffffff;");
+                mainVBox.setStyle(STYLE_PADDING_15 + " -fx-background-color: " + COLOR_DARK_BG + "; -fx-text-fill: " + COLOR_DARK_TEXT + ";");
             }
 
             // Название
