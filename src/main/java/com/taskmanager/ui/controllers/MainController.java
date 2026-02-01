@@ -1348,12 +1348,12 @@ public class MainController {
             title.setStyle(STYLE_TITLE_LARGE + " -fx-text-fill: " + COLOR_DARK_TEXT + ";");
             textArea.setStyle(STYLE_TEXTAREA_DARK);
         } else {
-            vbox.setStyle(STYLE_PADDING_20 + " -fx-background-color: #f9f9f9;");
-            title.setStyle(STYLE_TITLE_LARGE + " -fx-text-fill: #333333;");
+            vbox.setStyle(STYLE_PADDING_20 + " -fx-background-color: " + COLOR_LIGHT_BG_ALT + ";");
+            title.setStyle(STYLE_TITLE_LARGE + " -fx-text-fill: " + COLOR_LIGHT_TEXT_ALT + ";");
             textArea.setStyle(STYLE_TEXTAREA_LIGHT);
-
         }
     }
+
 
     /**
      * Показать окно "О программе"
