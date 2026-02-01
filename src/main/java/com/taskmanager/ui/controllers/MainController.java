@@ -627,7 +627,7 @@ public class MainController {
             });
 
             Button cancelButton = new Button("Отмена");
-            cancelButton.setStyle("-fx-padding: 10; -fx-font-size: 12;");
+            cancelButton.setStyle(STYLE_BUTTON_DEFAULT);
             cancelButton.setOnAction(e -> detailStage.close());
 
             HBox buttonBox = new HBox(10);
