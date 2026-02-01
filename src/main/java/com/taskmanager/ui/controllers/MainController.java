@@ -547,7 +547,7 @@ public class MainController {
 
             // Приоритет
             Label priorityLabel = new Label("Приоритет:");
-            priorityLabel.setStyle("-fx-font-weight: bold;");
+            priorityLabel.setStyle(STYLE_FONT_BOLD);
             Spinner<Integer> prioritySpinner2 = new Spinner<>(
                     new SpinnerValueFactory.IntegerSpinnerValueFactory(
                             PRIORITY_MIN, PRIORITY_MAX, task.getPriority()
