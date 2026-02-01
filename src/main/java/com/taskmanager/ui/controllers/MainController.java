@@ -549,7 +549,9 @@ public class MainController {
             Label priorityLabel = new Label("Приоритет:");
             priorityLabel.setStyle("-fx-font-weight: bold;");
             Spinner<Integer> prioritySpinner2 = new Spinner<>(
-                    new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 10, task.getPriority())
+                    new SpinnerValueFactory.IntegerSpinnerValueFactory(
+                            PRIORITY_MIN, PRIORITY_MAX, task.getPriority()
+                    )
             );
 
             // Дата
