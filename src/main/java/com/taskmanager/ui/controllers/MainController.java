@@ -125,6 +125,16 @@ public class MainController {
     private static final String STYLE_BUTTON_DEFAULT = "-fx-padding: 10; -fx-font-size: 12;";
     private static final String STYLE_TITLE_LARGE = "-fx-font-size: 22; -fx-font-weight: bold;";
 
+    // ========== СООБЩЕНИЯ ==========
+    private static final String MSG_ERROR = "Ошибка";
+    private static final String MSG_SUCCESS = "Успех";
+    private static final String MSG_CONFIRMATION = "Подтверждение";
+    private static final String MSG_SELECT_TASK = "Выберите задачу для удаления!";
+    private static final String MSG_TASK_CREATED = "Задача создана: ";
+    private static final String MSG_TASK_DELETED = "Задача удалена!";
+    private static final String MSG_TASK_UPDATED = "Задача обновлена!";
+    private static final String MSG_INVALID_DATE = "Неверный формат даты: dd.MM.yyyy HH:mm";
+
     // ==================== UI COMPONENTS ====================
     @FXML private TextField taskNameInput;
     @FXML private TextArea taskDescriptionInput;
@@ -245,11 +255,11 @@ public class MainController {
             // Применить приоритет по умолчанию
             prioritySpinner.getValueFactory().setValue(settings.getDefaultPriority());
 
-            log.info("✅ Настройки применены: тема={}, приоритет={}",
+            log.info("Настройки применены: тема={}, приоритет={}",
                     settings.getTheme(), settings.getDefaultPriority());
 
         } catch (Exception e) {
-            log.error("⚠️ Ошибка загрузки настроек", e);
+            log.error("Ошибка загрузки настроек", e);
         }
     }
 
