@@ -253,7 +253,7 @@ public class MainController {
             statusFilter.setItems(FXCollections.observableArrayList(
                     FILTER_ALL, STATUS_NEW, STATUS_IN_PROGRESS, STATUS_COMPLETED, STATUS_CANCELLED
             ));
-            statusFilter.setValue("ALL");
+            statusFilter.setValue(FILTER_ALL);
             statusFilter.setOnAction(e -> handleFilterByStatus());
 
             // Инициализация таблицы задач
