@@ -532,7 +532,7 @@ public class MainController {
 
             // Описание (без названия)
             Label descLabel = new Label("Описание:");
-            descLabel.setStyle("-fx-font-weight: bold;");
+            descLabel.setStyle(STYLE_FONT_BOLD);
             TextArea descArea = new TextArea();
             descArea.setWrapText(true);
             descArea.setStyle("-fx-font-size: 12; -fx-padding: 5;");
