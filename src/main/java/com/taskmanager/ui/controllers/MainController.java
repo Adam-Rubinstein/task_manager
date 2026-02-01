@@ -173,8 +173,8 @@ public class MainController {
     private static final String STYLE_TEXTAREA_LIGHT =
             STYLE_MONOSPACE_TEXTAREA +
                     " -fx-control-inner-background: " + COLOR_LIGHT_SURFACE + ";" +
-                    " -fx-text-fill: #333333;" +
-                    " -fx-border-color: #cccccc;" +
+                    " -fx-text-fill: " + COLOR_LIGHT_TEXT_SECONDARY + ";" +
+                    " -fx-border-color: " + COLOR_LIGHT_BORDER + ";" +
                     " -fx-border-width: 1;";
     private static final String STYLE_TEXT_FIELD = "-fx-font-size: 14; -fx-padding: 5;";
     private static final String STYLE_TEXT_AREA = "-fx-font-size: 12; -fx-padding: 5;";
@@ -591,7 +591,7 @@ public class MainController {
             } else if (fullDesc != null) {
                 descArea.setText(fullDesc);
             }
-            descArea.setPrefHeight(200);
+            descArea.setPrefHeight(DESCRIPTION_AREA_HEIGHT);
 
             // Приоритет
             Label priorityLabel = new Label("Приоритет:");
