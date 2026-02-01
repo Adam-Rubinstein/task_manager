@@ -556,7 +556,7 @@ public class MainController {
 
             // Дата
             Label dateLabel = new Label("Дата выполнения:");
-            dateLabel.setStyle("-fx-font-weight: bold;");
+            dateLabel.setStyle(STYLE_FONT_BOLD);
             TextField dateField = new TextField();
             if (task.getDueDate() != null) {
                 dateField.setText(task.getDueDate().format(inputFormatter));
