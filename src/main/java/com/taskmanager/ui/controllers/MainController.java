@@ -1348,7 +1348,7 @@ public class MainController {
         } else {
             vbox.setStyle(STYLE_PADDING_20 + " -fx-background-color: #f9f9f9;");
             title.setStyle(STYLE_TITLE_LARGE + " -fx-text-fill: #333333;");
-            textArea.setStyle(STYLE_TEXTAREA_DARK);
+            textArea.setStyle(STYLE_TEXTAREA_LIGHT);
 
         }
     }
