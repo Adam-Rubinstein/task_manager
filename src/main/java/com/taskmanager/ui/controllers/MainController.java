@@ -631,7 +631,7 @@ public class MainController {
             cancelButton.setOnAction(e -> detailStage.close());
 
             HBox buttonBox = new HBox(10);
-            buttonBox.setStyle("-fx-padding: 10;");
+            buttonBox.setStyle(STYLE_PADDING_10);
             buttonBox.getChildren().addAll(saveButton, cancelButton);
 
             // Добавить все элементы в форму
