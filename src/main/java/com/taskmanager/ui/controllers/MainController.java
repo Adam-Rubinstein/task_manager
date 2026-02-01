@@ -1236,7 +1236,7 @@ public class MainController {
         vbox.setStyle(STYLE_PADDING_20);
 
         Label title = new Label("⌨️ Горячие клавиши");
-        title.setStyle("-fx-font-size: 22; -fx-font-weight: bold;");
+        title.setStyle(STYLE_TITLE_LARGE);
 
         TextArea textArea = new TextArea();
         textArea.setEditable(false);
