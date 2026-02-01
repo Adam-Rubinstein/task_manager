@@ -17,6 +17,11 @@ public class SpeechRecognitionService {
 
     private static final Logger log = LoggerFactory.getLogger(SpeechRecognitionService.class);
 
+    // Константы для языков
+    private static final String LANG_RUSSIAN = "ru_RU";
+    private static final String LANG_ENGLISH = "en_US";
+    private static final String[] SUPPORTED_LANGUAGES = {LANG_RUSSIAN, LANG_ENGLISH};
+
     /**
      * Распознать речь из аудиофайла
      *
@@ -31,11 +36,10 @@ public class SpeechRecognitionService {
             // TODO: Или использовать OpenAI Whisper API
             // TODO: Или использовать локальное Vosk
 
-            log.warn("⚠️ Распознавание речи пока не реализовано");
+            log.warn("Распознавание речи пока не реализовано");
             return null;
-
         } catch (Exception e) {
-            log.error("❌ Ошибка при распознавании речи: {}", e.getMessage(), e);
+            log.error("Ошибка при распознавании речи", e);
             return null;
         }
     }
@@ -47,11 +51,12 @@ public class SpeechRecognitionService {
      */
     public boolean isMicrophoneAvailable() {
         log.debug("🔍 Проверка доступности микрофона");
+
         try {
             // TODO: реализовать проверку микрофона
             return true;
         } catch (Exception e) {
-            log.error("❌ Ошибка при проверке микрофона: {}", e.getMessage());
+            log.error("Ошибка при проверке микрофона", e);
             return false;
         }
     }
@@ -62,6 +67,6 @@ public class SpeechRecognitionService {
      * @return список кодов языков (например: ru_RU, en_US)
      */
     public String[] getSupportedLanguages() {
-        return new String[]{"ru_RU", "en_US"};
+        return SUPPORTED_LANGUAGES;
     }
 }
