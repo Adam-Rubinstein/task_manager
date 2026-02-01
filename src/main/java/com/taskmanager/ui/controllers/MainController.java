@@ -147,6 +147,8 @@ public class MainController {
     private static final String STYLE_BUTTON_DEFAULT = "-fx-padding: 10; -fx-font-size: 12;";
     private static final String STYLE_TITLE_LARGE = "-fx-font-size: 22; -fx-font-weight: bold;";
     private static final String STYLE_MONOSPACE_TEXTAREA = "-fx-font-family: " + FONT_MONOSPACE + "; -fx-font-size: " + FONT_SIZE_MONOSPACE + ";";
+    private static final String STYLE_BUTTON_CLOSE = "-fx-padding: 10 30; -fx-font-size: 14; -fx-font-weight: bold;";
+    private static final String STYLE_ALIGNMENT_CENTER = "-fx-alignment: center;";
 
     // ==================== UI COMPONENTS ====================
     @FXML private TextField taskNameInput;
