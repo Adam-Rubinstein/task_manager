@@ -576,7 +576,7 @@ public class MainController {
             descLabel.setStyle(STYLE_FONT_BOLD);
             TextArea descArea = new TextArea();
             descArea.setWrapText(true);
-            descArea.setStyle("-fx-font-size: 12; -fx-padding: 5;");
+            private static final String STYLE_TEXT_AREA = "-fx-font-size: 12; -fx-padding: 5;";
 
             String fullDesc = task.getDescription();
             if (fullDesc != null && fullDesc.contains("\n")) {
