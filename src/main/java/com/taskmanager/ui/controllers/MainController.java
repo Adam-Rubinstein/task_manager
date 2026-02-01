@@ -87,6 +87,10 @@ public class MainController {
     private static final double HOTKEYS_WINDOW_WIDTH = 550;
     private static final double HOTKEYS_WINDOW_HEIGHT = 650;
     private static final double DESCRIPTION_AREA_HEIGHT = 200;
+    private static final double VBOX_SPACING_DEFAULT = 10;
+    private static final double VBOX_SPACING_LARGE = 15;
+    private static final double HBOX_SPACING_DEFAULT = 10;
+    private static final double BUTTON_PREF_WIDTH = 150;
 
     // ========== ДВОЙНОЙ КЛИК ==========
     private static final int DOUBLE_CLICK_COUNT = 2;
