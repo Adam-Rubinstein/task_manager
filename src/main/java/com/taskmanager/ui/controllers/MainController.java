@@ -135,6 +135,12 @@ public class MainController {
     private static final String MSG_TASK_UPDATED = "Задача обновлена!";
     private static final String MSG_INVALID_DATE = "Неверный формат даты: dd.MM.yyyy HH:mm";
 
+    // ========== СТАТУСЫ ДЛЯ ФИЛЬТРА ==========
+    private static final String STATUS_NEW = "NEW";
+    private static final String STATUS_IN_PROGRESS = "IN_PROGRESS";
+    private static final String STATUS_COMPLETED = "COMPLETED";
+    private static final String STATUS_CANCELLED = "CANCELLED";
+
     // ==================== UI COMPONENTS ====================
     @FXML private TextField taskNameInput;
     @FXML private TextArea taskDescriptionInput;
