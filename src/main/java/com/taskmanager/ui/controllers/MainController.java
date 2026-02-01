@@ -1281,7 +1281,7 @@ public class MainController {
         javafx.stage.Stage hotkeysStage = new javafx.stage.Stage();
         hotkeysStage.setTitle("⌨️ Горячие клавиши");
         hotkeysStage.setWidth(HOTKEYS_WINDOW_WIDTH);
-        hotkeysStage.setHeight(650);
+        hotkeysStage.setHeight(HOTKEYS_WINDOW_HEIGHT);
         hotkeysStage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
 
         VBox vbox = new VBox(VBOX_SPACING_LARGE);
@@ -1351,7 +1351,7 @@ public class MainController {
         Button closeButton = new Button("✔ Закрыть");
         closeButton.setOnAction(e -> hotkeysStage.close());
         closeButton.setStyle(STYLE_BUTTON_CLOSE);
-        closeButton.setPrefWidth(150);
+        closeButton.setPrefWidth(BUTTON_PREF_WIDTH);
 
         HBox buttonBox = new HBox(closeButton);
         buttonBox.setStyle(STYLE_ALIGNMENT_CENTER);
