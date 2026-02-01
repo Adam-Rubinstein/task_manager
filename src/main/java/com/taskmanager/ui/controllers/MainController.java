@@ -1232,7 +1232,7 @@ public class MainController {
     private void handleRefreshTasks() {
         try {
             String currentFilter = statusFilter.getValue();
-            if (currentFilter == null || currentFilter.equals("ALL")) {
+            if (currentFilter == null || currentFilter.equals(FILTER_ALL)) {
                 loadTasksByStatuses(TaskStatus.NEW, TaskStatus.IN_PROGRESS, TaskStatus.COMPLETED, TaskStatus.CANCELLED);
             } else {
                 TaskStatus status = TaskStatus.valueOf(currentFilter);
