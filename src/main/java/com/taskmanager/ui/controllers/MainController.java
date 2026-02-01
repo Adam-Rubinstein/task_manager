@@ -784,7 +784,7 @@ public class MainController {
 
             if (isDarkTheme) {
                 applyDarkTheme();
-                settingsService.updateTheme("DARK");
+                settingsService.updateTheme(THEME_DARK);
             } else {
                 applyLightTheme();
                 settingsService.updateTheme("LIGHT");
