@@ -1344,9 +1344,7 @@ public class MainController {
         if (isDarkTheme) {
             vbox.setStyle(STYLE_PADDING_20 + " -fx-background-color: " + COLOR_DARK_BG + ";");
             title.setStyle(STYLE_TITLE_LARGE + " -fx-text-fill: " + COLOR_DARK_TEXT + ";");
-            textArea.setStyle("-fx-font-family: 'Consolas', 'Courier New', monospace; -fx-font-size: 13; " +
-                    "-fx-control-inner-background: #2b2b2b; -fx-text-fill: #e0e0e0; " +
-                    "-fx-border-color: #444444; -fx-border-width: 1;");
+            textArea.setStyle(STYLE_TEXTAREA_DARK);
         } else {
             vbox.setStyle("-fx-padding: 20; -fx-background-color: #f9f9f9;");
             title.setStyle("-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: #333333;");
