@@ -166,8 +166,8 @@ public class MainController {
     private static final String STYLE_TEXTAREA_DARK =
             STYLE_MONOSPACE_TEXTAREA +
                     " -fx-control-inner-background: " + COLOR_DARK_SURFACE + ";" +
-                    " -fx-text-fill: #e0e0e0;" +
-                    " -fx-border-color: #444444;" +
+                    " -fx-text-fill: " + COLOR_DARK_TEXT_SECONDARY + ";" +
+                    " -fx-border-color: " + COLOR_DARK_BORDER + ";" +
                     " -fx-border-width: 1;";
 
     private static final String STYLE_TEXTAREA_LIGHT =
