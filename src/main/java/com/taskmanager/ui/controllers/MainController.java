@@ -1320,11 +1320,11 @@ public class MainController {
 
         Button closeButton = new Button("✔ Закрыть");
         closeButton.setOnAction(e -> hotkeysStage.close());
-        closeButton.setStyle("-fx-padding: 10 30; -fx-font-size: 14; -fx-font-weight: bold;");
+        closeButton.setStyle(STYLE_BUTTON_CLOSE);
         closeButton.setPrefWidth(150);
 
         HBox buttonBox = new HBox(closeButton);
-        buttonBox.setStyle("-fx-alignment: center;");
+        buttonBox.setStyle(STYLE_ALIGNMENT_CENTER);
 
         vbox.getChildren().addAll(title, textArea, buttonBox);
 
