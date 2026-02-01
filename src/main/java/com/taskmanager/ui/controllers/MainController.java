@@ -569,7 +569,7 @@ public class MainController {
             Label titleLabel = new Label("Название:");
             titleLabel.setStyle(STYLE_FONT_BOLD);
             TextField titleField = new TextField(task.getTitle());
-            titleField.setStyle("-fx-font-size: 14; -fx-padding: 5;");
+            private static final String STYLE_TEXT_FIELD = "-fx-font-size: 14; -fx-padding: 5;";
 
             // Описание (без названия)
             Label descLabel = new Label("Описание:");
