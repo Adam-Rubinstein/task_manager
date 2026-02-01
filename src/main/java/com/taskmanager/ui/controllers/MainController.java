@@ -319,7 +319,7 @@ public class MainController {
      */
     private void applyLightTheme() {
         if (rootPane != null) {
-            rootPane.setStyle("-fx-base: #ffffff; -fx-background-color: #f5f5f5; -fx-text-fill: #000000;");
+            rootPane.setStyle("-fx-base: " + COLOR_LIGHT_SURFACE + "; -fx-background-color: " + COLOR_LIGHT_BG + "; -fx-text-fill: " + COLOR_LIGHT_TEXT + ";");
         }
         tasksTable.setStyle("-fx-background-color: #ffffff; -fx-text-fill: #000000;");
         if (themeToggleButton != null) {
