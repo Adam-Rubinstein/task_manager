@@ -210,9 +210,9 @@ public class MainController {
             loadSettingsOnStartup();
 
         } catch (Exception e) {
+            log.error("Ошибка инициализации интерфейса", e);
             showAlert("Ошибка инициализации", "Ошибка при инициализации интерфейса: " + e.getMessage());
-            e.printStackTrace();
-        }   
+        }
         setupKeyboardShortcuts();
         setupTooltips();
     }
