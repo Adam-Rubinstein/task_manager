@@ -787,7 +787,7 @@ public class MainController {
                 settingsService.updateTheme(THEME_DARK);
             } else {
                 applyLightTheme();
-                settingsService.updateTheme("LIGHT");
+                settingsService.updateTheme(THEME_LIGHT);
             }
 
         } catch (Exception e) {
