@@ -117,8 +117,15 @@ public class MainController {
     private static final DateTimeFormatter inputFormatter =
             DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
-    // ==================== UI COMPONENTS ====================
+    // ========== СТИЛИ UI ==========
+    private static final String STYLE_PADDING_10 = "-fx-padding: 10;";
+    private static final String STYLE_PADDING_15 = "-fx-padding: 15;";
+    private static final String STYLE_PADDING_20 = "-fx-padding: 20;";
+    private static final String STYLE_FONT_BOLD = "-fx-font-weight: bold;";
+    private static final String STYLE_BUTTON_DEFAULT = "-fx-padding: 10; -fx-font-size: 12;";
+    private static final String STYLE_TITLE_LARGE = "-fx-font-size: 22; -fx-font-weight: bold;";
 
+    // ==================== UI COMPONENTS ====================
     @FXML private TextField taskNameInput;
     @FXML private TextArea taskDescriptionInput;
     @FXML private Spinner<Integer> prioritySpinner;
