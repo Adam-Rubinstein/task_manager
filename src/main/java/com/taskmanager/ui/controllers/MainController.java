@@ -1233,7 +1233,7 @@ public class MainController {
         hotkeysStage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
 
         VBox vbox = new VBox(15);
-        vbox.setStyle("-fx-padding: 20;");
+        vbox.setStyle(STYLE_PADDING_20);
 
         Label title = new Label("⌨️ Горячие клавиши");
         title.setStyle("-fx-font-size: 22; -fx-font-weight: bold;");
