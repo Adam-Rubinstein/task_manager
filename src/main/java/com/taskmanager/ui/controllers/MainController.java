@@ -526,7 +526,7 @@ public class MainController {
 
             // Название
             Label titleLabel = new Label("Название:");
-            titleLabel.setStyle("-fx-font-weight: bold;");
+            titleLabel.setStyle(STYLE_FONT_BOLD);
             TextField titleField = new TextField(task.getTitle());
             titleField.setStyle("-fx-font-size: 14; -fx-padding: 5;");
 
