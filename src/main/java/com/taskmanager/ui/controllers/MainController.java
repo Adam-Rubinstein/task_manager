@@ -517,7 +517,7 @@ public class MainController {
             detailStage.setHeight(DETAIL_WINDOW_HEIGHT);
 
             VBox mainVBox = new VBox(10);
-            mainVBox.setStyle("-fx-padding: 15;");
+            mainVBox.setStyle(STYLE_PADDING_15);
 
             // ПРИМЕНЯЕМ ТЕКУЩУЮ ТЕМУ К ОКНУ
             if (isDarkTheme) {
