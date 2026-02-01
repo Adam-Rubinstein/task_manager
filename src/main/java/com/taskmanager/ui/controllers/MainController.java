@@ -587,14 +587,14 @@ public class MainController {
 
             // Статус
             Label statusLabel = new Label("Статус:");
-            statusLabel.setStyle("-fx-font-weight: bold;");
+            statusLabel.setStyle(STYLE_FONT_BOLD);
             ComboBox<TaskStatus> statusCombo = new ComboBox<>();
             statusCombo.setItems(FXCollections.observableArrayList(TaskStatus.values()));
             statusCombo.setValue(task.getStatus());
 
             // Кнопки
             Button saveButton = new Button("Сохранить");
-            saveButton.setStyle("-fx-padding: 10; -fx-font-size: 12;");
+            saveButton.setStyle(STYLE_BUTTON_DEFAULT);
             saveButton.setOnAction(e -> {
                 try {
                     task.setDescription(titleField.getText() + "\n" + descArea.getText());
