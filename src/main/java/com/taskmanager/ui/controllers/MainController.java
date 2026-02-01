@@ -105,6 +105,8 @@ public class MainController {
     private static final String COLOR_LIGHT_BG = "#f5f5f5";
     private static final String COLOR_LIGHT_SURFACE = "#ffffff";
     private static final String COLOR_LIGHT_TEXT = "#000000";
+    private static final String COLOR_LIGHT_BG_ALT = "#f9f9f9";
+    private static final String COLOR_LIGHT_TEXT_ALT = "#333333";
 
     // ========== ПРОЗРАЧНОСТЬ (RGBA) ==========
     private static final String COLOR_OVERDUE = "rgba(255, 100, 100, 0.15)";
