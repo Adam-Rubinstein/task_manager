@@ -1241,7 +1241,7 @@ public class MainController {
         TextArea textArea = new TextArea();
         textArea.setEditable(false);
         textArea.setWrapText(true);
-        textArea.setStyle("-fx-font-family: 'Consolas', 'Courier New', monospace; -fx-font-size: 13;");
+        textArea.setStyle(STYLE_MONOSPACE_TEXTAREA);
 
         String hotkeysText = """
     ╔═══════════════════════════════════════════════════════╗
