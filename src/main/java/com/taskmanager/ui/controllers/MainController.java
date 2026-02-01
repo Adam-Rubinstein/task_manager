@@ -461,7 +461,6 @@ public class MainController {
 
         } catch (Exception e) {
             showAlert("Ошибка", "Не удалось создать задачу: " + e.getMessage());
-            e.getMessage();
         }
     }
 
@@ -493,7 +492,6 @@ public class MainController {
 
         } catch (Exception e) {
             showAlert("Ошибка", "Не удалось удалить задачу: " + e.getMessage());
-            e.getMessage();
         }
     }
 
@@ -660,7 +658,6 @@ public class MainController {
 
         } catch (Exception e) {
             showAlert("Ошибка", "Не удалось открыть окно редактирования: " + e.getMessage());
-            e.getMessage();
         }
     }
 
@@ -774,7 +771,6 @@ public class MainController {
             tasksList.addAll(allTasks);
         } catch (Exception e) {
             showAlert("Ошибка", "Не удалось загрузить задачи: " + e.getMessage());
-            e.getMessage();
         }
     }
 
