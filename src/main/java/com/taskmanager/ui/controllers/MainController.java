@@ -321,10 +321,12 @@ public class MainController {
         if (rootPane != null) {
             rootPane.setStyle("-fx-base: " + COLOR_LIGHT_SURFACE + "; -fx-background-color: " + COLOR_LIGHT_BG + "; -fx-text-fill: " + COLOR_LIGHT_TEXT + ";");
         }
-        tasksTable.setStyle("-fx-background-color: #ffffff; -fx-text-fill: #000000;");
+
+        tasksTable.setStyle("-fx-background-color: " + COLOR_LIGHT_SURFACE + "; -fx-text-fill: " + COLOR_LIGHT_TEXT + ";");
+
         if (themeToggleButton != null) {
             themeToggleButton.setText("🌙");
-            themeToggleButton.setStyle("-fx-text-fill: #0000ff;");
+            themeToggleButton.setStyle("-fx-text-fill: " + COLOR_BLUE + ";");
         }
     }
 
@@ -338,12 +340,15 @@ public class MainController {
                     COLOR_DARK_SURFACE, COLOR_DARK_BG, COLOR_DARK_TEXT
             ));
         }
-        tasksTable.setStyle("-fx-background-color: #2b2b2b; -fx-text-fill: #ffffff;");
+
+        tasksTable.setStyle("-fx-background-color: " + COLOR_DARK_SURFACE + "; -fx-text-fill: " + COLOR_DARK_TEXT + ";");
+
         if (themeToggleButton != null) {
             themeToggleButton.setText("☀");
-            themeToggleButton.setStyle("-fx-text-fill: #ffff00;");
+            themeToggleButton.setStyle("-fx-text-fill: " + COLOR_YELLOW + ";");
         }
     }
+
 
     // ==================== ИНИЦИАЛИЗАЦИЯ КОМПОНЕНТОВ ====================
     /**
