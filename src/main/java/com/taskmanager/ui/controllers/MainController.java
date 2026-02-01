@@ -170,6 +170,8 @@ public class MainController {
                     " -fx-text-fill: #333333;" +
                     " -fx-border-color: #cccccc;" +
                     " -fx-border-width: 1;";
+    private static final String STYLE_TEXT_FIELD = "-fx-font-size: 14; -fx-padding: 5;";
+    private static final String STYLE_TEXT_AREA = "-fx-font-size: 12; -fx-padding: 5;";
 
     // ========== СТИЛИ ОКОН ==========
     private static final String STYLE_WINDOW_DARK =
