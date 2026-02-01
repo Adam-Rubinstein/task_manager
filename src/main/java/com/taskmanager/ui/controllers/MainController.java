@@ -1344,16 +1344,15 @@ public class MainController {
      */
     private void applyThemeToWindow(VBox vbox, Label title, TextArea textArea) {
         if (isDarkTheme) {
-            vbox.setStyle(STYLE_PADDING_20 + " -fx-background-color: " + COLOR_DARK_BG + ";");
-            title.setStyle(STYLE_TITLE_LARGE + " -fx-text-fill: " + COLOR_DARK_TEXT + ";");
+            vbox.setStyle(STYLE_WINDOW_DARK);
+            title.setStyle(STYLE_TITLE_DARK);
             textArea.setStyle(STYLE_TEXTAREA_DARK);
         } else {
-            vbox.setStyle(STYLE_PADDING_20 + " -fx-background-color: " + COLOR_LIGHT_BG_ALT + ";");
-            title.setStyle(STYLE_TITLE_LARGE + " -fx-text-fill: " + COLOR_LIGHT_TEXT_ALT + ";");
+            vbox.setStyle(STYLE_WINDOW_LIGHT);
+            title.setStyle(STYLE_TITLE_LIGHT);
             textArea.setStyle(STYLE_TEXTAREA_LIGHT);
         }
     }
-
 
     /**
      * Показать окно "О программе"
