@@ -117,14 +117,6 @@ public class MainController {
     private static final DateTimeFormatter inputFormatter =
             DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
-    // ========== СТИЛИ UI ==========
-    private static final String STYLE_PADDING_10 = "-fx-padding: 10;";
-    private static final String STYLE_PADDING_15 = "-fx-padding: 15;";
-    private static final String STYLE_PADDING_20 = "-fx-padding: 20;";
-    private static final String STYLE_FONT_BOLD = "-fx-font-weight: bold;";
-    private static final String STYLE_BUTTON_DEFAULT = "-fx-padding: 10; -fx-font-size: 12;";
-    private static final String STYLE_TITLE_LARGE = "-fx-font-size: 22; -fx-font-weight: bold;";
-
     // ========== СООБЩЕНИЯ ==========
     private static final String MSG_ERROR = "Ошибка";
     private static final String MSG_SUCCESS = "Успех";
@@ -146,6 +138,15 @@ public class MainController {
     private static final int FONT_SIZE_DEFAULT = 12;
     private static final int FONT_SIZE_MONOSPACE = 13;
     private static final int FONT_SIZE_TITLE = 22;
+
+    // ========== СТИЛИ UI ==========
+    private static final String STYLE_PADDING_10 = "-fx-padding: 10;";
+    private static final String STYLE_PADDING_15 = "-fx-padding: 15;";
+    private static final String STYLE_PADDING_20 = "-fx-padding: 20;";
+    private static final String STYLE_FONT_BOLD = "-fx-font-weight: bold;";
+    private static final String STYLE_BUTTON_DEFAULT = "-fx-padding: 10; -fx-font-size: 12;";
+    private static final String STYLE_TITLE_LARGE = "-fx-font-size: 22; -fx-font-weight: bold;";
+    private static final String STYLE_MONOSPACE_TEXTAREA = "-fx-font-family: " + FONT_MONOSPACE + "; -fx-font-size: " + FONT_SIZE_MONOSPACE + ";";
 
     // ==================== UI COMPONENTS ====================
     @FXML private TextField taskNameInput;
