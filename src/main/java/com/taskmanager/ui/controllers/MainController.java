@@ -1348,9 +1348,8 @@ public class MainController {
         } else {
             vbox.setStyle("-fx-padding: 20; -fx-background-color: #f9f9f9;");
             title.setStyle("-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: #333333;");
-            textArea.setStyle("-fx-font-family: 'Consolas', 'Courier New', monospace; -fx-font-size: 13; " +
-                    "-fx-control-inner-background: #ffffff; -fx-text-fill: #333333; " +
-                    "-fx-border-color: #cccccc; -fx-border-width: 1;");
+            textArea.setStyle(STYLE_TEXTAREA_DARK);
+
         }
     }
 
