@@ -171,6 +171,19 @@ public class MainController {
                     " -fx-border-color: #cccccc;" +
                     " -fx-border-width: 1;";
 
+    // ========== СТИЛИ ОКОН ==========
+    private static final String STYLE_WINDOW_DARK =
+            STYLE_PADDING_20 + " -fx-background-color: " + COLOR_DARK_BG + ";";
+
+    private static final String STYLE_WINDOW_LIGHT =
+            STYLE_PADDING_20 + " -fx-background-color: " + COLOR_LIGHT_BG_ALT + ";";
+
+    private static final String STYLE_TITLE_DARK =
+            STYLE_TITLE_LARGE + " -fx-text-fill: " + COLOR_DARK_TEXT + ";";
+
+    private static final String STYLE_TITLE_LIGHT =
+            STYLE_TITLE_LARGE + " -fx-text-fill: " + COLOR_LIGHT_TEXT_ALT + ";";
+
     // ==================== UI COMPONENTS ====================
     @FXML private TextField taskNameInput;
     @FXML private TextArea taskDescriptionInput;
