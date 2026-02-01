@@ -141,6 +141,12 @@ public class MainController {
     private static final String STATUS_COMPLETED = "COMPLETED";
     private static final String STATUS_CANCELLED = "CANCELLED";
 
+    // ========== ШРИФТЫ ==========
+    private static final String FONT_MONOSPACE = "'Consolas', 'Courier New', monospace";
+    private static final int FONT_SIZE_DEFAULT = 12;
+    private static final int FONT_SIZE_MONOSPACE = 13;
+    private static final int FONT_SIZE_TITLE = 22;
+
     // ==================== UI COMPONENTS ====================
     @FXML private TextField taskNameInput;
     @FXML private TextArea taskDescriptionInput;
