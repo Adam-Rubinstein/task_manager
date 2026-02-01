@@ -4,12 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.taskmanager.model.AppSettings;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Сервис для работы с настройками приложения (JSON)
@@ -17,9 +16,9 @@ import org.slf4j.LoggerFactory;
 @Service
 public class SettingsService {
 
-    private static final Logger log = LoggerFactory.getLogger(TaskService.class);
-
+    private static final Logger log = LoggerFactory.getLogger(SettingsService.class);
     private static final String SETTINGS_FILE = "settings.json";
+
     private final ObjectMapper objectMapper;
     private AppSettings currentSettings;
 
@@ -60,9 +59,9 @@ public class SettingsService {
     public void saveSettings(AppSettings settings) {
         try {
             objectMapper.writeValue(new File(SETTINGS_FILE), settings);
+            log.debug("Настройки сохранены: {}", settings);
         } catch (IOException e) {
-            System.err.println("Ошибка сохранения настроек: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Ошибка сохранения настроек", e);
         }
     }
 
@@ -77,24 +76,30 @@ public class SettingsService {
      * Обновить тему
      */
     public void updateTheme(String theme) {
+        log.debug("Обновление темы: {}", theme);
         currentSettings.setTheme(theme);
         saveSettings(currentSettings);
+        log.info("Тема обновлена: {}", theme);
     }
 
     /**
      * Обновить размер окна
      */
     public void updateWindowSize(double width, double height) {
+        log.debug("Обновление размера окна: {}x{}", width, height);
         currentSettings.setWindowWidth(width);
         currentSettings.setWindowHeight(height);
         saveSettings(currentSettings);
+        log.info("Размер окна обновлён: {}x{}", width, height);
     }
 
     /**
      * Обновить приоритет по умолчанию
      */
     public void updateDefaultPriority(int priority) {
+        log.debug("Обновление приоритета по умолчанию: {}", priority);
         currentSettings.setDefaultPriority(priority);
         saveSettings(currentSettings);
+        log.info("Приоритет по умолчанию обновлён: {}", priority);
     }
 }
