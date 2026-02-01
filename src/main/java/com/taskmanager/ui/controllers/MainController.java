@@ -1445,7 +1445,7 @@ public class MainController {
                     if (event.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
                         event.consume();
                         alert.close();
-                        System.out.println("ESC: Закрыт Alert - " + alert.getTitle());
+                        log.debug("ESC: Закрыт Alert '{}'", alert.getTitle());
                     }
                 });
             }
