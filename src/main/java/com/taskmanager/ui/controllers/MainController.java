@@ -682,7 +682,7 @@ public class MainController {
             cancelButton.setStyle(STYLE_BUTTON_DEFAULT);
             cancelButton.setOnAction(e -> detailStage.close());
 
-            HBox buttonBox = new HBox(10);
+            HBox buttonBox = new HBox(HBOX_SPACING_DEFAULT);
             buttonBox.setStyle(STYLE_PADDING_10);
             buttonBox.getChildren().addAll(saveButton, cancelButton);
 
