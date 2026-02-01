@@ -568,7 +568,7 @@ public class MainController {
             detailStage.setWidth(DETAIL_WINDOW_WIDTH);
             detailStage.setHeight(DETAIL_WINDOW_HEIGHT);
 
-            private static final double VBOX_SPACING_DEFAULT = 10;
+            VBox mainVBox = new VBox(VBOX_SPACING_DEFAULT);
             mainVBox.setStyle(STYLE_PADDING_15);
 
             // ПРИМЕНЯЕМ ТЕКУЩУЮ ТЕМУ К ОКНУ
