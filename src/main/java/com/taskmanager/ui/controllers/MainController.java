@@ -155,6 +155,12 @@ public class MainController {
                     " -fx-text-fill: #e0e0e0;" +
                     " -fx-border-color: #444444;" +
                     " -fx-border-width: 1;";
+    private static final String STYLE_TEXTAREA_LIGHT =
+            STYLE_MONOSPACE_TEXTAREA +
+                    " -fx-control-inner-background: " + COLOR_LIGHT_SURFACE + ";" +
+                    " -fx-text-fill: #333333;" +
+                    " -fx-border-color: #cccccc;" +
+                    " -fx-border-width: 1;";
 
     // ==================== UI COMPONENTS ====================
     @FXML private TextField taskNameInput;
