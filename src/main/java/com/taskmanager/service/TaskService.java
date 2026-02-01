@@ -7,21 +7,23 @@ import com.taskmanager.dao.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Service
 @Transactional
 public class TaskService {
 
+    private static final Logger log = LoggerFactory.getLogger(TaskService.class);
+
+    // Константы
+    private static final int DEFAULT_RECURRENCE_DAYS = 7;
+
     @Autowired
     private TaskRepository taskRepository;
-
-    private static final Logger log = LoggerFactory.getLogger(TaskService.class);
 
     /**
      * Получить все задачи
@@ -34,7 +36,7 @@ public class TaskService {
      * Получить задачу по ID
      */
     public Task getTaskById(Long id) {
-            return taskRepository.findById(id).orElse(null);
+        return taskRepository.findById(id).orElse(null);
     }
 
     /**
@@ -76,7 +78,8 @@ public class TaskService {
     /**
      * Обновить задачу (по ID и отдельным параметрам)
      */
-    public Task updateTask(Long id, String description, Integer priority, LocalDateTime dueDate, TaskStatus status, RecurrenceType recurrenceType) {
+    public Task updateTask(Long id, String description, Integer priority,
+                           LocalDateTime dueDate, TaskStatus status, RecurrenceType recurrenceType) {
         Task task = getTaskById(id);
         if (task != null) {
             task.setDescription(description);
@@ -133,7 +136,10 @@ public class TaskService {
             case DAILY -> currentDate.plusDays(1);
             case WEEKLY -> currentDate.plusWeeks(1);
             case MONTHLY -> currentDate.plusMonths(1);
-            case CUSTOM -> currentDate.plusDays(task.getRecurrenceInterval() > 0 ? task.getRecurrenceInterval() : 7);
+            case CUSTOM -> currentDate.plusDays(
+                    task.getRecurrenceInterval() > 0 ?
+                            task.getRecurrenceInterval() : DEFAULT_RECURRENCE_DAYS
+            );
             default -> currentDate.plusDays(1);
         };
     }
@@ -147,10 +153,15 @@ public class TaskService {
         }
 
         LocalDateTime nextDate = getNextRecurrenceDate(completedTask);
-        Task nextTask = new Task(completedTask.getDescription(), completedTask.getPriority(),
-                nextDate, completedTask.getRecurrenceType());
+        Task nextTask = new Task(
+                completedTask.getDescription(),
+                completedTask.getPriority(),
+                nextDate,
+                completedTask.getRecurrenceType()
+        );
         nextTask.setRecurrenceInterval(completedTask.getRecurrenceInterval());
         nextTask.setStatus(TaskStatus.NEW);
+
         return taskRepository.save(nextTask);
     }
 }
