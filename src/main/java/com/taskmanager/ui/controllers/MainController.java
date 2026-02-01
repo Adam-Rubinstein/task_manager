@@ -202,7 +202,7 @@ public class MainController {
 
             // Инициализация фильтра статусов
             statusFilter.setItems(FXCollections.observableArrayList(
-                    "ALL", "NEW", "IN_PROGRESS", "COMPLETED", "CANCELLED"
+                    FILTER_ALL, STATUS_NEW, STATUS_IN_PROGRESS, STATUS_COMPLETED, STATUS_CANCELLED
             ));
             statusFilter.setValue("ALL");
             statusFilter.setOnAction(e -> handleFilterByStatus());
