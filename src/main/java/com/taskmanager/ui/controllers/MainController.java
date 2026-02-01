@@ -212,7 +212,7 @@ public class MainController {
         } catch (Exception e) {
             showAlert("Ошибка инициализации", "Ошибка при инициализации интерфейса: " + e.getMessage());
             e.printStackTrace();
-        }
+        }   
         setupKeyboardShortcuts();
         setupTooltips();
     }
