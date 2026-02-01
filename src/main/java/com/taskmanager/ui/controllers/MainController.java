@@ -1343,7 +1343,7 @@ public class MainController {
     private void applyThemeToWindow(VBox vbox, Label title, TextArea textArea) {
         if (isDarkTheme) {
             vbox.setStyle(STYLE_PADDING_20 + " -fx-background-color: " + COLOR_DARK_BG + ";");
-            title.setStyle("-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: #ffffff;");
+            title.setStyle(STYLE_TITLE_LARGE + " -fx-text-fill: " + COLOR_DARK_TEXT + ";");
             textArea.setStyle("-fx-font-family: 'Consolas', 'Courier New', monospace; -fx-font-size: 13; " +
                     "-fx-control-inner-background: #2b2b2b; -fx-text-fill: #e0e0e0; " +
                     "-fx-border-color: #444444; -fx-border-width: 1;");
