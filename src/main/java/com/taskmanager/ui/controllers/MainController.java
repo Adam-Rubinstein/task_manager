@@ -968,7 +968,7 @@ public class MainController {
 
         dueDateTimeInput.clear();
         recurrenceCombo.setValue(RecurrenceType.NONE);
-        intervalSpinner.getValueFactory().setValue(7);
+        intervalSpinner.getValueFactory().setValue(INTERVAL_DEFAULT_DAYS);
         if (intervalContainer != null) {
             intervalContainer.setVisible(false);
         }
