@@ -1342,7 +1342,7 @@ public class MainController {
      */
     private void applyThemeToWindow(VBox vbox, Label title, TextArea textArea) {
         if (isDarkTheme) {
-            vbox.setStyle("-fx-padding: 20; -fx-background-color: #1e1e1e;");
+            vbox.setStyle(STYLE_PADDING_20 + " -fx-background-color: " + COLOR_DARK_BG + ";");
             title.setStyle("-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: #ffffff;");
             textArea.setStyle("-fx-font-family: 'Consolas', 'Courier New', monospace; -fx-font-size: 13; " +
                     "-fx-control-inner-background: #2b2b2b; -fx-text-fill: #e0e0e0; " +
