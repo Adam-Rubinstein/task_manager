@@ -576,7 +576,7 @@ public class MainController {
             descLabel.setStyle(STYLE_FONT_BOLD);
             TextArea descArea = new TextArea();
             descArea.setWrapText(true);
-            private static final String STYLE_TEXT_AREA = "-fx-font-size: 12; -fx-padding: 5;";
+            descArea.setStyle(STYLE_TEXT_AREA);
 
             String fullDesc = task.getDescription();
             if (fullDesc != null && fullDesc.contains("\n")) {
@@ -691,7 +691,7 @@ public class MainController {
 
             // ПРИМЕНЯЕМ ТЕМУ К SCROLL PANE И СЦЕНЕ
             if (isDarkTheme) {
-                scrollPane.setStyle("-fx-background-color: #1e1e1e; -fx-control-inner-background: #2b2b2b;");
+                scrollPane.setStyle("-fx-background-color: " + COLOR_DARK_BG + "; -fx-control-inner-background: " + COLOR_DARK_SURFACE + ";");
                 scene.setFill(javafx.scene.paint.Color.web("#1e1e1e"));
             }
 
