@@ -1083,7 +1083,7 @@ public class MainController {
     private void setupKeyboardShortcuts() {
         // Получаем Scene из rootPane
         if (rootPane == null) {
-            System.err.println("⚠ rootPane is null, cannot setup keyboard shortcuts");
+            log.warn("⚠ rootPane is null, cannot setup keyboard shortcuts");
             return;
         }
 
