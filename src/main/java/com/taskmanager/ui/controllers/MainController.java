@@ -142,7 +142,7 @@ public class MainController {
     private static final String MSG_DELETE = "Удалить задачу: \"";
     private static final String MSG_EDITING = "Редактирование: ";
     private static final String MSG_DESCRIPTION  = "Описание:";
-    private static final String MSG_NAME  = "Описание:";
+    private static final String MSG_NAME  = "Название:";
 
     // ========== СТАТУСЫ ДЛЯ ФИЛЬТРА ==========
     private static final String STATUS_NEW = "NEW";
@@ -582,7 +582,7 @@ public class MainController {
             }
 
             // Название
-            Label titleLabel = new Label("Название:");
+            Label titleLabel = new Label(MSG_NAME);
             titleLabel.setStyle(STYLE_FONT_BOLD);
             TextField titleField = new TextField(task.getTitle());
             titleField.setStyle(STYLE_TEXT_FIELD);
