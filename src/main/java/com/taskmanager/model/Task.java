@@ -123,17 +123,14 @@ public class Task {
      * Проверить, является ли задача на неделю
      */
     public boolean isThisWeek() {
-        if (dueDate == null) {  // Только проверяем дату, БЕЗ проверки статуса!
+        if (dueDate == null) {
             return false;
         }
-
         if (isOverdue() || isTodayOrTomorrow()) {
             return false;
         }
-
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime weekLater = now.plusDays(7);
-
+        LocalDateTime weekLater = now.plusDays(DAYS_IN_WEEK);
         return !dueDate.isAfter(weekLater) && status != TaskStatus.COMPLETED;
     }
 
@@ -200,7 +197,7 @@ public class Task {
     }
 
     public void setPriority(Integer priority) {
-        this.priority = priority != null ? priority : 5;
+        this.priority = priority != null ? priority : DEFAULT_PRIORITY;
     }
 
     public RecurrenceType getRecurrenceType() {
