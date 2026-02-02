@@ -10,6 +10,12 @@ import java.time.LocalDateTime;
 @Table(name = "task")
 public class Task {
 
+    // ========== КОНСТАНТЫ ==========
+    private static final String DEFAULT_TITLE = "Без названия";
+    private static final int DEFAULT_PRIORITY = 5;
+    private static final int DEFAULT_RECURRENCE_INTERVAL = 0;
+    private static final int DAYS_IN_WEEK = 7;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -49,10 +55,10 @@ public class Task {
      */
     public Task() {
         this.description = "";
-        this.priority = 5;
+        this.priority = DEFAULT_PRIORITY;
         this.status = TaskStatus.NEW;
         this.recurrenceType = RecurrenceType.NONE;
-        this.recurrenceInterval = 0;
+        this.recurrenceInterval = DEFAULT_RECURRENCE_INTERVAL;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
@@ -78,7 +84,7 @@ public class Task {
      */
     public String getTitle() {
         if (description == null || description.isEmpty()) {
-            return "Без названия";
+            return DEFAULT_TITLE;
         }
 
         int newlineIndex = description.indexOf('\n');
