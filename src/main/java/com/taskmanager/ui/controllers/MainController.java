@@ -141,8 +141,8 @@ public class MainController {
     private static final String MSG_INVALID_DELETE = "Не удалось удалить задачу: ";
     private static final String MSG_DELETE = "Удалить задачу: \"";
     private static final String MSG_EDITING = "Редактирование: ";
-    private static final String MSG_EDITING = "Редактирование: ";
-    
+    private static final String MSG_DESCRIPTION  = "Описание:";
+
     // ========== СТАТУСЫ ДЛЯ ФИЛЬТРА ==========
     private static final String STATUS_NEW = "NEW";
     private static final String STATUS_IN_PROGRESS = "IN_PROGRESS";
@@ -587,7 +587,7 @@ public class MainController {
             titleField.setStyle(STYLE_TEXT_FIELD);
 
             // Описание (без названия)
-            Label descLabel = new Label("Описание:");
+            Label descLabel = new Label(MSG_DESCRIPTION);
             descLabel.setStyle(STYLE_FONT_BOLD);
             TextArea descArea = new TextArea();
             descArea.setWrapText(true);
