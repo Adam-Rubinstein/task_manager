@@ -8,6 +8,13 @@ import java.io.Serializable;
  */
 public class AppSettings implements Serializable {
 
+    // ========== КОНСТАНТЫ ПО УМОЛЧАНИЮ ==========
+    private static final String DEFAULT_THEME = "LIGHT";
+    private static final double DEFAULT_WINDOW_WIDTH = 800.0;
+    private static final double DEFAULT_WINDOW_HEIGHT = 600.0;
+    private static final int DEFAULT_AUTO_SAVE_INTERVAL = 10;
+    private static final int DEFAULT_PRIORITY = 5;
+
     @JsonProperty("theme")
     private String theme; // "LIGHT" или "DARK"
 
@@ -25,11 +32,11 @@ public class AppSettings implements Serializable {
 
     // Конструктор по умолчанию
     public AppSettings() {
-        this.theme = "LIGHT";
-        this.windowWidth = 800.0;
-        this.windowHeight = 600.0;
-        this.autoSaveInterval = 10;
-        this.defaultPriority = 5;
+        this.theme = DEFAULT_THEME;
+        this.windowWidth = DEFAULT_WINDOW_WIDTH;
+        this.windowHeight = DEFAULT_WINDOW_HEIGHT;
+        this.autoSaveInterval = DEFAULT_AUTO_SAVE_INTERVAL;
+        this.defaultPriority = DEFAULT_PRIORITY;
     }
 
     // Геттеры и сеттеры
