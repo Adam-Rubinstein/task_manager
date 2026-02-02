@@ -213,7 +213,7 @@ public class Task {
     }
 
     public void setRecurrenceInterval(Integer recurrenceInterval) {
-        this.recurrenceInterval = recurrenceInterval != null ? recurrenceInterval : 0;
+        this.recurrenceInterval = recurrenceInterval != null ? recurrenceInterval : DEFAULT_RECURRENCE_INTERVAL;
     }
 
     // ==================== toString ====================
