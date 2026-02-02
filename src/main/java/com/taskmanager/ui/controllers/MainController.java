@@ -138,6 +138,8 @@ public class MainController {
     private static final String MSG_TASK_DELETED = "Задача удалена!";
     private static final String MSG_TASK_UPDATED = "Задача обновлена!";
     private static final String MSG_INVALID_DATE = "Неверный формат даты: dd.MM.yyyy HH:mm";
+    private static final String MSG_INVALID_DELETE = "Не удалось удалить задачу: ";
+    private static final String MSG_INVALID_DELETE = "Удалить задачу: ";
 
     // ========== СТАТУСЫ ДЛЯ ФИЛЬТРА ==========
     private static final String STATUS_NEW = "NEW";
@@ -524,12 +526,12 @@ public class MainController {
         try {
             Task selected = tasksTable.getSelectionModel().getSelectedItem();
             if (selected == null) {
-                showAlert("Ошибка", "Выберите задачу для удаления!");
+                showAlert(MSG_ERROR, MSG_SELECT_TASK);
                 return;
             }
 
             javafx.scene.control.Alert confirmAlert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
-            confirmAlert.setTitle("Подтверждение");
+            confirmAlert.setTitle(MSG_CONFIRMATION);
             confirmAlert.setHeaderText(null);
             confirmAlert.setContentText("Удалить задачу: \"" + selected.getTitle() + "\"?");
 
@@ -539,11 +541,11 @@ public class MainController {
             if (result.isPresent() && result.get() == ButtonType.OK) {
                 taskService.deleteTask(selected.getId());
                 tasksList.remove(selected);
-                showAlert("Успех", "Задача удалена!");
+                showAlert(MSG_SUCCESS, MSG_TASK_DELETED);
             }
 
         } catch (Exception e) {
-            showAlert("Ошибка", "Не удалось удалить задачу: " + e.getMessage());
+            showAlert(MSG_ERROR, MSG_INVALID_DELETE + e.getMessage());
         }
     }
 
