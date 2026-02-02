@@ -140,7 +140,9 @@ public class MainController {
     private static final String MSG_INVALID_DATE = "Неверный формат даты: dd.MM.yyyy HH:mm";
     private static final String MSG_INVALID_DELETE = "Не удалось удалить задачу: ";
     private static final String MSG_DELETE = "Удалить задачу: \"";
-
+    private static final String MSG_EDITING = "Редактирование: ";
+    private static final String MSG_EDITING = "Редактирование: ";
+    
     // ========== СТАТУСЫ ДЛЯ ФИЛЬТРА ==========
     private static final String STATUS_NEW = "NEW";
     private static final String STATUS_IN_PROGRESS = "IN_PROGRESS";
@@ -566,7 +568,7 @@ public class MainController {
     private void openTaskDetailWindow(Task task) {
         try {
             javafx.stage.Stage detailStage = new javafx.stage.Stage();
-            detailStage.setTitle("Редактирование: " + task.getTitle());
+            detailStage.setTitle(MSG_EDITING + task.getTitle());
             detailStage.setWidth(DETAIL_WINDOW_WIDTH);
             detailStage.setHeight(DETAIL_WINDOW_HEIGHT);
 
