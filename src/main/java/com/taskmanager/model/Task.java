@@ -68,10 +68,10 @@ public class Task {
      */
     public Task(String description, Integer priority, LocalDateTime dueDate, RecurrenceType recurrenceType) {
         this.description = description != null ? description : "";
-        this.priority = priority != null ? priority : 5;
+        this.priority = priority != null ? priority : DEFAULT_PRIORITY;
         this.dueDate = dueDate;
         this.recurrenceType = recurrenceType != null ? recurrenceType : RecurrenceType.NONE;
-        this.recurrenceInterval = 0;
+        this.recurrenceInterval = DEFAULT_RECURRENCE_INTERVAL;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
         this.status = TaskStatus.NEW;
@@ -86,12 +86,10 @@ public class Task {
         if (description == null || description.isEmpty()) {
             return DEFAULT_TITLE;
         }
-
         int newlineIndex = description.indexOf('\n');
         if (newlineIndex == -1) {
             return description;
         }
-
         return description.substring(0, newlineIndex).trim();
     }
 
