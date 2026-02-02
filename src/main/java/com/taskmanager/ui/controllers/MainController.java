@@ -142,6 +142,7 @@ public class MainController {
     private static final String MSG_DELETE = "Удалить задачу: \"";
     private static final String MSG_EDITING = "Редактирование: ";
     private static final String MSG_DESCRIPTION  = "Описание:";
+    private static final String MSG_NAME  = "Описание:";
 
     // ========== СТАТУСЫ ДЛЯ ФИЛЬТРА ==========
     private static final String STATUS_NEW = "NEW";
