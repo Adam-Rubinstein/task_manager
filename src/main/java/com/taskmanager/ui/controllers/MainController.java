@@ -139,7 +139,7 @@ public class MainController {
     private static final String MSG_TASK_UPDATED = "Задача обновлена!";
     private static final String MSG_INVALID_DATE = "Неверный формат даты: dd.MM.yyyy HH:mm";
     private static final String MSG_INVALID_DELETE = "Не удалось удалить задачу: ";
-    private static final String MSG_INVALID_DELETE = "Удалить задачу: ";
+    private static final String MSG_DELETE = "Удалить задачу: \"";
 
     // ========== СТАТУСЫ ДЛЯ ФИЛЬТРА ==========
     private static final String STATUS_NEW = "NEW";
@@ -488,7 +488,7 @@ public class MainController {
 
             // Валидация
             if (title.isEmpty() && description.isEmpty()) {
-                showAlert("Ошибка", "Введите название или описание задачи!");
+                showAlert(MSG_ERROR, "Введите название или описание задачи!");
                 return;
             }
 
@@ -496,7 +496,7 @@ public class MainController {
                 String[] lines = description.split("\\n");
                 title = lines[0].trim();
                 if (title.isEmpty()) {
-                    showAlert("Ошибка", "Первая строка описания пуста!");
+                    showAlert(MSG_ERROR, "Первая строка описания пуста!");
                     return;
                 }
             }
@@ -511,10 +511,10 @@ public class MainController {
 
             // Очистка формы
             clearTaskForm();
-            showAlert("Успех", "Задача создана: " + title);
+            showAlert(MSG_SUCCESS, MSG_TASK_CREATED + title);
 
         } catch (Exception e) {
-            showAlert("Ошибка", "Не удалось создать задачу: " + e.getMessage());
+            showAlert(MSG_ERROR, "Не удалось создать задачу: " + e.getMessage());
         }
     }
 
@@ -533,7 +533,7 @@ public class MainController {
             javafx.scene.control.Alert confirmAlert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
             confirmAlert.setTitle(MSG_CONFIRMATION);
             confirmAlert.setHeaderText(null);
-            confirmAlert.setContentText("Удалить задачу: \"" + selected.getTitle() + "\"?");
+            confirmAlert.setContentText(MSG_DELETE + selected.getTitle() + "\"?");
 
             addEscapeHandlerToAlert(confirmAlert);
 
@@ -660,7 +660,7 @@ public class MainController {
                         try {
                             task.setDueDate(LocalDateTime.parse(dateStr, inputFormatter));
                         } catch (Exception ex) {
-                            showAlert("Ошибка", "Неверный формат даты: dd.MM.yyyy HH:mm");
+                            showAlert(MSG_ERROR, MSG_INVALID_DATE);
                             return;
                         }
                     }
@@ -674,9 +674,9 @@ public class MainController {
                     }
 
                     detailStage.close();
-                    showAlert("Успех", "Задача обновлена!");
+                    showAlert(MSG_SUCCESS, MSG_TASK_UPDATED);
                 } catch (Exception ex) {
-                    showAlert("Ошибка", "Не удалось сохранить: " + ex.getMessage());
+                    showAlert(MSG_ERROR, "Не удалось сохранить: " + ex.getMessage());
                 }
             });
 
@@ -713,7 +713,7 @@ public class MainController {
             detailStage.show();
 
         } catch (Exception e) {
-            showAlert("Ошибка", "Не удалось открыть окно редактирования: " + e.getMessage());
+            showAlert(MSG_ERROR, "Не удалось открыть окно редактирования: " + e.getMessage());
         }
     }
 
@@ -749,7 +749,7 @@ public class MainController {
                 loadTasksByStatuses(status);
             }
         } catch (Exception e) {
-            showAlert("Ошибка", "Ошибка фильтрации: " + e.getMessage());
+            showAlert(MSG_ERROR, "Ошибка фильтрации: " + e.getMessage());
         }
     }
 
@@ -766,13 +766,13 @@ public class MainController {
                     Alert alert = unread.get(selectedIndex);
                     alertService.markAsRead(alert.getId());
                     updateAlertsCount();
-                    showAlert("Успех", "Оповещение отмечено как прочитанное");
+                    showAlert(MSG_SUCCESS, "Оповещение отмечено как прочитанное");
                 }
             } else {
-                showAlert("Ошибка", "Выберите оповещение!");
+                showAlert(MSG_ERROR, "Выберите оповещение!");
             }
         } catch (Exception e) {
-            showAlert("Ошибка", "Не удалось отметить оповещение: " + e.getMessage());
+            showAlert(MSG_ERROR, "Не удалось отметить оповещение: " + e.getMessage());
         }
     }
 
@@ -793,7 +793,7 @@ public class MainController {
             }
 
         } catch (Exception e) {
-            showAlert("Ошибка", "Не удалось переключить тему: " + e.getMessage());
+            showAlert(MSG_ERROR, "Не удалось переключить тему: " + e.getMessage());
         }
     }
 
@@ -826,7 +826,7 @@ public class MainController {
             tasksList.clear();
             tasksList.addAll(allTasks);
         } catch (Exception e) {
-            showAlert("Ошибка", "Не удалось загрузить задачи: " + e.getMessage());
+            showAlert(MSG_ERROR, "Не удалось загрузить задачи: " + e.getMessage());
         }
     }
 
@@ -965,7 +965,7 @@ public class MainController {
         try {
             LocalDate.of(year, month, day);
         } catch (java.time.DateTimeException e) {
-            showAlert("Ошибка", "Неверная дата: " + day + "." + month + "." + year);
+            showAlert(MSG_ERROR, "Неверная дата: " + day + "." + month + "." + year);
             day = currentDay;
             month = currentMonth;
             year = currentYear;
@@ -1242,7 +1242,7 @@ public class MainController {
             }
             showAlert("Обновлено", "Список задач обновлён из базы данных");
         } catch (Exception e) {
-            showAlert("Ошибка", "Не удалось обновить задачи: " + e.getMessage());
+            showAlert(MSG_ERROR, "Не удалось обновить задачи: " + e.getMessage());
         }
     }
 
