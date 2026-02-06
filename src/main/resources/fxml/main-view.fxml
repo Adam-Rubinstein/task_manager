@@ -56,7 +56,7 @@
                     <TextField fx:id="taskNameInput" promptText="Название задачи" prefHeight="30.0" />
 
                     <!-- Описание задачи (ОБЯЗАТЕЛЬНО) -->
-                    <Label text="Описание:" style="-fx-text-fill: #ff0000; -fx-font-weight: bold;" />
+                    <Label text="Описание:" style="-fx-font-weight: bold;" />
                     <TextArea fx:id="taskDescriptionInput" promptText="Описание задачи" wrapText="true"
                               prefHeight="50.0" />
 
@@ -95,7 +95,7 @@
             <!-- Верхняя панель с кнопками -->
             <HBox spacing="10.0" style="-fx-alignment: center_left;">
                 <Button fx:id="deleteTaskButtonRight" text="Удалить задачу" onAction="#handleDeleteTask"
-                        style="-fx-font-size: 12; -fx-padding: 8 16; -fx-font-weight: bold; -fx-min-width: 130; -fx-text-fill: #ffffff; -fx-background-color: #ff5555;" />
+                        style="-fx-font-size: 12; -fx-padding: 8 16; -fx-font-weight: bold; -fx-min-width: 130;" />
                 <Label text="Фильтр по статусу:" />
                 <ComboBox fx:id="statusFilter" prefWidth="200.0"
                           onAction="#handleFilterByStatus" />
@@ -120,7 +120,7 @@
             <!-- Оповещения -->
             <Label text="ОПОВЕЩЕНИЯ" style="-fx-font-size: 14; -fx-font-weight: bold;" />
             <HBox spacing="10.0">
-                <Label fx:id="alertsCountLabel" text="Оповещения: 0" style="-fx-text-fill: #ff0000;" />
+                <Label fx:id="alertsCountLabel" text="Оповещения: 0" />
                 <Region HBox.hgrow="ALWAYS" />
                 <Button text="Прочитано" onAction="#handleMarkAlertAsRead" />
             </HBox>
