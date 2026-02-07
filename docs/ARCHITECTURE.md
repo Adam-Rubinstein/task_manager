@@ -312,6 +312,12 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
 ---
 
+## ⚠️ Несостыковки (важно)
+
+- В `schema.sql` таблица задач называется `tasks`, а в JPA-модели `Task` указано `@Table(name = "task")` — при ручном прогоне схемы и JPA это нужно синхронизировать.
+- В `schema.sql` таблица аудио называется `audio_files`, а в JPA-модели `AudioFile` используется другое имя таблицы — тоже требуется синхронизация.
+
+
 ## 🏗️ Паттерны проектирования
 
 ### 1. MVC (Model-View-Controller)
