@@ -303,20 +303,23 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 |------|-----|----------|
 | `id` | BIGSERIAL | Первичный ключ |
 | `task_id` | BIGINT | Внешний ключ на tasks |
-| `type` | VARCHAR(50) | Тип оповещения |
-| `message` | TEXT | Текст оповещения |
+| `message` | VARCHAR(500) | Текст оповещения |
+| `alert_type` | VARCHAR(50) | Тип оповещения |
 | `is_read` | BOOLEAN | Прочитано или нет |
 | `created_at` | TIMESTAMP | Дата создания |
+
 
 #### Таблица `audio_files`
 
 | Поле | Тип | Описание |
 |------|-----|----------|
 | `id` | BIGSERIAL | Первичный ключ |
-| `file_name` | VARCHAR(255) | Имя файла |
-| `file_path` | TEXT | Путь к файлу |
+| `task_id` | BIGINT | FK на tasks.id, UNIQUE (1 аудио на задачу) |
+| `audio_data` | BYTEA | Бинарные данные аудио |
 | `file_size` | BIGINT | Размер файла |
 | `created_at` | TIMESTAMP | Дата создания |
+| `expires_at` | TIMESTAMP | Срок жизни (по умолчанию +30 дней) |
+
 
 ---
 
