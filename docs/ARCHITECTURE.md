@@ -46,7 +46,7 @@ Task Manager построен на основе **многослойной ар�
 ┌─────────────────────────────────────────────────────────┐
 │                     Data Layer                          │
 │                 (PostgreSQL Database)                   │
-│            tasks, alerts, audio_files                   │
+│        tasks, task_tags, alerts, audio_files            │
 └─────────────────────────────────────────────────────────┘
 ```
 
