@@ -1,4 +1,4 @@
-# 📋 Task Manager - Менеджер Задач v1.5.0
+# 📋 Voice Task Manager - Менеджер Задач v1.5.0
 
 Настольное приложение для управления задачами с JavaFX интерфейсом и PostgreSQL базой данных.
 
@@ -12,13 +12,13 @@
 - Редактирование задач (двойной клик на задаче)
 - Удаление задач с подтверждением
 - Система приоритетов (0-10, настраивается Spinner)
-- Статусы задач: `NEW`, `IN_PROGRESS`, `COMPLETED`, `CANCELLED`
+- Статусы задач: `NEW`, `INPROGRESS`, `COMPLETED`, `CANCELLED`
 - Фильтрация по статусу (ComboBox)
 - Сортировка по любой колонке таблицы
 
 ### ⏰ Даты и время
 
-- Автозаполнение даты - введи `0812` → автоматически заполнится `08.12.2026 00:00`
+- Автозаполнение даты - введи `0812` → автоматически заполнится `08.12.<текущий год> 00:00`
 - Работает на потере фокуса (переход на другое поле)
 - Работает по нажатию Enter
 - Валидация дат (31 февраля → текущая дата)
@@ -26,7 +26,7 @@
 
 ### 🎨 Интерфейс
 
-- Светлая/тёмная тема (кнопка 🌙/☀ в правом верхнем углу)
+- Светлая/тёмная тема (кнопка 🌙/☀ в правом верхнем углу + пункт меню)
 - Цветовая подсветка задач:
     - 🔴 **Красный фон** - просроченные задачи
     - 🟡 **Жёлтый фон** - задачи на сегодня/завтра
@@ -38,12 +38,13 @@
 - Счётчик непрочитанных оповещений
 - Список уведомлений (двойной клик → отметить как прочитанное)
 - Автообновление каждые 10 секунд
-- Типы оповещений: `NOTIFICATION`, `REMINDER`, `DEADLINE`
+- Типы оповещений: `NOTIFICATION`, `WARNING`, `ERROR`, `DEADLINE_REMINDER`, `TASK_COMPLETED`
 
-### 🔁 Повторяющиеся задачи (заготовка)
+### 🔁 Повторяющиеся задачи (заготовка + частично реализовано)
 
 - Типы повтора: `NONE`, `DAILY`, `WEEKLY`, `MONTHLY`, `CUSTOM`
 - Интервал повтора (для `CUSTOM`) - скрывается, если выбран "Без повтора"
+- В `TaskService` есть расчёт следующей даты повтора (DAILY/WEEKLY/MONTHLY/CUSTOM) и метод создания следующей задачи (createNextRecurrence)
 
 ---
 
@@ -107,7 +108,7 @@ TaskManager/
 │   │   │       ├── 📁 model/
 │   │   │       │   ├── 📄 Task.java              # 📋 Сущность задачи
 │   │   │       │   ├── 📄 Alert.java             # 🔔 Сущность оповещения
-│   │   │       │   ├── 📄 AudioFile.java         # 🔊 Аудиофайлы (резерв)
+│   │   │       │   ├── 📄 AudioFile.java         # 🔊 Аудиофайлы
 │   │   │       │   ├── 📄 TaskStatus.java        # 🏷️ Enum статусов
 │   │   │       │   ├── 📄 AlertType.java         # 🏷️ Enum типов оповещений
 │   │   │       │   └── 📄 RecurrenceType.java    # 🏷️ Enum типов повторов
@@ -130,7 +131,7 @@ TaskManager/
 │   │       │
 │   │       ├── 📁 styles/
 │   │       │   ├── 📄 light-theme.css         # 🎨 Стили
-│   │       │   └── 📄 dark-theme.css               
+│   │       │   └── 📄 dark-theme.css
 │   │       │
 │   │       └── 📁 db/
 │   │           └── 📄 schema.sql              # 🗄️ SQL схема БД
@@ -213,12 +214,10 @@ spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=false
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
 spring.jpa.properties.hibernate.format_sql=true
-
-# Логирование
-logging.level.root=INFO
-logging.level.com.taskmanager=DEBUG
-logging.level.org.hibernate=WARN
 ```
+
+🔐 **Важно (безопасность):**
+Не храни в репозитории `spring.datasource.password` и `telegram.bot.token` — вынеси их в переменные окружения/секреты.
 
 ---
 
@@ -276,10 +275,10 @@ java --add-modules javafx.controls,javafx.fxml,javafx.graphics -jar target/TaskM
 ### Создание задачи
 
 - **Название** (опционально) - если не заполнить, возьмётся первая строка описания
-- **Описание** (обязательно, красная метка) - основной текст задачи
+- **Описание** (обязательно) - основной текст задачи
 - **Приоритет** (0-10) - чем выше, тем важнее (по умолчанию 5)
 - **Дата выполнения** - формат `dd.MM.yyyy HH:mm`
-    - Введи `0812` → автоматически станет `08.12.2026 00:00`
+    - Введи `0812` → автоматически станет `08.12.<текущий год> 00:00`
     - Работает при потере фокуса или по Enter
 - **Тип повтора** - `NONE` (без повтора), `DAILY`, `WEEKLY`, `MONTHLY`, `CUSTOM`
 - Нажми **"Создать задачу"**
@@ -306,7 +305,7 @@ java --add-modules javafx.controls,javafx.fxml,javafx.graphics -jar target/TaskM
 ### Фильтрация задач
 
 - Используй **ComboBox "Фильтр по статусу"** справа вверху
-- Выбери: `ALL`, `NEW`, `IN_PROGRESS`, `COMPLETED`, `CANCELLED`
+- Выбери: `ALL`, `NEW`, `INPROGRESS`, `COMPLETED`, `CANCELLED`
 
 ---
 
@@ -334,116 +333,6 @@ java --add-modules javafx.controls,javafx.fxml,javafx.graphics -jar target/TaskM
 mvn test
 ```
 
-### Создание feature-ветки
-
-```bash
-git checkout -b feature/my-feature
-# ... изменения ...
-git add .
-git commit -m "feat: описание фичи"
-git push origin feature/my-feature
-```
-
-### Горячая перезагрузка (DevTools)
-
-Добавь в `pom.xml`:
-
-```xml
-<dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-devtools</artifactId>
-    <scope>runtime</scope>
-    <optional>true</optional>
-</dependency>
-```
-
----
-
-## 🐛 Решение проблем
-
-### ❌ «Cannot connect to database»
-
-**Причины:**
-
-- PostgreSQL не запущен
-- Неверные учётные данные в `application.properties`
-- БД не существует
-
-**Решение:**
-
-```bash
-# Проверка PostgreSQL (Windows)
-tasklist | findstr postgres
-
-# Проверка PostgreSQL (macOS/Linux)
-ps aux | grep postgres
-
-# Проверка существования БД
-psql -U postgres -l
-
-# Перезапуск PostgreSQL
-# Windows: Services → PostgreSQL → Restart
-# macOS: brew services restart postgresql
-# Linux: sudo service postgresql restart
-```
-
----
-
-### ❌ «relation "tasks" does not exist»
-
-**Причина:** Таблицы не созданы
-
-**Решение:**
-
-- Запусти приложение один раз с `ddl-auto=update` - Hibernate создаст таблицы
-- Или вручную: `psql -U postgres -d taskmanager -f src/main/resources/db/schema.sql`
-
----
-
-### ❌ «JavaFX runtime components are missing»
-
-**Причина:** Используешь JRE вместо JDK или неправильная версия Java
-
-**Решение:**
-
-```bash
-# Проверка версии Java
-java -version  # Должна быть 21+
-
-# Убедись, что JDK 21, а не JRE
-# Переустанови JDK если нужно
-
-# Для Maven используй:
-mvn javafx:run  # плагин автоматически настраивает модули
-
-# Для IDE укажи VM options:
---add-modules javafx.controls,javafx.fxml,javafx.graphics
-```
-
----
-
-### ❌ Автозаполнение даты не работает
-
-**Проверка:**
-
-- Введи несколько цифр (например `0812`)
-- Нажми Enter или кликни на другое поле
-- Должно автоматически заполниться `08.12.2026 00:00`
-
-**Если не работает:**
-
-- Проверь, что используешь новую версию `MainController.java`
-- Проверь логи в консоли (возможна ошибка парсинга)
-
----
-
-### ❌ Тёмная тема не применяется к всплывающему окну
-
-**Решение:**
-
-- Обновлена в последней версии
-- Окно редактирования задачи теперь учитывает текущую тему
-
 ---
 
 ## 📚 Документация
@@ -470,7 +359,7 @@ mvn javafx:run  # плагин автоматически настраивает
 | **Языки**          | Java 21, FXML, SQL                |
 | **Строк кода**     | ~3000+                            |
 | **Зависимостей**   | 12 (Maven)                        |
-| **Таблиц БД**      | 3 (tasks, alerts, audio_files)    |
+| **Таблиц БД**      | 4 (tasks, task_tags, alerts, audio_files) |
 
 ---
 
@@ -499,7 +388,7 @@ mvn javafx:run  # плагин автоматически настраивает
 - 🏷️ Категории и теги задач
 - 📤 Экспорт/импорт задач (JSON, CSV)
 - 🔔 Системные уведомления (Windows/macOS/Linux)
-- ⌨️ Горячие клавиши (Ctrl+N для новой задачи и т.д.)
+- ⌨️ Горячие клавиши
 
 ### Версия 3.0.0 (далёкое будущее)
 
@@ -510,6 +399,13 @@ mvn javafx:run  # плагин автоматически настраивает
 
 ---
 
-**Версия документа:** 1.5.0  
-**Последнее обновление:** 08.01.2026  
+## ⚠️ Важные несостыковки (по текущим файлам)
+
+- В `schema.sql` таблица задач называется `tasks`, а в модели `Task` указано `@Table(name = "task")` — это надо синхронизировать (иначе будут проблемы при ручном прогоне схемы).
+- В `schema.sql` таблица аудио называется `audio_files`, а в модели `AudioFile` указано `@Table(name = "audiofiles")` — тоже требуется синхронизация.
+
+---
+
+**Версия документа:** 1.5.0
+**Последнее обновление:** 07.02.2026
 **Статус:** ✅ Готов к использованию
