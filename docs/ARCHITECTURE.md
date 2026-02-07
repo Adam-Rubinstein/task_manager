@@ -276,18 +276,24 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
 #### Таблица `tasks`
 
-| Поле | Тип | Описание |
-|------|-----|----------|
 | `id` | BIGSERIAL | Первичный ключ |
 | `title` | VARCHAR(255) | Название задачи |
 | `description` | TEXT | Описание задачи |
-| `status` | VARCHAR(50) | Статус (NEW, IN_PROGRESS, COMPLETED, CANCELLED) |
-| `priority` | INTEGER | Приоритет (0-10) |
 | `due_date` | TIMESTAMP | Дата выполнения |
+| `status` | VARCHAR(50) | Статус (NEW, INPROGRESS, COMPLETED, CANCELLED) |
+| `priority` | INTEGER | Приоритет (0-10) |
 | `recurrence_type` | VARCHAR(50) | Тип повтора |
 | `recurrence_interval` | INTEGER | Интервал повтора |
+| `recurrence_day_of_week` | INTEGER | День недели (1..7), если используется |
+| `recurrence_day_of_month` | INTEGER | День месяца (1..31), если используется |
+| `recurrence_end_date` | TIMESTAMP | Дата окончания рекурсии |
+| `recurrence_count` | INTEGER | Сколько повторов осталось/разрешено |
+| `last_completed_date` | TIMESTAMP | Последняя дата выполнения |
+| `recurrence_parent_id` | BIGINT | Ссылка на родительскую задачу (FK на tasks.id) |
 | `created_at` | TIMESTAMP | Дата создания |
-| `updated_at` | TIMESTAMP | Дата обновления |
+| `updated_at` | TIMESTAMP | Дата обновления (авто через триггер) |
+| `version` | BIGINT | Версия записи |
+
 
 #### Таблица `alerts`
 
