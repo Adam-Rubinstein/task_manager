@@ -1,7 +1,7 @@
 {
-  "theme" : "DARK",
-  "window_width" : 1401.0,
-  "window_height" : 1049.0,
+  "theme" : "LIGHT",
+  "window_width" : 1259.0,
+  "window_height" : 940.0,
   "auto_save_interval" : 10,
   "default_priority" : 5
 }
