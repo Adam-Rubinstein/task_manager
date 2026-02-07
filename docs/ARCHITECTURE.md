@@ -276,6 +276,8 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
 #### Таблица `tasks`
 
+| Поле | Тип | Описание |
+|------|-----|----------|
 | `id` | BIGSERIAL | Первичный ключ |
 | `title` | VARCHAR(255) | Название задачи |
 | `description` | TEXT | Описание задачи |
