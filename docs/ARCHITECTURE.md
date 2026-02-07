@@ -329,7 +329,6 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 - Триггер: `task_update_timestamp` → автообновление `tasks.updated_at` перед UPDATE.
 - Функция: `delete_expired_audio_files()` удаляет записи из `audio_files`, у которых `expires_at < now()`.
 
-
 ## ⚠️ Несостыковки (важно)
 
 - В `schema.sql` таблица задач называется `tasks`, а в JPA-модели `Task` указано `@Table(name = "task")` — при ручном прогоне схемы и JPA это нужно синхронизировать.
