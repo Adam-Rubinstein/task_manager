@@ -323,6 +323,13 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
 ---
 
+## ⚙️ Индексы, триггеры и фоновые функции (schema.sql)
+
+- Индексы: `idx_due_date`, `idx_status`, `idx_priority`, `idx_recurrence_parent`, `idx_created_at`, `idx_alert_task_id`, `idx_alert_read`, `idx_audio_expires_at`, `idx_audio_task_id`.
+- Триггер: `task_update_timestamp` → автообновление `tasks.updated_at` перед UPDATE.
+- Функция: `delete_expired_audio_files()` удаляет записи из `audio_files`, у которых `expires_at < now()`.
+
+
 ## ⚠️ Несостыковки (важно)
 
 - В `schema.sql` таблица задач называется `tasks`, а в JPA-модели `Task` указано `@Table(name = "task")` — при ручном прогоне схемы и JPA это нужно синхронизировать.
