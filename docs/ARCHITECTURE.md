@@ -220,7 +220,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 **Компоненты:**
 
 - **PostgreSQL база данных**
-- **Таблицы:** tasks, alerts, audio_files
+- **Таблицы:** tasks, task_tags, alerts, audio_files
 
 ---
 
