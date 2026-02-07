@@ -260,8 +260,10 @@ logging.level.com.taskmanager=DEBUG
 logging.level.org.hibernate=WARN
 ```
 
+```
 🔐 **Важно (безопасность):**
 Не храни в репозитории `spring.datasource.password` и `telegram.bot.token` — в текущем `application.properties` они присутствуют в явном виде, лучше вынести в переменные окружения/секреты и использовать шаблон `application-example.properties`.
+
 
 ### Параметры конфигурации
 
