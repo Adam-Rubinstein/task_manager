@@ -261,11 +261,13 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 │      audio_files        │
 ├─────────────────────────┤
 │ id (PK)                 │
-│ file_name               │
-│ file_path               │
+│ task_id (UNIQUE, FK)    │
+│ audio_data (BYTEA)      │
 │ file_size               │
 │ created_at              │
+│ expires_at              │
 └─────────────────────────┘
+
 ```
 
 ---
